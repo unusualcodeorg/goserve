@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	address := fmt.Sprintf("%s:%s", Config.SERVER_HOST, Config.SERVER_PORT)
+	address := fmt.Sprintf("%s:%d", Config.SERVER_HOST, Config.SERVER_PORT)
 	api.CreateRouter().Run(address)
 }
