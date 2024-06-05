@@ -4,9 +4,12 @@ import (
 	"fmt"
 
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/internal/core"
 )
 
 func main() {
-	address := fmt.Sprintf("%s:%d", Config.SERVER_HOST, Config.SERVER_PORT)
+	core.ConnectMongoDb()
+	address := fmt.Sprintf("%s:%d", config.Env.SERVER_HOST, config.Env.SERVER_PORT)
 	api.CreateRouter().Run(address)
 }

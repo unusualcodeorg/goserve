@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"log"
@@ -8,15 +8,16 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/internal/utils"
 )
 
-var Config config
+var Env envconfig
 
-type config struct {
+type envconfig struct {
 	// server
 	SERVER_HOST string
 	SERVER_PORT uint16
 	// database
 	DB_HOST          string
-	DB_PORT          string
+	DB_NAME          string
+	DB_PORT          uint16
 	DB_USER          string
 	DB_USER_PWD      string
 	DB_MIN_POOL_SIZE uint8
@@ -25,13 +26,14 @@ type config struct {
 
 func init() {
 	loadEnvFile()
-	Config = config{
+	Env = envconfig{
 		// server
 		SERVER_HOST: os.Getenv("SERVER_HOST"),
 		SERVER_PORT: utils.ParseUint16(os.Getenv("SERVER_PORT")),
 		// database
 		DB_HOST:          os.Getenv("DB_HOST"),
-		DB_PORT:          os.Getenv("DB_PORT"),
+		DB_NAME:          os.Getenv("DB_NAME"),
+		DB_PORT:          utils.ParseUint16(os.Getenv("DB_PORT")),
 		DB_USER:          os.Getenv("DB_USER"),
 		DB_USER_PWD:      os.Getenv("DB_USER_PWD"),
 		DB_MIN_POOL_SIZE: utils.ParseUint8(os.Getenv("DB_MIN_POOL_SIZE")),
