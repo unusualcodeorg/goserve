@@ -1,7 +1,12 @@
 package main
 
-import "github.com/unusualcodeorg/go-lang-backend-architecture/api"
+import (
+	"fmt"
+
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api"
+)
 
 func main() {
-	api.CreateRouter().Run("localhost:8080")
+	address := fmt.Sprintf("%s:%s", Config.SERVER_HOST, Config.SERVER_PORT)
+	api.CreateRouter().Run(address)
 }
