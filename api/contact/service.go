@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/schema"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

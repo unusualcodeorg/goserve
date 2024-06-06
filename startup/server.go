@@ -3,9 +3,9 @@ package startup
 import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/middleware"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/middleware"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
 func Server() {
