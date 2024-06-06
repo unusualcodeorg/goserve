@@ -10,7 +10,6 @@ import (
 
 func main() {
 	defer core.DisconnectMongoDb()
-	core.ConnectMongoDb()
 	address := fmt.Sprintf("%s:%d", config.Env.SERVER_HOST, config.Env.SERVER_PORT)
 	api.CreateRouter().Run(address)
 }

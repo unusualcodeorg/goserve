@@ -45,8 +45,6 @@ func init() {
 	fmt.Println("Connected to MongoDB!")
 }
 
-func ConnectMongoDb() {}
-
 func DisconnectMongoDb() {
 	fmt.Println("Disconnect to MongoDB!")
 	client.Disconnect(context.TODO())
