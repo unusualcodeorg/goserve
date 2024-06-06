@@ -107,3 +107,11 @@ func NotFoundResponse(message string) Response {
 		Message: message,
 	}
 }
+
+func InternalServerErrorResponse(message string) Response {
+	return &messageResponse{
+		ResCode: failue_code,
+		Status:  http.StatusInternalServerError,
+		Message: message,
+	}
+}

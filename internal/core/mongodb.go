@@ -10,10 +10,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var client mongo.Client
+var client *mongo.Client
 
-func MongoDatabase() *mongo.Database {
-	return client.Database(config.Env.DB_NAME)
+func MongoCollection(name string) *mongo.Collection {
+	return client.Database(config.Env.DB_NAME).Collection(name)
 }
 
 func init() {
@@ -28,10 +28,13 @@ func init() {
 	clientOptions := options.Client().ApplyURI(uri)
 
 	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+	var err error
+	client, err = mongo.Connect(context.TODO(), clientOptions)
 
 	if err != nil {
 		log.Fatal(err)
+		fmt.Println("Failed to connect MongoDB:", err)
+		return
 	}
 
 	// Check the connection
@@ -39,7 +42,8 @@ func init() {
 
 	if err != nil {
 		log.Fatal(err)
-		fmt.Println("Failed to connect MongoDB:", err)
+		fmt.Println("Failed to ping MongoDB:", err)
+		return
 	}
 
 	fmt.Println("Connected to MongoDB!")

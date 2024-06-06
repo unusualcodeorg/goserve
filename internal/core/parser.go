@@ -5,6 +5,13 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+func Validate(obj any) error {
+	if err := validator.New().Struct(obj); err != nil {
+		return err
+	}
+	return nil
+}
+
 func ParseBody(ctx *gin.Context, obj any) []string {
 	if err := ctx.ShouldBindJSON(&obj); err != nil {
 		errMsgs := parseError(err)
