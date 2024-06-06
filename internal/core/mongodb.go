@@ -10,7 +10,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var MongoClient mongo.Client
+var client mongo.Client
+
+func MongoDatabase() *mongo.Database {
+	return client.Database(config.Env.DB_NAME)
+}
 
 func init() {
 	// Set client options
@@ -24,14 +28,14 @@ func init() {
 	clientOptions := options.Client().ApplyURI(uri)
 
 	// Connect to MongoDB
-	mongoClient, err := mongo.Connect(context.TODO(), clientOptions)
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Check the connection
-	err = mongoClient.Ping(context.TODO(), nil)
+	err = client.Ping(context.TODO(), nil)
 
 	if err != nil {
 		log.Fatal(err)
@@ -42,3 +46,8 @@ func init() {
 }
 
 func ConnectMongoDb() {}
+
+func DisconnectMongoDb() {
+	fmt.Println("Disconnect to MongoDB!")
+	client.Disconnect(context.TODO())
+}
