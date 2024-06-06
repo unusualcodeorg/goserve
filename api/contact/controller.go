@@ -3,27 +3,39 @@ package contact
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/internal/core"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/common/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/common/parser"
 )
 
-func Controller(router *gin.Engine) {
-	router.POST("/message", createMessageHandler)
+type controller struct {
+	contactService ContactService
 }
 
-func createMessageHandler(ctx *gin.Context) {
+func NewContactController(s ContactService) network.Controller {
+	cnt := controller{
+		contactService: s,
+	}
+	return &cnt
+}
+
+func (c *controller) MountRoutes(router *gin.Engine) {
+	router.POST("/message", c.createMessageHandler)
+}
+
+func (c *controller) createMessageHandler(ctx *gin.Context) {
 	var createMsg dto.CreateMessage
 
-	if err := core.ParseBody(ctx, &createMsg); err != nil {
-		core.BadRequestResponse(err).Send(ctx)
+	if err := parser.GetBody(ctx, &createMsg); err != nil {
+		network.BadRequestResponse(err).Send(ctx)
 		return
 	}
 
-	_, err := saveMessage(createMsg.Type, createMsg.Msg)
+	_, err := c.contactService.SaveMessage(createMsg.Type, createMsg.Msg)
 
 	if err != nil {
-		core.InternalServerErrorResponse("Something went wrong")
+		network.InternalServerErrorResponse("Something went wrong")
 		return
 	}
 
-	core.SuccessMsgResponse("Message received successfully!").Send(ctx)
+	network.SuccessMsgResponse("Message received successfully!").Send(ctx)
 }

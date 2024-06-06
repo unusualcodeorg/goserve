@@ -1,26 +1,19 @@
-package core
+package parser
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
-func Validate(obj any) error {
-	if err := validator.New().Struct(obj); err != nil {
-		return err
-	}
-	return nil
-}
-
-func ParseBody(ctx *gin.Context, obj any) []string {
+func GetBody(ctx *gin.Context, obj any) []string {
 	if err := ctx.ShouldBindJSON(&obj); err != nil {
-		errMsgs := parseError(err)
+		errMsgs := getErrorMsgs(err)
 		return errMsgs
 	}
 	return nil
 }
 
-func parseError(err error) []string {
+func getErrorMsgs(err error) []string {
 	errMsgs := make([]string, 0)
 	if validationErrors, ok := err.(validator.ValidationErrors); ok {
 		for _, err := range validationErrors {

@@ -1,4 +1,4 @@
-package core
+package network
 
 import (
 	"net/http"
@@ -25,7 +25,7 @@ type messageResponse struct {
 	Message string       `json:"message" binding:"required"`
 }
 
-func (r messageResponse) Send(c *gin.Context) {
+func (r *messageResponse) Send(c *gin.Context) {
 	c.JSON(int(r.Status), r)
 }
 
@@ -36,7 +36,7 @@ type errorResponse struct {
 	Errors  []string     `json:"errors"`
 }
 
-func (r errorResponse) Send(c *gin.Context) {
+func (r *errorResponse) Send(c *gin.Context) {
 	c.JSON(int(r.Status), r)
 }
 
@@ -46,7 +46,7 @@ type dataResponse struct {
 	Data    any          `json:"data" binding:"required"`
 }
 
-func (r dataResponse) Send(c *gin.Context) {
+func (r *dataResponse) Send(c *gin.Context) {
 	c.JSON(int(r.Status), r)
 }
 
