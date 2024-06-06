@@ -2,9 +2,9 @@ package contact
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/network"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/common/network"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/common/parser"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type controller struct {
@@ -18,14 +18,14 @@ func NewContactController(s ContactService) network.Controller {
 	return &cnt
 }
 
-func (c *controller) MountRoutes(router *gin.Engine) {
-	router.POST("/message", c.createMessageHandler)
+func (c *controller) MountRoutes(routeEngine *gin.Engine) {
+	routeEngine.POST("/message", c.createMessageHandler)
 }
 
 func (c *controller) createMessageHandler(ctx *gin.Context) {
 	var createMsg dto.CreateMessage
 
-	if err := parser.GetBody(ctx, &createMsg); err != nil {
+	if err := utils.GetBody(ctx, &createMsg); err != nil {
 		network.BadRequestResponse(err).Send(ctx)
 		return
 	}

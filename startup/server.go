@@ -2,9 +2,10 @@ package startup
 
 import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/common/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/common/network"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/middleware"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/mongo"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/network"
 )
 
 func Server() {
@@ -18,8 +19,10 @@ func Server() {
 	router.LoadControllers(
 		contact.NewContactController(contact.NewService(db)),
 	)
-	
-	router.LoadHandlers(network.NotFoundHandler)
+
+	router.LoadMiddlewares(
+		middleware.NewNotFoundMiddleware(),
+	)
 
 	router.Start(env.ServerHost, env.ServerPort)
 

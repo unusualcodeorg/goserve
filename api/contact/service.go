@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/schema"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/common/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/common/parser"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/mongo"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -28,7 +28,7 @@ func (s *service) SaveMessage(msgType string, msgTxt string) (*schema.Message, e
 
 	msg := schema.NewMessage(msgType, msgTxt)
 
-	if err := parser.Validate(msg); err != nil {
+	if err := utils.Validate(msg); err != nil {
 		return nil, err
 	}
 
