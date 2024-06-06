@@ -13,12 +13,12 @@ func Server() {
 	db := mongo.NewDatabase(env)
 	db.Connect()
 
-	contactService := contact.NewService(db)
-	contactController := contact.NewContactController(contactService)
-
 	router := network.NewRouter()
 
-	router.LoadControllers(contactController)
+	router.LoadControllers(
+		contact.NewContactController(contact.NewService(db)),
+	)
+	
 	router.LoadHandlers(network.NotFoundHandler)
 
 	router.Start(env.ServerHost, env.ServerPort)
