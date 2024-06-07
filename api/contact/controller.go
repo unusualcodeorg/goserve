@@ -6,7 +6,7 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/middleware"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/utils"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/parser"
 )
 
 type controller struct {
@@ -32,7 +32,7 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 func (c *controller) createMessageHandler(ctx *gin.Context) {
 	var createMsg dto.CreateMessage
 
-	if err := utils.GetBody(ctx, &createMsg); err != nil {
+	if err := parser.GetBody(ctx, &createMsg); err != nil {
 		network.BadRequestResponse(err).Send(ctx)
 		return
 	}

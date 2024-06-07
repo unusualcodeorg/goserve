@@ -1,4 +1,4 @@
-package utils
+package parser
 
 import (
 	"github.com/gin-gonic/gin"
