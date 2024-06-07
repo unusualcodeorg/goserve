@@ -7,34 +7,35 @@ import (
 )
 
 type router struct {
-	routeEngine *gin.Engine
+	engine *gin.Engine
 }
 
 func NewRouter() Router {
-	engine := gin.Default()
+	e := gin.Default()
 	r := router{
-		routeEngine: engine,
+		engine: e,
 	}
 	return &r
 }
 
-func (r *router) GetRouteEngine() *gin.Engine {
-	return r.routeEngine
+func (r *router) GetEngine() *gin.Engine {
+	return r.engine
 }
 
 func (r *router) LoadControllers(controllers ...Controller) {
 	for _, c := range controllers {
-		c.MountRoutes(r.routeEngine)
+		g := r.engine.Group(c.Path())
+		c.MountRoutes(g)
 	}
 }
 
-func (r *router) LoadMiddlewares(middlewares ...Middleware) {
+func (r *router) LoadRootMiddlewares(middlewares ...RootMiddleware) {
 	for _, m := range middlewares {
-		m.Mount(r.routeEngine)
+		m.Attach(r.engine)
 	}
 }
 
 func (r *router) Start(ip string, port uint16) {
 	address := fmt.Sprintf("%s:%d", ip, port)
-	r.routeEngine.Run(address)
+	r.engine.Run(address)
 }

@@ -8,15 +8,15 @@ import (
 type notFoundMiddleware struct {
 }
 
-func NewNotFoundMiddleware() network.Middleware {
+func NewNotFoundMiddleware() network.RootMiddleware {
 	m := notFoundMiddleware{}
 	return &m
 }
 
-func (nfm *notFoundMiddleware) Mount(routeEngine *gin.Engine) {
-	routeEngine.NoRoute(NotFoundHandler)
+func (m *notFoundMiddleware) Attach(engine *gin.Engine) {
+	engine.NoRoute(m.Handler)
 }
 
-func NotFoundHandler(ctx *gin.Context) {
+func (*notFoundMiddleware) Handler(ctx *gin.Context) {
 	network.NotFoundResponse("resource not found").Send(ctx)
 }

@@ -16,12 +16,17 @@ func Server() {
 
 	router := network.NewRouter()
 
+
 	router.LoadControllers(
-		contact.NewContactController(contact.NewService(db)),
+		contact.NewContactController(
+			network.NewBaseController("/contact", middleware.NewAuthenticationMiddleware(), middleware.NewAuthorizationMiddleware()),
+			contact.NewService(db),
+		),
 	)
 
-	router.LoadMiddlewares(
+	router.LoadRootMiddlewares(
 		middleware.NewNotFoundMiddleware(),
+		middleware.NewApikeyMiddleware(),
 	)
 
 	router.Start(env.ServerHost, env.ServerPort)
