@@ -10,7 +10,8 @@ type router struct {
 	engine *gin.Engine
 }
 
-func NewRouter() Router {
+func NewRouter(mode string) Router {
+	gin.SetMode(mode)
 	e := gin.Default()
 	r := router{
 		engine: e,

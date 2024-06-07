@@ -6,7 +6,7 @@ import (
 )
 
 type Env struct {
-	GoEnv         string `mapstructure:"GO_ENV"`
+	GoMode         string `mapstructure:"GO_MODE"`
 	ServerHost    string `mapstructure:"SERVER_HOST"`
 	ServerPort    uint16 `mapstructure:"SERVER_PORT"`
 	DBHost        string `mapstructure:"DB_HOST"`
@@ -14,8 +14,8 @@ type Env struct {
 	DBPort        uint16 `mapstructure:"DB_PORT"`
 	DBUser        string `mapstructure:"DB_USER"`
 	DBUserPwd     string `mapstructure:"DB_USER_PWD"`
-	DBMinPoolSize uint8  `mapstructure:"DB_MIN_POOL_SIZE"`
-	DBMaxPoolSize uint8  `mapstructure:"DB_MAX_POOL_SIZE"`
+	DBMinPoolSize uint16 `mapstructure:"DB_MIN_POOL_SIZE"`
+	DBMaxPoolSize uint16 `mapstructure:"DB_MAX_POOL_SIZE"`
 }
 
 func NewEnv(filename string) *Env {

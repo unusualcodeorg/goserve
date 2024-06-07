@@ -5,18 +5,18 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
-type notFoundMiddleware struct {
+type notFound struct {
 }
 
-func NewNotFoundMiddleware() network.RootMiddleware {
-	m := notFoundMiddleware{}
+func NewNotFound() network.RootMiddleware {
+	m := notFound{}
 	return &m
 }
 
-func (m *notFoundMiddleware) Attach(engine *gin.Engine) {
+func (m *notFound) Attach(engine *gin.Engine) {
 	engine.NoRoute(m.Handler)
 }
 
-func (*notFoundMiddleware) Handler(ctx *gin.Context) {
+func (*notFound) Handler(ctx *gin.Context) {
 	network.NotFoundResponse("resource not found").Send(ctx)
 }

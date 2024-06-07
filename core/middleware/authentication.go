@@ -5,18 +5,18 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
-type authenticationMiddleware struct {
+type authentication struct {
 }
 
-func NewAuthenticationMiddleware() network.GroupMiddleware {
-	m := authenticationMiddleware{}
+func NewAuthentication() network.GroupMiddleware {
+	m := authentication{}
 	return &m
 }
 
-func (m *authenticationMiddleware) Attach(group *gin.RouterGroup) {
+func (m *authentication) Attach(group *gin.RouterGroup) {
 	group.Use(m.Handler)
 }
 
-func (m *authenticationMiddleware) Handler(ctx *gin.Context) {
+func (m *authentication) Handler(ctx *gin.Context) {
 	ctx.Next()
 }

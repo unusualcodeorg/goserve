@@ -17,7 +17,7 @@ type service struct {
 	db mongo.Database
 }
 
-func NewService(database mongo.Database) ContactService {
+func NewContactService(database mongo.Database) ContactService {
 	s := service{
 		db: database,
 	}

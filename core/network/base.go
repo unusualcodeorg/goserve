@@ -1,20 +1,20 @@
 package network
 
 type baseController struct {
-	path                string
-	authenticationMiddleware GroupMiddleware
-	authorizationMiddleware  GroupMiddleware
+	path                 string
+	authenticationRecipe GroupMiddlewareRecipe
+	authorizationRecipe  GroupMiddlewareRecipe
 }
 
 func NewBaseController(
 	path string,
-	auth GroupMiddleware,
-	authorize GroupMiddleware,
+	authRecipe GroupMiddlewareRecipe,
+	authorizeRecipe GroupMiddlewareRecipe,
 ) BaseController {
 	c := baseController{
-		path:                path,
-		authenticationMiddleware: auth,
-		authorizationMiddleware:  authorize,
+		path:                 path,
+		authenticationRecipe: authRecipe,
+		authorizationRecipe:  authorizeRecipe,
 	}
 	return &c
 }
@@ -24,9 +24,9 @@ func (c *baseController) Path() string {
 }
 
 func (c *baseController) AuthenticationMiddleware() GroupMiddleware {
-	return c.authenticationMiddleware
+	return c.authenticationRecipe()
 }
 
 func (c *baseController) AuthorizationMiddleware() GroupMiddleware {
-	return c.authorizationMiddleware
+	return c.authorizationRecipe()
 }

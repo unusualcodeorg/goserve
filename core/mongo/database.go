@@ -18,27 +18,31 @@ type Database interface {
 }
 
 type database struct {
-	user   string
-	pwd    string
-	host   string
-	port   uint16
-	name   string
-	client *mongo.Client
+	user        string
+	pwd         string
+	host        string
+	port        uint16
+	name        string
+	minPoolSize uint16
+	maxPoolSize uint16
+	client      *mongo.Client
 }
 
 func NewDatabase(env *config.Env) Database {
 	db := database{
-		user: env.DBUser,
-		pwd:  env.DBUserPwd,
-		host: env.DBHost,
-		port: env.DBPort,
-		name: env.DBName,
+		user:        env.DBUser,
+		pwd:         env.DBUserPwd,
+		host:        env.DBHost,
+		port:        env.DBPort,
+		name:        env.DBName,
+		minPoolSize: env.DBMinPoolSize,
+		maxPoolSize: env.DBMaxPoolSize,
 	}
 	return &db
 }
 
 func (db *database) Connect() {
-	fmt.Println("Connecting Mongo...")
+	ctx := context.TODO()
 
 	uri := fmt.Sprintf(
 		"mongodb://%s:%s@%s:%d/%s",
@@ -46,22 +50,19 @@ func (db *database) Connect() {
 	)
 
 	clientOptions := options.Client().ApplyURI(uri)
+	clientOptions.SetMaxPoolSize(uint64(db.maxPoolSize))
+	clientOptions.SetMaxPoolSize(uint64(db.minPoolSize))
 
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-
+	fmt.Println("Connecting Mongo...")
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		fmt.Println("Connection to Mongo Failed!")
-		log.Fatal(err)
+		log.Fatal("Connection to Mongo Failed!: ", err)
 	}
 
-	fmt.Println("Pinging to Mongo...")
-	err = client.Ping(context.TODO(), nil)
-
+	err = client.Ping(ctx, nil)
 	if err != nil {
-		fmt.Println("Pinging to Mongo Failed!")
-		log.Panic(err)
+		log.Panic("Pinging to Mongo Failed!: ", err)
 	}
-
 	fmt.Println("Connected to Mongo!")
 
 	db.client = client

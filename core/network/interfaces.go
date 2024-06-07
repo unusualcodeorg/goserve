@@ -23,6 +23,8 @@ type GroupMiddleware interface {
 	Handler(ctx *gin.Context)
 }
 
+type GroupMiddlewareRecipe func() GroupMiddleware
+
 type Router interface {
 	GetEngine() *gin.Engine
 	LoadControllers(...Controller)
