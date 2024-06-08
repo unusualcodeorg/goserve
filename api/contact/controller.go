@@ -3,7 +3,6 @@ package contact
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/middleware"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -13,9 +12,13 @@ type controller struct {
 	contactService ContactService
 }
 
-func NewContactController(service ContactService) network.Controller {
+func NewContactController(
+	authMFunc network.GroupMiddlewareFunc,
+	authorizeMFunc network.GroupMiddlewareFunc,
+	service ContactService,
+) network.Controller {
 	path := "/contact"
-	base := network.NewBaseController(path, middleware.NewAuthentication, middleware.NewAuthorization)
+	base := network.NewBaseController(path, authMFunc, authorizeMFunc)
 	c := controller{
 		BaseController: base,
 		contactService: service,

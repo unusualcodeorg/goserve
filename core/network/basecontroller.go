@@ -6,15 +6,11 @@ type baseController struct {
 	authorizationFunc  GroupMiddlewareFunc
 }
 
-func NewBaseController(
-	path string,
-	authenticationFunc GroupMiddlewareFunc,
-	authorizationFunc GroupMiddlewareFunc,
-) BaseController {
+func NewBaseController(path string, authMFunc GroupMiddlewareFunc, authorizeMFunc GroupMiddlewareFunc) BaseController {
 	c := baseController{
 		path:               path,
-		authenticationFunc: authenticationFunc,
-		authorizationFunc:  authorizationFunc,
+		authenticationFunc: authMFunc,
+		authorizationFunc:  authorizeMFunc,
 	}
 	return &c
 }

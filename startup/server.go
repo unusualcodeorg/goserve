@@ -19,7 +19,7 @@ func Server() {
 	router := network.NewRouter(env.GoMode)
 
 	router.LoadControllers(
-		contact.NewContactController(contact.NewContactService(dbQuery)),
+		contact.NewContactController(middleware.NewAuthentication, middleware.NewAuthorization, contact.NewContactService(dbQuery)),
 	)
 
 	router.LoadRootMiddlewares(
