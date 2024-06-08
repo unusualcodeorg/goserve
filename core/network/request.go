@@ -12,7 +12,7 @@ import (
 func ReqBody[T any](ctx *gin.Context) (*T, error) {
 	var body T
 	if err := ctx.ShouldBindJSON(&body); err != nil {
-		e := validate(err)
+		e := parseError(err)
 		return nil, e
 	}
 	return &body, nil
@@ -21,9 +21,30 @@ func ReqBody[T any](ctx *gin.Context) (*T, error) {
 func ReqQuery[T any](ctx *gin.Context) (*T, error) {
 	var query T
 	if err := ctx.ShouldBindQuery(&query); err != nil {
-		e := validate(err)
+		e := parseError(err)
 		return nil, e
 	}
+
+	if err := validator.New().Struct(query); err != nil {
+		e := parseError(err)
+		return nil, e
+	}
+
+	return &query, nil
+}
+
+func ReqHeaders[T any](ctx *gin.Context) (*T, error) {
+	var query T
+	if err := ctx.ShouldBindHeader(&query); err != nil {
+		e := parseError(err)
+		return nil, e
+	}
+
+	if err := validator.New().Struct(query); err != nil {
+		e := parseError(err)
+		return nil, e
+	}
+
 	return &query, nil
 }
 
@@ -36,7 +57,7 @@ func MapToDto[T any, V any](modelObj *V) (*T, error) {
 	return &dtoObj, nil
 }
 
-func validate(err error) error {
+func parseError(err error) error {
 	var msg strings.Builder
 	br := " | "
 
