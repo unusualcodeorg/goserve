@@ -9,6 +9,11 @@ import (
 	"github.com/jinzhu/copier"
 )
 
+const (
+	ReqPayloadApiKey string = "apikey"
+	ReqPayloadUser   string = "user"
+)
+
 func ReqBody[T any](ctx *gin.Context) (*T, error) {
 	var body T
 	if err := ctx.ShouldBindJSON(&body); err != nil {

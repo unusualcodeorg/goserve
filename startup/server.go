@@ -22,9 +22,9 @@ func Server() {
 	dbQueryTimeout := time.Duration(env.DBQueryTimeout) * time.Second
 
 	router.LoadRootMiddlewares(
+		middleware.NewErrorHandler(), // NOTE: this should be the first handler to be mounted
 		middleware.NewKeyProtection(core.NewContactService(db, dbQueryTimeout)),
 		middleware.NewNotFound(),
-		middleware.NewErrorHandler(),
 	)
 
 	router.LoadControllers(

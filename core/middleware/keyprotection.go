@@ -22,17 +22,17 @@ func (m *keyProtection) Attach(engine *gin.Engine) {
 }
 
 func (m *keyProtection) Handler(ctx *gin.Context) {
-	// key := ctx.GetHeader(network.ApiKeyHeader)
-	// if len(key) == 0 {
-	// 	network.UnauthorizedResponse("permission denied").Send(ctx)
-	// 	return
-	// }
+	key := ctx.GetHeader(network.ApiKeyHeader)
+	if len(key) == 0 {
+		panic(network.UnauthorizedError("permission denied: missing x-api-key header", nil))
+	}
 
-	// apikey, err := m.coreService.FindApiKey(key)
-	// if err != nil {
-	// 	network.InternalServerErrorResponse("something went wrong").Send(ctx)
-	// 	return
-	// }
+	apikey, err := m.coreService.FindApiKey(key)
+	if err != nil {
+		panic(network.ForbiddenError("permission denied: invalid x-api-key", err))
+	}
+
+	ctx.Set(network.ReqPayloadApiKey, apikey)
 
 	ctx.Next()
 }
