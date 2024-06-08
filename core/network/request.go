@@ -34,18 +34,18 @@ func ReqQuery[T any](ctx *gin.Context) (*T, error) {
 }
 
 func ReqHeaders[T any](ctx *gin.Context) (*T, error) {
-	var query T
-	if err := ctx.ShouldBindHeader(&query); err != nil {
+	var headers T
+	if err := ctx.ShouldBindHeader(&headers); err != nil {
 		e := parseError(err)
 		return nil, e
 	}
 
-	if err := validator.New().Struct(query); err != nil {
+	if err := validator.New().Struct(headers); err != nil {
 		e := parseError(err)
 		return nil, e
 	}
 
-	return &query, nil
+	return &headers, nil
 }
 
 func MapToDto[T any, V any](modelObj *V) (*T, error) {
