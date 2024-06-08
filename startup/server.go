@@ -14,10 +14,12 @@ func Server() {
 	db := mongo.NewDatabase(env)
 	db.Connect()
 
+	dbQuery := mongo.NewDatabaseQuery(db)
+
 	router := network.NewRouter(env.GoMode)
 
 	router.LoadControllers(
-		contact.NewContactController(db),
+		contact.NewContactController(contact.NewContactService(dbQuery)),
 	)
 
 	router.LoadRootMiddlewares(

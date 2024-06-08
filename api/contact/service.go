@@ -2,11 +2,10 @@ package contact
 
 import (
 	"context"
+	"time"
 
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/schema"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/parser"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ContactService interface {
@@ -14,36 +13,31 @@ type ContactService interface {
 }
 
 type service struct {
-	db mongo.Database
+	dbQuery mongo.DatabaseQuery
 }
 
-func NewContactService(database mongo.Database) ContactService {
+func NewContactService(dbQuery mongo.DatabaseQuery) ContactService {
 	s := service{
-		db: database,
+		dbQuery: dbQuery,
 	}
 	return &s
 }
 
 func (s *service) SaveMessage(msgType string, msgTxt string) (*schema.Message, error) {
 
-	msg := schema.NewMessage(msgType, msgTxt)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-	if err := parser.Validate(msg); err != nil {
-		return nil, err
-	}
-
-	collection := s.db.GetCollection(schema.MessageCollectionName)
-
-	result, err := collection.InsertOne(context.Background(), msg)
+	msg, err := schema.NewMessage(msgType, msgTxt)
 	if err != nil {
 		return nil, err
 	}
 
-	insertedID, ok := result.InsertedID.(primitive.ObjectID)
-	if !ok {
+	result, err := s.dbQuery.InsertOne(ctx, schema.MessageCollectionName, msg)
+	if err != nil {
 		return nil, err
 	}
 
-	msg.ID = insertedID.Hex()
+	msg.ID = result.Hex()
 	return msg, nil
 }

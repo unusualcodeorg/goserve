@@ -2,6 +2,8 @@ package schema
 
 import (
 	"time"
+
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/parser"
 )
 
 const MessageCollectionName = "messages"
@@ -15,7 +17,7 @@ type Message struct {
 	UpdatedAt time.Time `bson:"updatedAt" validate:"required"`
 }
 
-func NewMessage(msgType string, msgTxt string) *Message {
+func NewMessage(msgType string, msgTxt string) (*Message, error) {
 	time := time.Now()
 	m := Message{
 		Type:      msgType,
@@ -24,5 +26,8 @@ func NewMessage(msgType string, msgTxt string) *Message {
 		CreatedAt: time,
 		UpdatedAt: time,
 	}
-	return &m
+	if err := parser.Validate(m); err != nil {
+		return nil, err
+	}
+	return &m, nil
 }
