@@ -2,65 +2,104 @@ package mongo
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"fmt"
+
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type DatabaseQuery interface {
-	FindOne(ctx context.Context, collectionName string, filter any, doc any) error
-	// FindAll(ctx context.Context, collectionName string, filter any) (any, error)
-	InsertOne(ctx context.Context, collectionName string, doc any) (*primitive.ObjectID, error)
-	// InsertMany(ctx context.Context, collectionName string, docs []any) ([]*primitive.ObjectID, error)
-	// UpdateOne(ctx context.Context, collectionName string, filter any, doc any) (int64, error)
-	// DeleteOne(ctx context.Context, collectionName string, filter any, doc any) (int64, error)
+type DatabaseQuery[T any] interface {
+	FindOne(context context.Context, filter Filter) (*T, error)
+	FindPaginated(context context.Context, filter Filter, page int64, limit int64) (*[]T, error)
+	InsertOne(context context.Context, doc *T) (*T, error)
+	// InsertMany(collectionName string, docs []any) ([]*primitive.ObjectID, error)
+	// UpdateOne( collectionName string, filter any, doc any) (int64, error)
+	// DeleteOne( collectionName string, filter any, doc any) (int64, error)
 }
 
-type query struct {
-	db Database
+type query[T any] struct {
+	db             Database
+	collectionName string
 }
 
-func NewDatabaseQuery(db Database) DatabaseQuery {
-	return &query{db: db}
-}
-
-func (q *query) FindOne(ctx context.Context, collectionName string, filter any, doc any) error {
-	collection := q.db.GetCollection(collectionName)
-
-	err := collection.FindOne(ctx, filter).Decode(doc)
-	if err != nil {
-		return err
+func NewDatabaseQuery[T any](db Database, collectionName string) DatabaseQuery[T] {
+	return &query[T]{
+		db:             db,
+		collectionName: collectionName,
 	}
-
-	return nil
 }
 
-// func (q *query) FindAll(ctx context.Context, collectionName string, filter any) ([]any, error) {
-// 	return nil, nil
-// }
+func (q *query[T]) FindOne(context context.Context, filter Filter) (*T, error) {
+	collection := q.db.GetCollection(q.collectionName)
 
-func (q *query) InsertOne(ctx context.Context, collectionName string, doc any) (*primitive.ObjectID, error) {
-	collection := q.db.GetCollection(collectionName)
-
-	result, err := collection.InsertOne(ctx, doc)
+	var doc T
+	err := collection.FindOne(context, filter).Decode(&doc)
 	if err != nil {
 		return nil, err
 	}
 
-	insertedID, ok := result.InsertedID.(primitive.ObjectID)
-	if !ok {
+	return &doc, nil
+}
+
+func (q *query[T]) FindPaginated(context context.Context, filter Filter, page int64, limit int64) (*[]T, error) {
+	collection := q.db.GetCollection(q.collectionName)
+
+	skip := (page - 1) * limit
+
+	findOptions := options.Find()
+	findOptions.SetSkip(skip)
+	findOptions.SetLimit(int64(limit))
+
+	cursor, err := collection.Find(context, filter, findOptions)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query1: %w", err)
+	}
+	defer cursor.Close(context)
+
+	var docs []T
+
+	for cursor.Next(context) {
+		var result T
+		err := cursor.Decode(&result)
+		if err != nil {
+			return nil, fmt.Errorf("error decoding result: %w", err)
+		}
+		docs = append(docs, result)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, fmt.Errorf("cursor error: %w", err)
+	}
+
+	return &docs, nil
+}
+
+func (q *query[T]) InsertOne(context context.Context, doc *T) (*T, error) {
+	collection := q.db.GetCollection(q.collectionName)
+
+	result, err := collection.InsertOne(context, doc)
+	if err != nil {
 		return nil, err
 	}
 
-	return &insertedID, nil
+	insertedID, err := castObjectID(result.InsertedID)
+	if err != nil {
+		return nil, err
+	}
+
+	d := utils.CopyAndSetField(doc, "ID", *insertedID)
+
+	return d, nil
 }
 
-// func (q *query) InsertMany(ctx context.Context, collectionName string, docs []any) ([]*primitive.ObjectID, error) {
+// func (q *query1) InsertMany( collectionName string, docs []any) ([]*primitive.ObjectID, error) {
 // 	return nil, nil
 // }
 
-// func (q *query) UpdateOne(ctx context.Context, collectionName string, filter any, doc any) (int64, error) {
+// func (q *query1) UpdateOne( collectionName string, filter any, doc any) (int64, error) {
 // 	return 0, nil
 // }
 
-// func (q *query) DeleteOne(ctx context.Context, collectionName string, filter any, doc any) (int64, error) {
+// func (q *query1) DeleteOne( collectionName string, filter any, doc any) (int64, error) {
 // 	return 0, nil
 // }

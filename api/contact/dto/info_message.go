@@ -1,9 +1,14 @@
 package dto
 
-import "time"
+import (
+	"time"
+
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
+)
 
 type InfoMessage struct {
-	Type      string    `json:"type" binding:"required"`
-	Msg       string    `json:"msg" binding:"required"`
-	CreatedAt time.Time `json:"createdAt" binding:"required"`
+	ID        mongo.ObjectID `json:"_id" binding:"required"`
+	Type      string         `json:"type" binding:"required"`
+	Msg       string         `json:"msg" binding:"required"`
+	CreatedAt time.Time      `json:"createdAt" binding:"required"`
 }

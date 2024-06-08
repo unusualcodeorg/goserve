@@ -1,4 +1,4 @@
-package network
+package utils
 
 import (
 	"github.com/gin-gonic/gin"
@@ -14,9 +14,13 @@ func Body(ctx *gin.Context, obj any) []string {
 	return nil
 }
 
-func MapToDto(modelObj any, dtoObj any) any {
-	copier.Copy(dtoObj, modelObj)
-	return dtoObj
+func MapToDto[T any, V any](modelObj *V) (*T, error) {
+	var dtoObj T
+	err := copier.Copy(&dtoObj, modelObj)
+	if err != nil {
+		return nil, err
+	}
+	return &dtoObj, nil
 }
 
 func getErrorMsgs(err error) []string {

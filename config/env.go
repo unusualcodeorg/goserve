@@ -6,7 +6,7 @@ import (
 )
 
 type Env struct {
-	GoMode         string `mapstructure:"GO_MODE"`
+	GoMode        string `mapstructure:"GO_MODE"`
 	ServerHost    string `mapstructure:"SERVER_HOST"`
 	ServerPort    uint16 `mapstructure:"SERVER_PORT"`
 	DBHost        string `mapstructure:"DB_HOST"`

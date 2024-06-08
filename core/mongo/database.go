@@ -6,12 +6,33 @@ import (
 	"log"
 
 	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type ObjectID struct {
+	primitive.ObjectID
+}
+
+func castObjectID(id any) (*ObjectID, error) {
+	i, ok := id.(primitive.ObjectID)
+	if !ok {
+		return nil, fmt.Errorf("castObjectID: cast failed id")
+	}
+	return &ObjectID{i}, nil
+}
+
+func NewObjectID(id string) (*ObjectID, error) {
+	i, err := primitive.ObjectIDFromHex(id)
+	return &ObjectID{i}, err
+}
+
+type Filter bson.M
+
 type Database interface {
-	Client() *mongo.Client
+	GetClient() *mongo.Client
 	GetCollection(string) *mongo.Collection
 	Connect()
 	Disconnect()
@@ -80,6 +101,6 @@ func (db *database) Disconnect() {
 	}
 }
 
-func (db *database) Client() *mongo.Client {
+func (db *database) GetClient() *mongo.Client {
 	return db.client
 }
