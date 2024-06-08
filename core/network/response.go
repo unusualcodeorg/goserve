@@ -29,17 +29,6 @@ func (r *messageResponse) Send(c *gin.Context) {
 	c.JSON(int(r.Status), r)
 }
 
-type errorResponse struct {
-	ResCode ResponseCode `json:"code" binding:"required"`
-	Status  int          `json:"status" binding:"required"`
-	Message string       `json:"message" binding:"required"`
-	Errors  []string     `json:"errors"`
-}
-
-func (r *errorResponse) Send(c *gin.Context) {
-	c.JSON(int(r.Status), r)
-}
-
 type dataResponse struct {
 	ResCode ResponseCode `json:"code" binding:"required"`
 	Status  int          `json:"status" binding:"required"`
@@ -68,25 +57,11 @@ func SuccessMsgResponse(message string) Response {
 	}
 }
 
-func ErrorResponse(message string, status int, errors []string) Response {
-	return &errorResponse{
-		ResCode: failue_code,
-		Status:  status,
-		Message: message,
-		Errors:  errors,
-	}
-}
-
-func BadRequestResponse(errors []string) Response {
-	message := "bad request error"
-	if len(message) > 0 {
-		message = errors[0]
-	}
-	return &errorResponse{
+func BadRequestResponse(message string) Response {
+	return &messageResponse{
 		ResCode: failue_code,
 		Status:  http.StatusBadRequest,
 		Message: message,
-		Errors:  errors,
 	}
 }
 

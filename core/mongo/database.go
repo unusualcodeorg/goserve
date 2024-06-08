@@ -13,6 +13,9 @@ import (
 
 func NewObjectID(id string) (*primitive.ObjectID, error) {
 	i, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		err = fmt.Errorf(id + " is not a valid mongo id")
+	}
 	return &i, err
 }
 

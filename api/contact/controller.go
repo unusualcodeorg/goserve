@@ -3,9 +3,9 @@ package contact
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
+	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type controller struct {
@@ -32,20 +32,20 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 }
 
 func (c *controller) createMessageHandler(ctx *gin.Context) {
-	var body dto.CreateMessage
 
-	if err := utils.Body(ctx, &body); err != nil {
-		network.BadRequestResponse(err).Send(ctx)
+	body, err := network.ReqBody[dto.CreateMessage](ctx)
+	if err != nil {
+		network.BadRequestResponse(err.Error()).Send(ctx)
 		return
 	}
 
-	msg, err := c.contactService.SaveMessage(&body)
+	msg, err := c.contactService.SaveMessage(body)
 	if err != nil {
 		network.InternalServerErrorResponse("something went wrong")
 		return
 	}
 
-	data, err := utils.MapToDto[dto.InfoMessage](msg)
+	data, err := network.MapToDto[dto.InfoMessage](msg)
 	if err != nil {
 		network.InternalServerErrorResponse("something went wrong")
 		return
@@ -59,7 +59,7 @@ func (c *controller) getMessageHandler(ctx *gin.Context) {
 
 	objectId, err := mongo.NewObjectID(id)
 	if err != nil {
-		network.BadRequestResponse([]string{id + " is not a valid mongo id"}).Send(ctx)
+		network.BadRequestResponse(err.Error()).Send(ctx)
 		return
 	}
 
@@ -70,7 +70,7 @@ func (c *controller) getMessageHandler(ctx *gin.Context) {
 		return
 	}
 
-	data, err := utils.MapToDto[dto.InfoMessage](msg)
+	data, err := network.MapToDto[dto.InfoMessage](msg)
 	if err != nil {
 		network.InternalServerErrorResponse("something went wrong")
 		return
@@ -79,15 +79,20 @@ func (c *controller) getMessageHandler(ctx *gin.Context) {
 }
 
 func (c *controller) getMessagesPaginated(ctx *gin.Context) {
+	pagenation, err := network.ReqQuery[coredto.PaginationDto](ctx)
+	if err != nil {
+		network.BadRequestResponse(err.Error()).Send(ctx)
+		return
+	}
 
-	msgs, err := c.contactService.FindPaginatedMessage(1, 5)
+	msgs, err := c.contactService.FindPaginatedMessage(pagenation)
 
 	if err != nil {
 		network.NotFoundResponse("message not found").Send(ctx)
 		return
 	}
 
-	data, err := utils.MapToDto[[]dto.InfoMessage](msgs)
+	data, err := network.MapToDto[[]dto.InfoMessage](msgs)
 	if err != nil {
 		network.InternalServerErrorResponse("something went wrong")
 		return

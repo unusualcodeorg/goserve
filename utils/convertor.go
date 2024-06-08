@@ -38,7 +38,7 @@ func CopyAndSetField[T any, V any](input *T, fieldName string, newValue *V) *T {
 	// Check if the field exists and is settable
 	if fieldValue.IsValid() && fieldValue.CanSet() {
 		// Convert the new value to the field's type
-		newValueReflect := reflect.ValueOf(newValue).Convert(fieldValue.Type())
+		newValueReflect := reflect.ValueOf(*newValue).Convert(fieldValue.Type())
 
 		// Set the value of the field in the new struct
 		fieldValue.Set(newValueReflect)
