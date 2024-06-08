@@ -5,7 +5,7 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/middleware"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/parser"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type controller struct {
@@ -25,22 +25,43 @@ func NewContactController(service ContactService) network.Controller {
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
 	group.POST("/", c.createMessageHandler)
+	group.GET("/id/:id", c.getMessageHandler)
 }
 
 func (c *controller) createMessageHandler(ctx *gin.Context) {
-	var createMsg dto.CreateMessage
+	var body dto.CreateMessage
 
-	if err := parser.GetBody(ctx, &createMsg); err != nil {
+	if err := network.Body(ctx, &body); err != nil {
 		network.BadRequestResponse(err).Send(ctx)
 		return
 	}
 
-	_, err := c.contactService.SaveMessage(createMsg.Type, createMsg.Msg)
+	_, err := c.contactService.SaveMessage(body)
 
 	if err != nil {
-		network.InternalServerErrorResponse("Something went wrong")
+		network.InternalServerErrorResponse("something went wrong")
 		return
 	}
 
-	network.SuccessMsgResponse("Message received successfully!").Send(ctx)
+	network.SuccessMsgResponse("message received successfully!").Send(ctx)
+}
+
+func (c *controller) getMessageHandler(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		network.BadRequestResponse([]string{id + " is not a valid mongo id"}).Send(ctx)
+		return
+	}
+
+	msg, err := c.contactService.FindMessage(objectId)
+
+	if err != nil {
+		network.NotFoundResponse("message not found").Send(ctx)
+		return
+	}
+
+	data := network.MapToDto(msg, &dto.InfoMessage{})
+	network.SuccessResponse("success", data).Send(ctx)
 }

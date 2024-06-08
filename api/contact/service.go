@@ -4,12 +4,16 @@ import (
 	"context"
 	"time"
 
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/schema"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ContactService interface {
-	SaveMessage(msgType string, msgTxt string) (*schema.Message, error)
+	SaveMessage(d dto.CreateMessage) (*schema.Message, error)
+	FindMessage(id primitive.ObjectID) (*schema.Message, error)
 }
 
 type service struct {
@@ -23,12 +27,12 @@ func NewContactService(dbQuery mongo.DatabaseQuery) ContactService {
 	return &s
 }
 
-func (s *service) SaveMessage(msgType string, msgTxt string) (*schema.Message, error) {
+func (s *service) SaveMessage(d dto.CreateMessage) (*schema.Message, error) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 
-	msg, err := schema.NewMessage(msgType, msgTxt)
+	msg, err := schema.NewMessage(d.Type, d.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -39,5 +43,22 @@ func (s *service) SaveMessage(msgType string, msgTxt string) (*schema.Message, e
 	}
 
 	msg.ID = result.Hex()
+
 	return msg, nil
+}
+
+func (s *service) FindMessage(id primitive.ObjectID) (*schema.Message, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+
+	var msg schema.Message
+	filter := bson.M{"_id": id}
+
+	err := s.dbQuery.FindOne(ctx, schema.MessageCollectionName, filter, &msg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &msg, nil
 }

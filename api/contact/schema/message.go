@@ -3,7 +3,7 @@ package schema
 import (
 	"time"
 
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/parser"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 const MessageCollectionName = "messages"
@@ -26,7 +26,7 @@ func NewMessage(msgType string, msgTxt string) (*Message, error) {
 		CreatedAt: time,
 		UpdatedAt: time,
 	}
-	if err := parser.Validate(m); err != nil {
+	if err := utils.Validate(m); err != nil {
 		return nil, err
 	}
 	return &m, nil

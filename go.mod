@@ -5,6 +5,7 @@ go 1.22.4
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.21.0
+	github.com/jinzhu/copier v0.4.0
 	github.com/spf13/viper v1.19.0
 	go.mongodb.org/mongo-driver v1.15.0
 )

@@ -20,7 +20,7 @@ type Response interface {
 }
 
 type messageResponse struct {
-	ResCode ResponseCode `json:"statusCode" binding:"required"`
+	ResCode ResponseCode `json:"code" binding:"required"`
 	Status  int          `json:"status" binding:"required"`
 	Message string       `json:"message" binding:"required"`
 }
@@ -30,7 +30,7 @@ func (r *messageResponse) Send(c *gin.Context) {
 }
 
 type errorResponse struct {
-	ResCode ResponseCode `json:"statusCode" binding:"required"`
+	ResCode ResponseCode `json:"code" binding:"required"`
 	Status  int          `json:"status" binding:"required"`
 	Message string       `json:"message" binding:"required"`
 	Errors  []string     `json:"errors"`
@@ -41,8 +41,9 @@ func (r *errorResponse) Send(c *gin.Context) {
 }
 
 type dataResponse struct {
-	ResCode ResponseCode `json:"statusCode" binding:"required"`
+	ResCode ResponseCode `json:"code" binding:"required"`
 	Status  int          `json:"status" binding:"required"`
+	Message string       `json:"message" binding:"required"`
 	Data    any          `json:"data" binding:"required"`
 }
 
@@ -50,10 +51,11 @@ func (r *dataResponse) Send(c *gin.Context) {
 	c.JSON(int(r.Status), r)
 }
 
-func SuccessResponse(data any) Response {
+func SuccessResponse(message string, data any) Response {
 	return &dataResponse{
 		ResCode: success_code,
 		Status:  http.StatusOK,
+		Message: message,
 		Data:    data,
 	}
 }
@@ -76,10 +78,14 @@ func ErrorResponse(message string, status int, errors []string) Response {
 }
 
 func BadRequestResponse(errors []string) Response {
+	message := "bad request error"
+	if len(message) > 0 {
+		message = errors[0]
+	}
 	return &errorResponse{
 		ResCode: failue_code,
 		Status:  http.StatusBadRequest,
-		Message: "badRequest",
+		Message: message,
 		Errors:  errors,
 	}
 }

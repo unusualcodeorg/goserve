@@ -1,7 +1,8 @@
-package parser
+package utils
 
 import (
 	"github.com/go-playground/validator/v10"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func Validate(obj any) error {
@@ -9,4 +10,9 @@ func Validate(obj any) error {
 		return err
 	}
 	return nil
+}
+
+func IsValidObjectID(id string) bool {
+	_, err := primitive.ObjectIDFromHex(id)
+	return err == nil
 }
