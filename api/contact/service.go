@@ -47,7 +47,6 @@ func (s *service) SaveMessage(d *dto.CreateMessage) (*schema.Message, error) {
 }
 
 func (s *service) FindMessage(id *primitive.ObjectID) (*schema.Message, error) {
-
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 
@@ -62,7 +61,6 @@ func (s *service) FindMessage(id *primitive.ObjectID) (*schema.Message, error) {
 }
 
 func (s *service) FindPaginatedMessage(p *coredto.PaginationDto) (*[]schema.Message, error) {
-
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 

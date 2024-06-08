@@ -32,7 +32,6 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 }
 
 func (c *controller) createMessageHandler(ctx *gin.Context) {
-
 	body, err := network.ReqBody[dto.CreateMessage](ctx)
 	if err != nil {
 		network.BadRequestResponse(err.Error()).Send(ctx)
