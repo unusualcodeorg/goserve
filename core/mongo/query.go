@@ -5,12 +5,14 @@ import (
 	"fmt"
 
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DatabaseQuery[T any] interface {
-	FindOne(context context.Context, filter Filter) (*T, error)
-	FindPaginated(context context.Context, filter Filter, page int64, limit int64) (*[]T, error)
+	FindOne(context context.Context, filter bson.M) (*T, error)
+	FindPaginated(context context.Context, filter bson.M, page int64, limit int64) (*[]T, error)
 	InsertOne(context context.Context, doc *T) (*T, error)
 	// InsertMany(collectionName string, docs []any) ([]*primitive.ObjectID, error)
 	// UpdateOne( collectionName string, filter any, doc any) (int64, error)
@@ -29,7 +31,7 @@ func NewDatabaseQuery[T any](db Database, collectionName string) DatabaseQuery[T
 	}
 }
 
-func (q *query[T]) FindOne(context context.Context, filter Filter) (*T, error) {
+func (q *query[T]) FindOne(context context.Context, filter bson.M) (*T, error) {
 	collection := q.db.GetCollection(q.collectionName)
 
 	var doc T
@@ -41,7 +43,7 @@ func (q *query[T]) FindOne(context context.Context, filter Filter) (*T, error) {
 	return &doc, nil
 }
 
-func (q *query[T]) FindPaginated(context context.Context, filter Filter, page int64, limit int64) (*[]T, error) {
+func (q *query[T]) FindPaginated(context context.Context, filter bson.M, page int64, limit int64) (*[]T, error) {
 	collection := q.db.GetCollection(q.collectionName)
 
 	skip := (page - 1) * limit
@@ -82,12 +84,12 @@ func (q *query[T]) InsertOne(context context.Context, doc *T) (*T, error) {
 		return nil, err
 	}
 
-	insertedID, err := castObjectID(result.InsertedID)
-	if err != nil {
-		return nil, err
+	insertedID, ok := result.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return nil, fmt.Errorf("castObjectID: cast failed id")
 	}
 
-	d := utils.CopyAndSetField(doc, "ID", *insertedID)
+	d := utils.CopyAndSetField(doc, "ID", &insertedID)
 
 	return d, nil
 }

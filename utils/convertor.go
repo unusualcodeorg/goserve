@@ -22,7 +22,7 @@ func ConvertUint8(str string) uint8 {
 }
 
 // CopyAndSetField creates a copy of the provided struct and sets the specified field to the new value.
-func CopyAndSetField[T any](input *T, fieldName string, newValue any) *T {
+func CopyAndSetField[T any, V any](input *T, fieldName string, newValue *V) *T {
 	// Get the reflect.Value of the input struct
 	inputValue := reflect.ValueOf(*input)
 

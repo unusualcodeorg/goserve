@@ -3,19 +3,19 @@ package schema
 import (
 	"time"
 
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const MessageCollectionName = "messages"
 
 type Message struct {
-	ID        mongo.ObjectID `bson:"_id,omitempty" validate:"-"`
-	Type      string         `bson:"type" validate:"required"`
-	Msg       string         `bson:"msg" validate:"required"`
-	Status    bool           `bson:"status" validate:"required"`
-	CreatedAt time.Time      `bson:"createdAt" validate:"required"`
-	UpdatedAt time.Time      `bson:"updatedAt" validate:"required"`
+	ID        primitive.ObjectID `bson:"_id,omitempty" validate:"-"`
+	Type      string             `bson:"type" validate:"required"`
+	Msg       string             `bson:"msg" validate:"required"`
+	Status    bool               `bson:"status" validate:"required"`
+	CreatedAt time.Time          `bson:"createdAt" validate:"required"`
+	UpdatedAt time.Time          `bson:"updatedAt" validate:"required"`
 }
 
 func NewMessage(msgType string, msgTxt string) (*Message, error) {

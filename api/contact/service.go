@@ -7,11 +7,13 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/schema"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ContactService interface {
 	SaveMessage(d *dto.CreateMessage) (*schema.Message, error)
-	FindMessage(id *mongo.ObjectID) (*schema.Message, error)
+	FindMessage(id *primitive.ObjectID) (*schema.Message, error)
 	FindPaginatedMessage(page uint64, limit uint64) (*[]schema.Message, error)
 }
 
@@ -43,12 +45,12 @@ func (s *service) SaveMessage(d *dto.CreateMessage) (*schema.Message, error) {
 	return result, nil
 }
 
-func (s *service) FindMessage(id *mongo.ObjectID) (*schema.Message, error) {
+func (s *service) FindMessage(id *primitive.ObjectID) (*schema.Message, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 
-	filter := mongo.Filter{"_id": id.ObjectID}
+	filter := bson.M{"_id": id}
 
 	msg, err := s.messageDbQuery.FindOne(ctx, filter)
 	if err != nil {
@@ -63,7 +65,7 @@ func (s *service) FindPaginatedMessage(page uint64, limit uint64) (*[]schema.Mes
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 
-	filter := mongo.Filter{"status": true}
+	filter := bson.M{"status": true}
 
 	msgs, err := s.messageDbQuery.FindPaginated(ctx, filter, 2, 10)
 	if err != nil {
