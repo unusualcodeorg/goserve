@@ -3,7 +3,6 @@ package mongo
 import (
 	"context"
 	"fmt"
-
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

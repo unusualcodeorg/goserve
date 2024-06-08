@@ -6,7 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-const ApiKeyCollectionName = "api_keys"
+const CollectionName = "api_keys"
 
 type Permission string
 

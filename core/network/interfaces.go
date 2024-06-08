@@ -1,11 +1,19 @@
 package network
 
-import "github.com/gin-gonic/gin"
+import (
+	"context"
+
+	"github.com/gin-gonic/gin"
+)
 
 type BaseController interface {
 	Path() string
 	AuthenticationMiddleware() GroupMiddleware
 	AuthorizationMiddleware() GroupMiddleware
+}
+
+type BaseService interface {
+	Context() (context.Context, context.CancelFunc)
 }
 
 type Controller interface {

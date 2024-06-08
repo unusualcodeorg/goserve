@@ -34,20 +34,17 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 func (c *controller) createMessageHandler(ctx *gin.Context) {
 	body, err := network.ReqBody[dto.CreateMessage](ctx)
 	if err != nil {
-		network.BadRequestResponse(err.Error()).Send(ctx)
-		return
+		panic(network.BadRequestError(err.Error(), err))
 	}
 
 	msg, err := c.contactService.SaveMessage(body)
 	if err != nil {
-		network.InternalServerErrorResponse("something went wrong")
-		return
+		panic(network.InternalServerError("something went wrong", err))
 	}
 
 	data, err := network.MapToDto[dto.InfoMessage](msg)
 	if err != nil {
-		network.InternalServerErrorResponse("something went wrong")
-		return
+		panic(network.InternalServerError("something went wrong", err))
 	}
 
 	network.SuccessResponse("message received successfully!", data).Send(ctx)
@@ -58,43 +55,37 @@ func (c *controller) getMessageHandler(ctx *gin.Context) {
 
 	objectId, err := mongo.NewObjectID(id)
 	if err != nil {
-		network.BadRequestResponse(err.Error()).Send(ctx)
-		return
+		panic(network.BadRequestError(err.Error(), err))
 	}
 
 	msg, err := c.contactService.FindMessage(objectId)
-
 	if err != nil {
-		network.NotFoundResponse("message not found").Send(ctx)
-		return
+		panic(network.NotFoundError("message not found", err))
 	}
 
 	data, err := network.MapToDto[dto.InfoMessage](msg)
 	if err != nil {
-		network.InternalServerErrorResponse("something went wrong")
-		return
+		panic(network.InternalServerError("something went wrong", err))
 	}
+
 	network.SuccessResponse("success", data).Send(ctx)
 }
 
 func (c *controller) getMessagesPaginated(ctx *gin.Context) {
 	pagenation, err := network.ReqQuery[coredto.PaginationDto](ctx)
 	if err != nil {
-		network.BadRequestResponse(err.Error()).Send(ctx)
-		return
+		panic(network.BadRequestError(err.Error(), err))
 	}
 
 	msgs, err := c.contactService.FindPaginatedMessage(pagenation)
 
 	if err != nil {
-		network.NotFoundResponse("message not found").Send(ctx)
-		return
+		panic(network.NotFoundError("messages not found", err))
 	}
 
 	data, err := network.MapToDto[[]dto.InfoMessage](msgs)
 	if err != nil {
-		network.InternalServerErrorResponse("something went wrong")
-		return
+		panic(network.InternalServerError("something went wrong", err))
 	}
 	network.SuccessResponse("success", data).Send(ctx)
 }

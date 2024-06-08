@@ -1,17 +1,41 @@
 package core
 
-import "github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
+import (
+	"time"
+
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/schema"
+	"go.mongodb.org/mongo-driver/bson"
+)
 
 type CoreService interface {
+	FindApiKey(key string) (*schema.ApiKey, error)
 }
 
 type service struct {
-	db mongo.Database
+	network.BaseService
+	apikeyQuery mongo.DatabaseQuery[schema.ApiKey]
 }
 
-func NewCoreService(database mongo.Database) CoreService {
+func NewContactService(db mongo.Database, dbQueryTimeout time.Duration) CoreService {
 	s := service{
-		db: database,
+		BaseService: network.NewBaseService(dbQueryTimeout),
+		apikeyQuery: mongo.NewDatabaseQuery[schema.ApiKey](db, schema.CollectionName),
 	}
 	return &s
+}
+
+func (s *service) FindApiKey(key string) (*schema.ApiKey, error) {
+	ctx, cancel := s.Context()
+	defer cancel()
+
+	filter := bson.M{"key": key, "status": true}
+
+	apikey, err := s.apikeyQuery.FindOne(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return apikey, nil
 }

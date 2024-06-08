@@ -2,14 +2,18 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
 type keyProtection struct {
+	coreService core.CoreService
 }
 
-func NewKeyProtection() network.RootMiddleware {
-	m := keyProtection{}
+func NewKeyProtection(coreService core.CoreService) network.RootMiddleware {
+	m := keyProtection{
+		coreService: coreService,
+	}
 	return &m
 }
 
@@ -18,5 +22,17 @@ func (m *keyProtection) Attach(engine *gin.Engine) {
 }
 
 func (m *keyProtection) Handler(ctx *gin.Context) {
+	// key := ctx.GetHeader(network.ApiKeyHeader)
+	// if len(key) == 0 {
+	// 	network.UnauthorizedResponse("permission denied").Send(ctx)
+	// 	return
+	// }
+
+	// apikey, err := m.coreService.FindApiKey(key)
+	// if err != nil {
+	// 	network.InternalServerErrorResponse("something went wrong").Send(ctx)
+	// 	return
+	// }
+
 	ctx.Next()
 }
