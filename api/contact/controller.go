@@ -83,7 +83,7 @@ func (c *controller) getMessagesPaginated(ctx *gin.Context) {
 		panic(network.NotFoundError("messages not found", err))
 	}
 
-	data, err := network.MapToDto[[]dto.InfoMessage](msgs)
+	data, err := network.MapToDto[[]dto.InfoMessage](&msgs)
 	if err != nil {
 		panic(network.InternalServerError("something went wrong", err))
 	}

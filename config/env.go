@@ -17,6 +17,8 @@ type Env struct {
 	DBMinPoolSize  uint16 `mapstructure:"DB_MIN_POOL_SIZE"`
 	DBMaxPoolSize  uint16 `mapstructure:"DB_MAX_POOL_SIZE"`
 	DBQueryTimeout uint16 `mapstructure:"DB_QUERY_TIMEOUT_SEC"`
+	RSAPrivateKey  string `mapstructure:"RSA_PRIVATE_KEY"`
+	RSAPublicKey   string `mapstructure:"RSA_PUBLIC_KEY"`
 }
 
 func NewEnv(filename string) *Env {

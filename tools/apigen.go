@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,7 +18,7 @@ func capitalizeFirstLetter(str string) string {
 
 func generateFeature(featureTemplate string) error {
 	if featureTemplate == "" {
-		return fmt.Errorf("api name should be a non-empty string")
+		return errors.New("api name should be a non-empty string")
 	}
 
 	featureName := strings.ToLower(featureTemplate)

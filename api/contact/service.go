@@ -15,7 +15,7 @@ import (
 type ContactService interface {
 	SaveMessage(d *dto.CreateMessage) (*schema.Message, error)
 	FindMessage(id *primitive.ObjectID) (*schema.Message, error)
-	FindPaginatedMessage(p *coredto.PaginationDto) (*[]schema.Message, error)
+	FindPaginatedMessage(p *coredto.PaginationDto) ([]schema.Message, error)
 }
 
 type service struct {
@@ -40,7 +40,7 @@ func (s *service) SaveMessage(d *dto.CreateMessage) (*schema.Message, error) {
 		return nil, err
 	}
 
-	result, err := s.messageQuery.InsertOne(ctx, msg)
+	result, err := s.messageQuery.InsertAndRetrieveOne(ctx, msg)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (s *service) FindMessage(id *primitive.ObjectID) (*schema.Message, error) {
 	return msg, nil
 }
 
-func (s *service) FindPaginatedMessage(p *coredto.PaginationDto) (*[]schema.Message, error) {
+func (s *service) FindPaginatedMessage(p *coredto.PaginationDto) ([]schema.Message, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 

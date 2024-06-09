@@ -1,7 +1,7 @@
 package network
 
 import (
-	"fmt"
+	"errors"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -84,7 +84,7 @@ func parseError(err error) error {
 		if len(errorMsg) > 0 {
 			errorMsg = errorMsg[:len(errorMsg)-len(br)]
 		}
-		return fmt.Errorf(errorMsg)
+		return errors.New(errorMsg)
 	}
 
 	return err
