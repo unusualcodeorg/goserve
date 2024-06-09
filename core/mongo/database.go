@@ -21,7 +21,7 @@ func NewObjectID(id string) (*primitive.ObjectID, error) {
 
 type Database interface {
 	GetClient() *mongo.Client
-	GetCollection(string) *mongo.Collection
+	Collection(string) *mongo.Collection
 	Connect()
 	Disconnect()
 }
@@ -77,7 +77,7 @@ func (db *database) Connect() {
 	db.client = client
 }
 
-func (db *database) GetCollection(name string) *mongo.Collection {
+func (db *database) Collection(name string) *mongo.Collection {
 	return db.client.Database(db.name).Collection(name)
 }
 

@@ -172,10 +172,14 @@ func generateSchema(featureDir, featureName string) error {
 	tStr := `package schema
 
 import (
+	"context"
 	"time"
 
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	mongod "go.mongodb.org/mongo-driver/mongo"
 )
 
 const CollectionName = "%ss"
@@ -201,9 +205,22 @@ func New%s(field string) (*%s, error) {
 	}
 	return &m, nil
 }
+
+func EnsureIndexes(db mongo.Database) {
+	indexes := []mongod.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "_id", Value: 1},
+				{Key: "status", Value: 1},
+			},
+		},
+	}
+	q := mongo.NewDatabaseQuery[%s](db, CollectionName)
+	q.CreateIndexes(context.Background(), indexes)
+}
 `
 
-	template := fmt.Sprintf(tStr, featureLower, featureCaps, featureCaps, featureCaps, featureCaps)
+	template := fmt.Sprintf(tStr, featureLower, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps)
 
 	return os.WriteFile(schemaPath, []byte(template), os.ModePerm)
 }

@@ -21,6 +21,13 @@
 go.work
 go.work.sum
 
-.env
+# Environment varibles
+*.env
+*.env.test
+
+#keys
+keys/*
+!keys/*.md
+!keys/*.example
 
 __debug*

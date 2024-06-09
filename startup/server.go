@@ -18,6 +18,8 @@ func Server() {
 	defer db.Disconnect()
 	db.Connect()
 
+	EnsureDbIndexes(db)
+
 	router := network.NewRouter(env.GoMode)
 	dbQueryTimeout := time.Duration(env.DBQueryTimeout) * time.Second
 

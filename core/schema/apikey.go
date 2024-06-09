@@ -1,9 +1,13 @@
 package schema
 
 import (
+	"context"
 	"time"
 
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	mongod "go.mongodb.org/mongo-driver/mongo"
 )
 
 const CollectionName = "api_keys"
@@ -36,4 +40,17 @@ func NewApiKey(key string, version int, permissions []Permission, comments []str
 		CreatedAt:   currentTime,
 		UpdatedAt:   currentTime,
 	}
+}
+
+func EnsureIndexes(db mongo.Database) {
+	indexes := []mongod.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "code", Value: 1},
+				{Key: "status", Value: 1},
+			},
+		},
+	}
+	q := mongo.NewDatabaseQuery[ApiKey](db, CollectionName)
+	q.CreateIndexes(context.Background(), indexes)
 }
