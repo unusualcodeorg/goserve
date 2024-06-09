@@ -8,17 +8,21 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type InfoUser struct {
+type CreateUser struct {
 	ID        primitive.ObjectID `json:"_id" binding:"required"`
 	Field     string             `json:"field" binding:"required"`
 	CreatedAt time.Time          `json:"createdAt" binding:"required"`
 }
 
-func (d *InfoUser) Payload() *InfoUser {
+func EmptyCreateUser() *CreateUser {
+	return &CreateUser{}
+}
+
+func (d *CreateUser) Payload() *CreateUser {
 	return d
 }
 
-func (d *InfoUser) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
+func (d *CreateUser) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
 	var msgs []string
 	for _, err := range errs {
 		switch err.Tag() {

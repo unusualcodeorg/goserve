@@ -14,6 +14,10 @@ type InfoMessage struct {
 	CreatedAt time.Time `json:"createdAt" binding:"required"`
 }
 
+func EmptyInfoMessage() *InfoMessage {
+	return &InfoMessage{}
+}
+
 func (d *InfoMessage) Payload() *InfoMessage {
 	return d
 }

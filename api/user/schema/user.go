@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	auth "github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/schema"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const CollectionName = "users"
+const UserCollectionName = "users"
 
 type User struct {
 	ID            primitive.ObjectID   `bson:"_id,omitempty"`
@@ -28,18 +27,34 @@ type User struct {
 	UpdatedAt     time.Time            `bson:"updatedAt" validate:"required"`
 
 	// docs
-	RoleDocs []auth.Role `bson:"-" validate:"-"`
+	RoleDocs []Role `bson:"-" validate:"-"`
 }
 
-func NewUser(email string, password *string) (mongo.Schema[User], error) {
+func NewUser(
+	email string,
+	pwdHash string,
+	name *string,
+	profilePicUrl *string,
+	roles []Role,
+) (mongo.Schema[User], error,
+) {
+	roleIds := make([]primitive.ObjectID, len(roles))
+	for i, role := range roles {
+		roleIds[i] = role.ID
+	}
+
 	now := time.Now()
 	u := User{
-		Email:     email,
-		Password:  password,
-		Verified:  false,
-		Status:    true,
-		CreatedAt: now,
-		UpdatedAt: now,
+		Email:         email,
+		Password:      &pwdHash,
+		Name:          name,
+		ProfilePicURL: profilePicUrl,
+		Roles:         roleIds,
+		Verified:      false,
+		Status:        true,
+		CreatedAt:     now,
+		UpdatedAt:     now,
+		RoleDocs:      roles,
 	}
 	if err := u.Validate(); err != nil {
 		return nil, err
@@ -77,6 +92,6 @@ func (*User) EnsureIndexes(db mongo.Database) {
 			Options: options.Index().SetUnique(true),
 		},
 	}
-	q := mongo.NewQuery[User](db, CollectionName)
+	q := mongo.NewQuery[User](db, UserCollectionName)
 	q.CreateIndexes(context.Background(), indexes)
 }

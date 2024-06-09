@@ -260,6 +260,10 @@ type Info%s struct {
 	CreatedAt time.Time          ` + "`" + `json:"createdAt" binding:"required"` + "`" + `
 }
 
+func EmptyInfo%s() *Info%s {
+	return &Info%s{}
+}
+
 func (d *Info%s) Payload() *Info%s {
 	return d
 }
@@ -281,7 +285,7 @@ func (d *Info%s) ValidateErrors(errs validator.ValidationErrors) ([]string, erro
 	return msgs, nil
 }
 `
-	template := fmt.Sprintf(tStr, featureCaps, featureCaps, featureCaps, featureCaps)
+	template := fmt.Sprintf(tStr, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps)
 
 	return os.WriteFile(dtoPath, []byte(template), os.ModePerm)
 }

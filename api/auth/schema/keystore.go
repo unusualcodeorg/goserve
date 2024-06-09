@@ -59,6 +59,6 @@ func (*Keystore) EnsureIndexes(db mongo.Database) {
 			},
 		},
 	}
-	q := mongo.NewQuery[Role](db, KeystoreCollectionName)
+	q := mongo.NewQuery[Keystore](db, KeystoreCollectionName)
 	q.CreateIndexes(context.Background(), indexes)
 }

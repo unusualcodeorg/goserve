@@ -19,7 +19,7 @@ func NewUserController(
 ) network.Controller {
 	c := controller{
 		BaseController: network.NewBaseController("/user", authMFunc, authorizeMFunc),
-		userService:  service,
+		userService:    service,
 	}
 	return &c
 }
@@ -41,7 +41,7 @@ func (c *controller) getUserHandler(ctx *gin.Context) {
 		panic(network.NotFoundError("message not found", err))
 	}
 
-	data, err := network.MapToDto[dto.InfoUser](msg)
+	data, err := network.MapToDto[dto.InfoPrivateUser](msg)
 	if err != nil {
 		panic(network.InternalServerError("something went wrong", err))
 	}

@@ -6,20 +6,22 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type SignInBasic struct {
-	Email    string `json:"email" binding:"required" validate:"required,email"`
-	Password string `json:"password" binding:"required" validate:"required,min=6,max=100"`
+type SignUpBasic struct {
+	Email         string `json:"email" binding:"required" validate:"required,email"`
+	Password      string `json:"password" binding:"required" validate:"required,min=6,max=100"`
+	Name          string `json:"name" binding:"required" validate:"required,min=2,max=200"`
+	ProfilePicUrl string `json:"profilePicUrl,omitempty" validate:"omitempty,url"`
 }
 
-func EmptySignInBasic() *SignInBasic {
-	return &SignInBasic{}
+func EmptySignUpBasic() *SignUpBasic {
+	return &SignUpBasic{}
 }
 
-func (d *SignInBasic) Payload() *SignInBasic {
+func (d *SignUpBasic) Payload() *SignUpBasic {
 	return d
 }
 
-func (d *SignInBasic) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
+func (d *SignUpBasic) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
 	var msgs []string
 	for _, err := range errs {
 		switch err.Tag() {
@@ -31,6 +33,8 @@ func (d *SignInBasic) ValidateErrors(errs validator.ValidationErrors) ([]string,
 			msgs = append(msgs, fmt.Sprintf("%s must be at most %s characters", err.Field(), err.Param()))
 		case "email":
 			msgs = append(msgs, fmt.Sprintf("%s is not a valid email", err.Field()))
+		case "url":
+			msgs = append(msgs, fmt.Sprintf("%s is not a valid URL", err.Field()))
 		default:
 			msgs = append(msgs, fmt.Sprintf("%s is invalid", err.Field()))
 		}

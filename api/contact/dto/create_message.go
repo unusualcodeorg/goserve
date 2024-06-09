@@ -11,6 +11,10 @@ type CreateMessage struct {
 	Msg  string `json:"msg" binding:"required,min=0,max=2000"`
 }
 
+func EmptyCreateMessage() *CreateMessage {
+	return &CreateMessage{}
+}
+
 func (d *CreateMessage) Payload() *CreateMessage {
 	return d
 }

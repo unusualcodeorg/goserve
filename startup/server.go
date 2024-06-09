@@ -26,8 +26,8 @@ func Server() {
 	dbQueryTimeout := time.Duration(env.DBQueryTimeout) * time.Second
 
 	coreService := core.NewCoreService(db, dbQueryTimeout)
-	authService := auth.NewAuthService(db, dbQueryTimeout, env)
-	userService := user.NewUserService(db, dbQueryTimeout, authService)
+	userService := user.NewUserService(db, dbQueryTimeout)
+	authService := auth.NewAuthService(db, dbQueryTimeout, env, userService)
 	contactService := contact.NewContactService(db, dbQueryTimeout)
 
 	router.LoadRootMiddlewares(

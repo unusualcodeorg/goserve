@@ -6,9 +6,11 @@ import (
 )
 
 type Env struct {
-	GoMode         string `mapstructure:"GO_MODE"`
-	ServerHost     string `mapstructure:"SERVER_HOST"`
-	ServerPort     uint16 `mapstructure:"SERVER_PORT"`
+	// server
+	GoMode     string `mapstructure:"GO_MODE"`
+	ServerHost string `mapstructure:"SERVER_HOST"`
+	ServerPort uint16 `mapstructure:"SERVER_PORT"`
+	// database
 	DBHost         string `mapstructure:"DB_HOST"`
 	DBName         string `mapstructure:"DB_NAME"`
 	DBPort         uint16 `mapstructure:"DB_PORT"`
@@ -17,8 +19,14 @@ type Env struct {
 	DBMinPoolSize  uint16 `mapstructure:"DB_MIN_POOL_SIZE"`
 	DBMaxPoolSize  uint16 `mapstructure:"DB_MAX_POOL_SIZE"`
 	DBQueryTimeout uint16 `mapstructure:"DB_QUERY_TIMEOUT_SEC"`
-	RSAPrivateKey  string `mapstructure:"RSA_PRIVATE_KEY"`
-	RSAPublicKey   string `mapstructure:"RSA_PUBLIC_KEY"`
+	// keys
+	RSAPrivateKey string `mapstructure:"RSA_PRIVATE_KEY"`
+	RSAPublicKey  string `mapstructure:"RSA_PUBLIC_KEY"`
+	// Token
+	AccessTokenValiditySec  string `mapstructure:"ACCESS_TOKEN_VALIDITY_SEC"`
+	RefreshTokenValiditySec string `mapstructure:"REFRESH_TOKEN_VALIDITY_SEC"`
+	TokenIssuer             string `mapstructure:"TOKEN_ISSUER"`
+	TokenAudience           string `mapstructure:"TOKEN_AUDIENCE"`
 }
 
 func NewEnv(filename string) *Env {
