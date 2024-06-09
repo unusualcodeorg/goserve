@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	mongod "go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const CollectionName = "api_keys"
@@ -49,6 +50,12 @@ func EnsureIndexes(db mongo.Database) {
 				{Key: "code", Value: 1},
 				{Key: "status", Value: 1},
 			},
+		},
+		{
+			Keys: bson.D{
+				{Key: "key", Value: 1},
+			},
+			Options: options.Index().SetUnique(true),
 		},
 	}
 	q := mongo.NewDatabaseQuery[ApiKey](db, CollectionName)
