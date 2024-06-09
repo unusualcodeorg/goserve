@@ -32,7 +32,7 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 }
 
 func (c *controller) createMessageHandler(ctx *gin.Context) {
-	body, err := network.ReqBody[dto.CreateMessage](ctx)
+	body, err := network.ReqBody(ctx, &dto.CreateMessage{})
 	if err != nil {
 		panic(network.BadRequestError(err.Error(), err))
 	}
@@ -72,12 +72,12 @@ func (c *controller) getMessageHandler(ctx *gin.Context) {
 }
 
 func (c *controller) getMessagesPaginated(ctx *gin.Context) {
-	pagenation, err := network.ReqQuery[coredto.PaginationDto](ctx)
+	pagination, err := network.ReqQuery(ctx, &coredto.PaginationDto{})
 	if err != nil {
 		panic(network.BadRequestError(err.Error(), err))
 	}
 
-	msgs, err := c.contactService.FindPaginatedMessage(pagenation)
+	msgs, err := c.contactService.FindPaginatedMessage(pagination)
 
 	if err != nil {
 		panic(network.NotFoundError("messages not found", err))

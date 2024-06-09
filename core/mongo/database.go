@@ -20,6 +20,12 @@ func NewObjectID(id string) (*primitive.ObjectID, error) {
 	return &i, err
 }
 
+type Schema[T any] interface {
+	EnsureIndexes(Database)
+	Document() *T
+	Validate() error
+}
+
 type Database interface {
 	GetClient() *mongo.Client
 	Collection(string) *mongo.Collection

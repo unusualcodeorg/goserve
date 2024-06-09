@@ -2,23 +2,20 @@ package dto
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/go-playground/validator/v10"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type InfoUser struct {
-	ID        primitive.ObjectID `json:"_id" binding:"required"`
-	Field     string             `json:"field" binding:"required"`
-	CreatedAt time.Time          `json:"createdAt" binding:"required"`
+type SignInBasic struct {
+	Email    string `json:"email" binding:"required" validate:"required,email"`
+	Password string `json:"password" binding:"required" validate:"required,min=6,max=100"`
 }
 
-func (d *InfoUser) Payload() *InfoUser {
+func (d *SignInBasic) Payload() *SignInBasic {
 	return d
 }
 
-func (d *InfoUser) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
+func (d *SignInBasic) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
 	var msgs []string
 	for _, err := range errs {
 		switch err.Tag() {

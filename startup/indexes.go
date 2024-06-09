@@ -1,15 +1,17 @@
 package startup
 
 import (
-	authSchema "github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/schema"
-	userSchema "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/schema"
+	auth "github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/schema"
+	contact "github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/schema"
+	user "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/schema"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
-	coreSchema "github.com/unusualcodeorg/go-lang-backend-architecture/core/schema"
+	core "github.com/unusualcodeorg/go-lang-backend-architecture/core/schema"
 )
 
 func EnsureDbIndexes(db mongo.Database) {
-	go authSchema.EnsureRoleIndexes(db)
-	go authSchema.EnsureKeystoreIndexes(db)
-	go userSchema.EnsureIndexes(db)
-	go coreSchema.EnsureIndexes(db)
+	go mongo.Schema[auth.Keystore](&auth.Keystore{}).EnsureIndexes(db)
+	go mongo.Schema[auth.Role](&auth.Role{}).EnsureIndexes(db)
+	go mongo.Schema[user.User](&user.User{}).EnsureIndexes(db)
+	go mongo.Schema[core.ApiKey](&core.ApiKey{}).EnsureIndexes(db)
+	go mongo.Schema[contact.Message](&contact.Message{}).EnsureIndexes(db)
 }

@@ -3,7 +3,8 @@ package schema
 import (
 	"time"
 
-	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
+	"github.com/go-playground/validator/v10"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -18,7 +19,7 @@ type Message struct {
 	UpdatedAt time.Time          `bson:"updatedAt" validate:"required"`
 }
 
-func NewMessage(msgType string, msgTxt string) (*Message, error) {
+func NewMessage(msgType string, msgTxt string) (mongo.Schema[Message], error) {
 	time := time.Now()
 	m := Message{
 		Type:      msgType,
@@ -27,8 +28,19 @@ func NewMessage(msgType string, msgTxt string) (*Message, error) {
 		CreatedAt: time,
 		UpdatedAt: time,
 	}
-	if err := utils.Validate(m); err != nil {
+	if err := m.Validate(); err != nil {
 		return nil, err
 	}
 	return &m, nil
 }
+
+func (message *Message) Document() *Message {
+	return message
+}
+
+func (message *Message) Validate() error {
+	validate := validator.New()
+	return validate.Struct(message)
+}
+
+func (*Message) EnsureIndexes(db mongo.Database) {}

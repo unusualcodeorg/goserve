@@ -31,7 +31,7 @@ type Role struct {
 
 const CollectionName = "roles"
 
-func NewRole(code RoleCode) (*Role, error) {
+func NewRole(code RoleCode) (mongo.Schema[Role], error) {
 	now := time.Now()
 	r := Role{
 		Code:      code,
@@ -60,7 +60,16 @@ func validateRole(r Role) error {
 	return validate.Struct(r)
 }
 
-func EnsureRoleIndexes(db mongo.Database) {
+func (role *Role) Document() *Role {
+	return role
+}
+
+func (role *Role) Validate() error {
+	validate := validator.New()
+	return validate.Struct(role)
+}
+
+func (*Role) EnsureIndexes(db mongo.Database) {
 	indexes := []mongod.IndexModel{
 		{
 			Keys: bson.D{

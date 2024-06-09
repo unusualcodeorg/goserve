@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	mongod "go.mongodb.org/mongo-driver/mongo"
@@ -23,7 +23,7 @@ type Keystore struct {
 	UpdatedAt    time.Time          `bson:"updatedAt" validate:"required"`
 }
 
-func NewKeystore(clientID primitive.ObjectID, primaryKey string, secondaryKey string) (*Keystore, error) {
+func NewKeystore(clientID primitive.ObjectID, primaryKey string, secondaryKey string) (mongo.Schema[Keystore], error) {
 	now := time.Now()
 	k := Keystore{
 		Client:       clientID,
@@ -33,13 +33,22 @@ func NewKeystore(clientID primitive.ObjectID, primaryKey string, secondaryKey st
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}
-	if err := utils.Validate(k); err != nil {
+	if err := k.Validate(); err != nil {
 		return nil, err
 	}
 	return &k, nil
 }
 
-func EnsureKeystoreIndexes(db mongo.Database) {
+func (keystore *Keystore) Document() *Keystore {
+	return keystore
+}
+
+func (keystore *Keystore) Validate() error {
+	validate := validator.New()
+	return validate.Struct(keystore)
+}
+
+func (*Keystore) EnsureIndexes(db mongo.Database) {
 	indexes := []mongod.IndexModel{
 		{
 			Keys: bson.D{

@@ -14,43 +14,41 @@ const (
 	ReqPayloadUser   string = "user"
 )
 
-func ReqBody[T any](ctx *gin.Context) (*T, error) {
-	var body T
-	if err := ctx.ShouldBindJSON(&body); err != nil {
-		e := parseError(err)
+// ShouldBindJSON in gin internally used go-playground/validator i.e. why we have error with validaiton info
+func ReqBody[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
+	if err := ctx.ShouldBindJSON(dto); err != nil {
+		e := processErrors(dto, err)
 		return nil, e
 	}
-	return &body, nil
+	return dto.Payload(), nil
 }
 
-func ReqQuery[T any](ctx *gin.Context) (*T, error) {
-	var query T
-	if err := ctx.ShouldBindQuery(&query); err != nil {
-		e := parseError(err)
+func ReqQuery[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
+	if err := ctx.ShouldBindQuery(dto); err != nil {
+		e := processErrors(dto, err)
 		return nil, e
 	}
 
-	if err := validator.New().Struct(query); err != nil {
-		e := parseError(err)
+	if err := validator.New().Struct(dto); err != nil {
+		e := processErrors(dto, err)
 		return nil, e
 	}
 
-	return &query, nil
+	return dto.Payload(), nil
 }
 
-func ReqHeaders[T any](ctx *gin.Context) (*T, error) {
-	var headers T
-	if err := ctx.ShouldBindHeader(&headers); err != nil {
-		e := parseError(err)
+func ReqHeaders[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
+	if err := ctx.ShouldBindHeader(dto); err != nil {
+		e := processErrors(dto, err)
 		return nil, e
 	}
 
-	if err := validator.New().Struct(headers); err != nil {
-		e := parseError(err)
+	if err := validator.New().Struct(dto); err != nil {
+		e := processErrors(dto, err)
 		return nil, e
 	}
 
-	return &headers, nil
+	return dto.Payload(), nil
 }
 
 func MapToDto[T any, V any](modelObj *V) (*T, error) {
@@ -62,22 +60,16 @@ func MapToDto[T any, V any](modelObj *V) (*T, error) {
 	return &dtoObj, nil
 }
 
-func parseError(err error) error {
-	var msg strings.Builder
-	br := " | "
-
+func processErrors[T any](dto Dto[T], err error) error {
 	if validationErrors, ok := err.(validator.ValidationErrors); ok {
-		for _, err := range validationErrors {
-			switch err.Tag() {
-			case "required":
-				msg.WriteString(err.Field() + " is required" + br)
-			case "min":
-				msg.WriteString(err.Field() + " must be min " + err.Param() + br)
-			case "max":
-				msg.WriteString(err.Field() + " must be max " + err.Param() + br)
-			default:
-				msg.WriteString(err.Field() + " is invalid" + br)
-			}
+		msgs, e := dto.ValidateErrors(validationErrors)
+		if e != nil {
+			return e
+		}
+		var msg strings.Builder
+		br := ", "
+		for _, m := range msgs {
+			msg.WriteString(m + br)
 		}
 		// Remove the trailing separator
 		errorMsg := msg.String()
@@ -86,6 +78,5 @@ func parseError(err error) error {
 		}
 		return errors.New(errorMsg)
 	}
-
 	return err
 }

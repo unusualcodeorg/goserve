@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type BaseController interface {
@@ -18,17 +19,22 @@ type BaseService interface {
 
 type Controller interface {
 	BaseController
-	MountRoutes(group *gin.RouterGroup)
+	MountRoutes(*gin.RouterGroup)
+}
+
+type Dto[T any] interface {
+	Payload() *T
+	ValidateErrors(validator.ValidationErrors) ([]string, error)
 }
 
 type RootMiddleware interface {
-	Attach(engine *gin.Engine)
-	Handler(ctx *gin.Context)
+	Attach(*gin.Engine)
+	Handler(*gin.Context)
 }
 
 type GroupMiddleware interface {
-	Attach(group *gin.RouterGroup)
-	Handler(ctx *gin.Context)
+	Attach(*gin.RouterGroup)
+	Handler(*gin.Context)
 }
 
 type GroupMiddlewareFunc func() GroupMiddleware

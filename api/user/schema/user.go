@@ -27,7 +27,7 @@ type User struct {
 	UpdatedAt     time.Time            `bson:"updatedAt" validate:"required"`
 }
 
-func NewUser(email string, password *string) (*User, error) {
+func NewUser(email string, password *string) (mongo.Schema[User], error) {
 	now := time.Now()
 	u := User{
 		Email:     email,
@@ -37,18 +37,22 @@ func NewUser(email string, password *string) (*User, error) {
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
-	if err := validateUser(u); err != nil {
+	if err := u.Validate(); err != nil {
 		return nil, err
 	}
 	return &u, nil
 }
 
-func validateUser(u User) error {
-	validate := validator.New()
-	return validate.Struct(u)
+func (user *User) Document() *User {
+	return user
 }
 
-func EnsureIndexes(db mongo.Database) {
+func (user *User) Validate() error {
+	validate := validator.New()
+	return validate.Struct(user)
+}
+
+func (*User) EnsureIndexes(db mongo.Database) {
 	indexes := []mongod.IndexModel{
 		{
 			Keys: bson.D{

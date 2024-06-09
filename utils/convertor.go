@@ -3,6 +3,8 @@ package utils
 import (
 	"reflect"
 	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func ConvertUint16(str string) uint16 {
@@ -48,4 +50,9 @@ func CopyAndSetField[T any, V any](input *T, fieldName string, newValue *V) *T {
 	output := outputValue.Interface().(T)
 
 	return &output
+}
+
+func IsValidObjectID(id string) bool {
+	_, err := primitive.ObjectIDFromHex(id)
+	return err == nil
 }

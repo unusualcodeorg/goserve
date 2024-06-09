@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -30,7 +31,7 @@ type ApiKey struct {
 	UpdatedAt   time.Time          `bson:"updatedAt" validate:"-"`
 }
 
-func NewApiKey(key string, version int, permissions []Permission, comments []string) *ApiKey {
+func NewApiKey(key string, version int, permissions []Permission, comments []string) mongo.Schema[ApiKey] {
 	currentTime := time.Now()
 	return &ApiKey{
 		Key:         key,
@@ -43,7 +44,16 @@ func NewApiKey(key string, version int, permissions []Permission, comments []str
 	}
 }
 
-func EnsureIndexes(db mongo.Database) {
+func (apikey *ApiKey) Document() *ApiKey {
+	return apikey
+}
+
+func (apikey *ApiKey) Validate() error {
+	validate := validator.New()
+	return validate.Struct(apikey)
+}
+
+func (*ApiKey) EnsureIndexes(db mongo.Database) {
 	indexes := []mongod.IndexModel{
 		{
 			Keys: bson.D{
