@@ -3,7 +3,9 @@ package startup
 import (
 	"time"
 
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/middleware"
@@ -23,18 +25,21 @@ func Server() {
 	router := network.NewRouter(env.GoMode)
 	dbQueryTimeout := time.Duration(env.DBQueryTimeout) * time.Second
 
+	coreService := core.NewCoreService(db, dbQueryTimeout)
+	authService := auth.NewAuthService(db, dbQueryTimeout, env)
+	userService := user.NewUserService(db, dbQueryTimeout, authService)
+	contactService := contact.NewContactService(db, dbQueryTimeout)
+
 	router.LoadRootMiddlewares(
 		middleware.NewErrorHandler(), // NOTE: this should be the first handler to be mounted
-		middleware.NewKeyProtection(core.NewContactService(db, dbQueryTimeout)),
+		middleware.NewKeyProtection(coreService),
 		middleware.NewNotFound(),
 	)
 
 	router.LoadControllers(
-		contact.NewContactController(
-			middleware.NewAuthentication,
-			middleware.NewAuthorization,
-			contact.NewContactService(db, dbQueryTimeout),
-		),
+		auth.NewAuthController(middleware.NewAuthentication, middleware.NewAuthorization, authService),
+		user.NewUserController(middleware.NewAuthentication, middleware.NewAuthorization, userService),
+		contact.NewContactController(middleware.NewAuthentication, middleware.NewAuthorization, contactService),
 	)
 
 	router.Start(env.ServerHost, env.ServerPort)

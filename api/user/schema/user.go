@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	auth "github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/schema"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -25,6 +26,9 @@ type User struct {
 	Status        bool                 `bson:"status" validate:"required"`
 	CreatedAt     time.Time            `bson:"createdAt" validate:"required"`
 	UpdatedAt     time.Time            `bson:"updatedAt" validate:"required"`
+
+	// docs
+	RoleDocs []auth.Role `bson:"-" validate:"-"`
 }
 
 func NewUser(email string, password *string) (mongo.Schema[User], error) {
@@ -43,7 +47,7 @@ func NewUser(email string, password *string) (mongo.Schema[User], error) {
 	return &u, nil
 }
 
-func (user *User) Document() *User {
+func (user *User) GetDocument() *User {
 	return user
 }
 
@@ -63,10 +67,16 @@ func (*User) EnsureIndexes(db mongo.Database) {
 		{
 			Keys: bson.D{
 				{Key: "email", Value: 1},
+				{Key: "status", Value: 1},
+			},
+		},
+		{
+			Keys: bson.D{
+				{Key: "email", Value: 1},
 			},
 			Options: options.Index().SetUnique(true),
 		},
 	}
-	q := mongo.NewDatabaseQuery[User](db, CollectionName)
+	q := mongo.NewQuery[User](db, CollectionName)
 	q.CreateIndexes(context.Background(), indexes)
 }

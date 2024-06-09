@@ -29,7 +29,7 @@ type Role struct {
 	UpdatedAt time.Time          `bson:"updatedAt" validate:"required"`
 }
 
-const CollectionName = "roles"
+const RolesCollectionName = "roles"
 
 func NewRole(code RoleCode) (mongo.Schema[Role], error) {
 	now := time.Now()
@@ -60,7 +60,7 @@ func validateRole(r Role) error {
 	return validate.Struct(r)
 }
 
-func (role *Role) Document() *Role {
+func (role *Role) GetDocument() *Role {
 	return role
 }
 
@@ -90,6 +90,6 @@ func (*Role) EnsureIndexes(db mongo.Database) {
 			Options: options.Index().SetUnique(true),
 		},
 	}
-	q := mongo.NewDatabaseQuery[Role](db, CollectionName)
+	q := mongo.NewQuery[Role](db, RolesCollectionName)
 	q.CreateIndexes(context.Background(), indexes)
 }

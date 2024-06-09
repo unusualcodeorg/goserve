@@ -44,7 +44,7 @@ func NewApiKey(key string, version int, permissions []Permission, comments []str
 	}
 }
 
-func (apikey *ApiKey) Document() *ApiKey {
+func (apikey *ApiKey) GetDocument() *ApiKey {
 	return apikey
 }
 
@@ -68,6 +68,6 @@ func (*ApiKey) EnsureIndexes(db mongo.Database) {
 			Options: options.Index().SetUnique(true),
 		},
 	}
-	q := mongo.NewDatabaseQuery[ApiKey](db, CollectionName)
+	q := mongo.NewQuery[ApiKey](db, CollectionName)
 	q.CreateIndexes(context.Background(), indexes)
 }

@@ -36,7 +36,7 @@ func (c *controller) getUserHandler(ctx *gin.Context) {
 		panic(network.BadRequestError(err.Error(), err))
 	}
 
-	msg, err := c.userService.FindUser(objectId)
+	msg, err := c.userService.FindUserById(objectId)
 	if err != nil {
 		panic(network.NotFoundError("message not found", err))
 	}

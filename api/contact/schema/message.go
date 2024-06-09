@@ -34,7 +34,7 @@ func NewMessage(msgType string, msgTxt string) (mongo.Schema[Message], error) {
 	return &m, nil
 }
 
-func (message *Message) Document() *Message {
+func (message *Message) GetDocument() *Message {
 	return message
 }
 

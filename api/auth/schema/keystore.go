@@ -39,7 +39,7 @@ func NewKeystore(clientID primitive.ObjectID, primaryKey string, secondaryKey st
 	return &k, nil
 }
 
-func (keystore *Keystore) Document() *Keystore {
+func (keystore *Keystore) GetDocument() *Keystore {
 	return keystore
 }
 
@@ -59,6 +59,6 @@ func (*Keystore) EnsureIndexes(db mongo.Database) {
 			},
 		},
 	}
-	q := mongo.NewDatabaseQuery[Role](db, CollectionName)
+	q := mongo.NewQuery[Role](db, KeystoreCollectionName)
 	q.CreateIndexes(context.Background(), indexes)
 }

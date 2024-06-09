@@ -15,13 +15,13 @@ type CoreService interface {
 
 type service struct {
 	network.BaseService
-	apikeyQuery mongo.DatabaseQuery[schema.ApiKey]
+	apikeyQuery mongo.Query[schema.ApiKey]
 }
 
-func NewContactService(db mongo.Database, dbQueryTimeout time.Duration) CoreService {
+func NewCoreService(db mongo.Database, dbQueryTimeout time.Duration) CoreService {
 	s := service{
 		BaseService: network.NewBaseService(dbQueryTimeout),
-		apikeyQuery: mongo.NewDatabaseQuery[schema.ApiKey](db, schema.CollectionName),
+		apikeyQuery: mongo.NewQuery[schema.ApiKey](db, schema.CollectionName),
 	}
 	return &s
 }
@@ -32,7 +32,7 @@ func (s *service) FindApiKey(key string) (*schema.ApiKey, error) {
 
 	filter := bson.M{"key": key, "status": true}
 
-	apikey, err := s.apikeyQuery.FindOne(ctx, filter)
+	apikey, err := s.apikeyQuery.FindOne(ctx, filter, nil)
 	if err != nil {
 		return nil, err
 	}

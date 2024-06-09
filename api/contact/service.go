@@ -20,13 +20,13 @@ type ContactService interface {
 
 type service struct {
 	network.BaseService
-	messageQuery mongo.DatabaseQuery[schema.Message]
+	messageQuery mongo.Query[schema.Message]
 }
 
 func NewContactService(db mongo.Database, dbQueryTimeout time.Duration) ContactService {
 	s := service{
 		BaseService:  network.NewBaseService(dbQueryTimeout),
-		messageQuery: mongo.NewDatabaseQuery[schema.Message](db, schema.CollectionName),
+		messageQuery: mongo.NewQuery[schema.Message](db, schema.CollectionName),
 	}
 	return &s
 }
@@ -40,7 +40,7 @@ func (s *service) SaveMessage(d *dto.CreateMessage) (*schema.Message, error) {
 		return nil, err
 	}
 
-	result, err := s.messageQuery.InsertAndRetrieveOne(ctx, msg.Document())
+	result, err := s.messageQuery.InsertAndRetrieveOne(ctx, msg.GetDocument())
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (s *service) FindMessage(id primitive.ObjectID) (*schema.Message, error) {
 
 	filter := bson.M{"_id": id}
 
-	msg, err := s.messageQuery.FindOne(ctx, filter)
+	msg, err := s.messageQuery.FindOne(ctx, filter, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (s *service) FindPaginatedMessage(p *coredto.Pagination) ([]schema.Message,
 
 	filter := bson.M{"status": true}
 
-	msgs, err := s.messageQuery.FindPaginated(ctx, filter, p.Page, p.Limit)
+	msgs, err := s.messageQuery.FindPaginated(ctx, filter, p.Page, p.Limit, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -71,13 +71,13 @@ type %sService interface {
 
 type service struct {
 	network.BaseService
-	%sQuery mongo.DatabaseQuery[schema.%s]
+	%sQuery mongo.Query[schema.%s]
 }
 
 func New%sService(db mongo.Database, dbQueryTimeout time.Duration) %sService {
 	s := service{
 		BaseService:  network.NewBaseService(dbQueryTimeout),
-		%sQuery: mongo.NewDatabaseQuery[schema.%s](db, schema.CollectionName),
+		%sQuery: mongo.NewQuery[schema.%s](db, schema.CollectionName),
 	}
 	return &s
 }
@@ -205,7 +205,7 @@ func New%s(field string) (mongo.Schema[%s], error) {
 	return &doc, nil
 }
 
-func (message *%s) Document() *%s {
+func (message *%s) GetDocument() *%s {
 	return message
 }
 
@@ -223,7 +223,7 @@ func (*%s) EnsureIndexes(db mongo.Database) {
 			},
 		},
 	}
-	q := mongo.NewDatabaseQuery[%s](db, CollectionName)
+	q := mongo.NewQuery[%s](db, CollectionName)
 	q.CreateIndexes(context.Background(), indexes)
 }
 

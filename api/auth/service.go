@@ -8,9 +8,12 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AuthService interface {
+	FindRoles(roleIds []primitive.ObjectID) ([]schema.Role, error)
 	verifyToken(tokenStr string) (*jwt.RegisteredClaims, error)
 	decodeToken(tokenStr string) (*jwt.RegisteredClaims, error)
 	signToken(claims jwt.RegisteredClaims) (string, error)
@@ -20,17 +23,26 @@ type service struct {
 	network.BaseService
 	rsaPrivateKey string
 	rsaPublicKey  string
-	authQuery     mongo.DatabaseQuery[schema.Role]
+	roleQuery     mongo.Query[schema.Role]
+	keystoreQuery mongo.Query[schema.Keystore]
 }
 
-func NewAuthService(env config.Env, db mongo.Database, dbQueryTimeout time.Duration) AuthService {
+func NewAuthService(db mongo.Database, dbQueryTimeout time.Duration, env *config.Env) AuthService {
 	s := service{
 		BaseService:   network.NewBaseService(dbQueryTimeout),
 		rsaPrivateKey: env.RSAPrivateKey,
 		rsaPublicKey:  env.RSAPublicKey,
-		authQuery:     mongo.NewDatabaseQuery[schema.Role](db, schema.CollectionName),
+		roleQuery:     mongo.NewQuery[schema.Role](db, schema.RolesCollectionName),
+		keystoreQuery: mongo.NewQuery[schema.Keystore](db, schema.KeystoreCollectionName),
 	}
 	return &s
+}
+
+func (s *service) FindRoles(roleIds []primitive.ObjectID) ([]schema.Role, error) {
+	ctx, cancel := s.Context()
+	cancel()
+	filter := bson.M{"_id": bson.M{"$in": roleIds}}
+	return s.roleQuery.FindAll(ctx, filter, nil)
 }
 
 func (s *service) signToken(claims jwt.RegisteredClaims) (string, error) {

@@ -10,11 +10,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type DatabaseQuery[T any] interface {
+type Query[T any] interface {
 	CreateIndexes(ctx context.Context, indexes []mongo.IndexModel) error
-	FindOne(ctx context.Context, filter bson.M) (*T, error)
-	FindAll(ctx context.Context, filter bson.M) ([]T, error)
-	FindPaginated(ctx context.Context, filter bson.M, page int64, limit int64) ([]T, error)
+	FindOne(ctx context.Context, filter bson.M, opts *options.FindOneOptions) (*T, error)
+	FindAll(ctx context.Context, filter bson.M, opts *options.FindOptions) ([]T, error)
+	FindPaginated(ctx context.Context, filter bson.M, page int64, limit int64, opts *options.FindOptions) ([]T, error)
 	InsertOne(ctx context.Context, doc *T) (*primitive.ObjectID, error)
 	InsertAndRetrieveOne(ctx context.Context, doc *T) (*T, error)
 	InsertMany(ctx context.Context, doc []T) ([]primitive.ObjectID, error)
@@ -29,7 +29,7 @@ type query[T any] struct {
 	collectionName string
 }
 
-func NewDatabaseQuery[T any](db Database, collectionName string) DatabaseQuery[T] {
+func NewQuery[T any](db Database, collectionName string) Query[T] {
 	return &query[T]{
 		db:             db,
 		collectionName: collectionName,
@@ -43,11 +43,11 @@ func (q *query[T]) CreateIndexes(ctx context.Context, indexes []mongo.IndexModel
 	return err
 }
 
-func (q *query[T]) FindOne(ctx context.Context, filter bson.M) (*T, error) {
+func (q *query[T]) FindOne(ctx context.Context, filter bson.M, opts *options.FindOneOptions) (*T, error) {
 	collection := q.db.Collection(q.collectionName)
 
 	var doc T
-	err := collection.FindOne(ctx, filter).Decode(&doc)
+	err := collection.FindOne(ctx, filter, opts).Decode(&doc)
 	if err != nil {
 		return nil, err
 	}
@@ -55,10 +55,10 @@ func (q *query[T]) FindOne(ctx context.Context, filter bson.M) (*T, error) {
 	return &doc, nil
 }
 
-func (q *query[T]) FindAll(ctx context.Context, filter bson.M) ([]T, error) {
+func (q *query[T]) FindAll(ctx context.Context, filter bson.M, opts *options.FindOptions) ([]T, error) {
 	collection := q.db.Collection(q.collectionName)
 
-	cursor, err := collection.Find(ctx, filter)
+	cursor, err := collection.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %w", err)
 	}
@@ -82,7 +82,7 @@ func (q *query[T]) FindAll(ctx context.Context, filter bson.M) ([]T, error) {
 	return docs, nil
 }
 
-func (q *query[T]) FindPaginated(ctx context.Context, filter bson.M, page int64, limit int64) ([]T, error) {
+func (q *query[T]) FindPaginated(ctx context.Context, filter bson.M, page int64, limit int64, opts *options.FindOptions) ([]T, error) {
 	collection := q.db.Collection(q.collectionName)
 
 	skip := (page - 1) * limit
@@ -140,7 +140,7 @@ func (q *query[T]) InsertAndRetrieveOne(ctx context.Context, doc *T) (*T, error)
 	}
 
 	filter := bson.M{"_id": result.InsertedID}
-	retrived, err := q.FindOne(ctx, filter)
+	retrived, err := q.FindOne(ctx, filter, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +189,7 @@ func (q *query[T]) InsertAndRetrieveMany(ctx context.Context, docs []T) ([]T, er
 
 	filter := bson.M{"_id": bson.M{"$in": result.InsertedIDs}}
 
-	retrieved, err := q.FindAll(ctx, filter)
+	retrieved, err := q.FindAll(ctx, filter, nil)
 	if err != nil {
 		return nil, err
 	}
