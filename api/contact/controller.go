@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
 	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
@@ -51,14 +50,12 @@ func (c *controller) createMessageHandler(ctx *gin.Context) {
 }
 
 func (c *controller) getMessageHandler(ctx *gin.Context) {
-	id := ctx.Param("id")
-
-	objectId, err := mongo.NewObjectID(id)
+	mongoId, err := network.ReqParams(ctx, &coredto.MongoId{})
 	if err != nil {
 		panic(network.BadRequestError(err.Error(), err))
 	}
 
-	msg, err := c.contactService.FindMessage(objectId)
+	msg, err := c.contactService.FindMessage(mongoId.ID)
 	if err != nil {
 		panic(network.NotFoundError("message not found", err))
 	}
@@ -72,7 +69,7 @@ func (c *controller) getMessageHandler(ctx *gin.Context) {
 }
 
 func (c *controller) getMessagesPaginated(ctx *gin.Context) {
-	pagination, err := network.ReqQuery(ctx, &coredto.PaginationDto{})
+	pagination, err := network.ReqQuery(ctx, &coredto.Pagination{})
 	if err != nil {
 		panic(network.BadRequestError(err.Error(), err))
 	}

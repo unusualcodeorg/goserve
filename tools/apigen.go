@@ -66,7 +66,7 @@ import (
 )
 
 type %sService interface {
-	Find%s(id *primitive.ObjectID) (*schema.%s, error)
+	Find%s(id primitive.ObjectID) (*schema.%s, error)
 }
 
 type service struct {
@@ -82,7 +82,7 @@ func New%sService(db mongo.Database, dbQueryTimeout time.Duration) %sService {
 	return &s
 }
 
-func (s *service) Find%s(id *primitive.ObjectID) (*schema.%s, error) {
+func (s *service) Find%s(id primitive.ObjectID) (*schema.%s, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 
@@ -110,7 +110,7 @@ func generateController(featureDir, featureName string) error {
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/%s/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
+	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
@@ -136,14 +136,12 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 }
 
 func (c *controller) get%sHandler(ctx *gin.Context) {
-	id := ctx.Param("id")
-
-	objectId, err := mongo.NewObjectID(id)
+	mongoId, err := network.ReqParams(ctx, &coredto.MongoId{})
 	if err != nil {
 		panic(network.BadRequestError(err.Error(), err))
 	}
 
-	msg, err := c.%sService.Find%s(objectId)
+	msg, err := c.%sService.Find%s(mongoId.ID)
 	if err != nil {
 		panic(network.NotFoundError("message not found", err))
 	}
@@ -176,8 +174,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	mongod "go.mongodb.org/mongo-driver/mongo"
@@ -193,21 +191,30 @@ type %s struct {
 	UpdatedAt time.Time          ` + "`" + `bson:"updatedAt" validate:"required"` + "`" + `
 }` + `
 
-func New%s(field string) (*%s, error) {
+func New%s(field string) (mongo.Schema[%s], error) {
 	time := time.Now()
-	m := %s{
+	doc := %s{
 		Field:     field,
 		Status:    true,
 		CreatedAt: time,
 		UpdatedAt: time,
 	}
-	if err := utils.Validate(m); err != nil {
+	if err := doc.Validate(); err != nil {
 		return nil, err
 	}
-	return &m, nil
+	return &doc, nil
 }
 
-func EnsureIndexes(db mongo.Database) {
+func (message *%s) Document() *%s {
+	return message
+}
+
+func (message *%s) Validate() error {
+	validate := validator.New()
+	return validate.Struct(message)
+}
+
+func (*%s) EnsureIndexes(db mongo.Database) {
 	indexes := []mongod.IndexModel{
 		{
 			Keys: bson.D{
@@ -219,9 +226,10 @@ func EnsureIndexes(db mongo.Database) {
 	q := mongo.NewDatabaseQuery[%s](db, CollectionName)
 	q.CreateIndexes(context.Background(), indexes)
 }
+
 `
 
-	template := fmt.Sprintf(tStr, featureLower, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps)
+	template := fmt.Sprintf(tStr, featureLower, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps)
 
 	return os.WriteFile(schemaPath, []byte(template), os.ModePerm)
 }
@@ -239,8 +247,10 @@ func generateDto(featureDir, featureName string) error {
 	tStr := `package dto
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -249,9 +259,29 @@ type Info%s struct {
 	Field     string             ` + "`" + `json:"field" binding:"required"` + "`" + `
 	CreatedAt time.Time          ` + "`" + `json:"createdAt" binding:"required"` + "`" + `
 }
-`
 
-	template := fmt.Sprintf(tStr, featureCaps)
+func (d *Info%s) Payload() *Info%s {
+	return d
+}
+
+func (d *Info%s) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
+	var msgs []string
+	for _, err := range errs {
+		switch err.Tag() {
+		case "required":
+			msgs = append(msgs, fmt.Sprintf("%%s is required", err.Field()))
+		case "min":
+			msgs = append(msgs, fmt.Sprintf("%%s must be min %%s", err.Field(), err.Param()))
+		case "max":
+			msgs = append(msgs, fmt.Sprintf("%%s must be max %%s", err.Field(), err.Param()))
+		default:
+			msgs = append(msgs, fmt.Sprintf("%%s is invalid", err.Field()))
+		}
+	}
+	return msgs, nil
+}
+`
+	template := fmt.Sprintf(tStr, featureCaps, featureCaps, featureCaps, featureCaps)
 
 	return os.WriteFile(dtoPath, []byte(template), os.ModePerm)
 }

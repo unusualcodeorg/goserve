@@ -43,4 +43,6 @@ func (message *Message) Validate() error {
 	return validate.Struct(message)
 }
 
-func (*Message) EnsureIndexes(db mongo.Database) {}
+func (*Message) EnsureIndexes(db mongo.Database) {
+
+}

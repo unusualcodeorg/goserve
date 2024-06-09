@@ -12,12 +12,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func NewObjectID(id string) (*primitive.ObjectID, error) {
+func NewObjectID(id string) (primitive.ObjectID, error) {
 	i, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		err = errors.New(id + " is not a valid mongo id")
 	}
-	return &i, err
+	return i, err
 }
 
 type Schema[T any] interface {

@@ -7,17 +7,17 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type PaginationDto struct {
+type Pagination struct {
 	Page  int64 `form:"page" binding:"required" validate:"required,min=1,max=1000"`
 	Limit int64 `form:"limit" binding:"required" validate:"required,min=1,max=1000"`
 }
 
-func (d *PaginationDto) Payload() *PaginationDto {
+func (d *Pagination) Payload() *Pagination {
 	return d
 }
 
-// strings.ToLower because gin query param validation does not give back form:"page" 
-func (d *PaginationDto) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
+// strings.ToLower because gin query param validation does not give back form:"page"
+func (d *Pagination) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
 	var msgs []string
 	for _, err := range errs {
 		switch err.Tag() {

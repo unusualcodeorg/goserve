@@ -11,7 +11,7 @@ import (
 )
 
 type UserService interface {
-	FindUser(id *primitive.ObjectID) (*schema.User, error)
+	FindUser(id primitive.ObjectID) (*schema.User, error)
 }
 
 type service struct {
@@ -27,7 +27,7 @@ func NewUserService(db mongo.Database, dbQueryTimeout time.Duration) UserService
 	return &s
 }
 
-func (s *service) FindUser(id *primitive.ObjectID) (*schema.User, error) {
+func (s *service) FindUser(id primitive.ObjectID) (*schema.User, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 

@@ -37,6 +37,20 @@ func ReqQuery[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
 	return dto.Payload(), nil
 }
 
+func ReqParams[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
+	if err := ctx.ShouldBindUri(dto); err != nil {
+		e := processErrors(dto, err)
+		return nil, e
+	}
+
+	if err := validator.New().Struct(dto); err != nil {
+		e := processErrors(dto, err)
+		return nil, e
+	}
+
+	return dto.Payload(), nil
+}
+
 func ReqHeaders[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
 	if err := ctx.ShouldBindHeader(dto); err != nil {
 		e := processErrors(dto, err)
