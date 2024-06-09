@@ -9,7 +9,7 @@ import (
 
 func EnsureDbIndexes(db mongo.Database) {
 	go authSchema.EnsureRoleIndexes(db)
-	go authSchema.EnsureRoleIndexes(db)
+	go authSchema.EnsureKeystoreIndexes(db)
 	go userSchema.EnsureIndexes(db)
 	go coreSchema.EnsureIndexes(db)
 }
