@@ -28,7 +28,7 @@ type Schema[T any] interface {
 
 type Database interface {
 	GetClient() *mongo.Client
-	Collection(string) *mongo.Collection
+	Collection(name string) *mongo.Collection
 	Connect()
 	Disconnect()
 }

@@ -16,7 +16,7 @@ const (
 )
 
 type Response interface {
-	Send(c *gin.Context)
+	Send(ctx *gin.Context)
 }
 
 type messageResponse struct {

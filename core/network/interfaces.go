@@ -19,29 +19,29 @@ type BaseService interface {
 
 type Controller interface {
 	BaseController
-	MountRoutes(*gin.RouterGroup)
+	MountRoutes(group *gin.RouterGroup)
 }
 
 type Dto[T any] interface {
 	Payload() *T
-	ValidateErrors(validator.ValidationErrors) ([]string, error)
+	ValidateErrors(errs validator.ValidationErrors) ([]string, error)
 }
 
 type RootMiddleware interface {
-	Attach(*gin.Engine)
-	Handler(*gin.Context)
+	Attach(engine *gin.Engine)
+	Handler(ctx *gin.Context)
 }
 
 type GroupMiddleware interface {
-	Attach(*gin.RouterGroup)
-	Handler(*gin.Context)
+	Attach(group *gin.RouterGroup)
+	Handler(ctx *gin.Context)
 }
 
 type GroupMiddlewareFunc func() GroupMiddleware
 
 type Router interface {
 	GetEngine() *gin.Engine
-	LoadControllers(...Controller)
-	LoadRootMiddlewares(...RootMiddleware)
+	LoadControllers(controllers ...Controller)
+	LoadRootMiddlewares(middlewares ...RootMiddleware)
 	Start(ip string, port uint16)
 }
