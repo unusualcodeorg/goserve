@@ -32,7 +32,7 @@ func Server() {
 	contactService := contact.NewContactService(db, dbQueryTimeout)
 
 	router.LoadRootMiddlewares(
-		middleware.NewErrorHandler(), // NOTE: this should be the first handler to be mounted
+		middleware.NewErrorHandle(), // NOTE: this should be the first handler to be mounted
 		middleware.NewKeyProtection(coreService),
 		middleware.NewNotFound(),
 	)

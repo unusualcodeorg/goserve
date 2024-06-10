@@ -8,21 +8,21 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
-type errorHandler struct {
+type errorHandle struct {
 	debug bool
 }
 
-func NewErrorHandler() network.RootMiddleware {
+func NewErrorHandle() network.RootMiddleware {
 	debug := gin.Mode() == gin.DebugMode
-	m := errorHandler{debug: debug}
+	m := errorHandle{debug: debug}
 	return &m
 }
 
-func (m *errorHandler) Attach(engine *gin.Engine) {
+func (m *errorHandle) Attach(engine *gin.Engine) {
 	engine.Use(m.Handler)
 }
 
-func (m *errorHandler) Handler(ctx *gin.Context) {
+func (m *errorHandle) Handler(ctx *gin.Context) {
 	defer func() {
 		if r := recover(); r != nil {
 			var apiError *network.ApiError
