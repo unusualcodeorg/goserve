@@ -88,7 +88,7 @@ func (s *service) Find%s(id primitive.ObjectID) (*schema.%s, error) {
 
 	filter := bson.M{"_id": id}
 
-	msg, err := s.%sQuery.FindOne(ctx, filter)
+	msg, err := s.%sQuery.FindOne(ctx, filter, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -141,19 +141,19 @@ func (c *controller) get%sHandler(ctx *gin.Context) {
 		panic(network.BadRequestError(err.Error(), err))
 	}
 
-	msg, err := c.%sService.Find%s(mongoId.ID)
+	%s, err := c.%sService.Find%s(mongoId.ID)
 	if err != nil {
-		panic(network.NotFoundError("message not found", err))
+		panic(network.NotFoundError("%s not found", err))
 	}
 
-	data, err := network.MapToDto[dto.Info%s](msg)
+	data, err := network.MapToDto[dto.Info%s](%s)
 	if err != nil {
 		panic(network.InternalServerError("something went wrong", err))
 	}
 
 	network.SuccessResponse("success", data).Send(ctx)
 }
-`, featureLower, featureLower, featureLower, featureCaps, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureCaps, featureLower, featureCaps, featureCaps)
+`, featureLower, featureLower, featureLower, featureCaps, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureLower, featureCaps, featureLower)
 
 	return os.WriteFile(controllerPath, []byte(template), os.ModePerm)
 }
@@ -205,13 +205,13 @@ func New%s(field string) (*%s, error) {
 	return &doc, nil
 }
 
-func (message *%s) GetValue() *%s {
-	return message
+func (doc *%s) GetValue() *%s {
+	return doc
 }
 
-func (message *%s) Validate() error {
+func (doc *%s) Validate() error {
 	validate := validator.New()
-	return validate.Struct(message)
+	return validate.Struct(doc)
 }
 
 func (*%s) EnsureIndexes(db mongo.Database) {
