@@ -27,6 +27,11 @@ func NewAuthController(
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
 	group.POST("/signup/basic", c.singupBasicHandler)
+
+	logout := group.Group("/logout")
+	c.AuthenticationMiddleware().Attach(logout)
+	logout.DELETE("/", c.logoutBasicHandler)
+
 }
 
 func (c *controller) singupBasicHandler(ctx *gin.Context) {
@@ -48,4 +53,8 @@ func (c *controller) singupBasicHandler(ctx *gin.Context) {
 	}
 
 	network.SuccessResponse("success", data).Send(ctx)
+}
+
+func (c *controller) logoutBasicHandler(ctx *gin.Context) {
+	network.SuccessMsgResponse("logout not working!").Send(ctx)
 }
