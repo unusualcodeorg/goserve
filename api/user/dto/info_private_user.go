@@ -31,7 +31,7 @@ func NewInfoPrivateUser(user schema.User) *InfoPrivateUser {
 	}
 }
 
-func (d *InfoPrivateUser) Payload() *InfoPrivateUser {
+func (d *InfoPrivateUser) GetValue() *InfoPrivateUser {
 	return d
 }
 

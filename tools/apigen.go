@@ -191,7 +191,7 @@ type %s struct {
 	UpdatedAt time.Time          ` + "`" + `bson:"updatedAt" validate:"required"` + "`" + `
 }` + `
 
-func New%s(field string) (mongo.Schema[%s], error) {
+func New%s(field string) (*%s, error) {
 	time := time.Now()
 	doc := %s{
 		Field:     field,
@@ -205,7 +205,7 @@ func New%s(field string) (mongo.Schema[%s], error) {
 	return &doc, nil
 }
 
-func (message *%s) GetDocument() *%s {
+func (message *%s) GetValue() *%s {
 	return message
 }
 
@@ -264,7 +264,7 @@ func EmptyInfo%s() *Info%s {
 	return &Info%s{}
 }
 
-func (d *Info%s) Payload() *Info%s {
+func (d *Info%s) GetValue() *Info%s {
 	return d
 }
 

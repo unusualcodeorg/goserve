@@ -40,7 +40,7 @@ func (s *service) SaveMessage(d *dto.CreateMessage) (*schema.Message, error) {
 		return nil, err
 	}
 
-	result, err := s.messageQuery.InsertAndRetrieveOne(ctx, msg.GetDocument())
+	result, err := s.messageQuery.InsertAndRetrieveOne(ctx, msg)
 	if err != nil {
 		return nil, err
 	}

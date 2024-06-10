@@ -31,7 +31,7 @@ type Role struct {
 
 const RolesCollectionName = "roles"
 
-func NewRole(code RoleCode) (mongo.Schema[Role], error) {
+func NewRole(code RoleCode) (*Role, error) {
 	now := time.Now()
 	r := Role{
 		Code:      code,
@@ -60,7 +60,7 @@ func validateRole(r Role) error {
 	return validate.Struct(r)
 }
 
-func (role *Role) GetDocument() *Role {
+func (role *Role) GetValue() *Role {
 	return role
 }
 

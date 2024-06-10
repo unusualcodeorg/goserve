@@ -18,7 +18,7 @@ func EmptyCreateUser() *CreateUser {
 	return &CreateUser{}
 }
 
-func (d *CreateUser) Payload() *CreateUser {
+func (d *CreateUser) GetValue() *CreateUser {
 	return d
 }
 

@@ -18,7 +18,7 @@ func NewUserToken(access string, refresh string) *UserTokens {
 	}
 }
 
-func (d *UserTokens) Payload() *UserTokens {
+func (d *UserTokens) GetValue() *UserTokens {
 	return d
 }
 

@@ -31,7 +31,7 @@ type ApiKey struct {
 	UpdatedAt   time.Time          `bson:"updatedAt" validate:"-"`
 }
 
-func NewApiKey(key string, version int, permissions []Permission, comments []string) mongo.Schema[ApiKey] {
+func NewApiKey(key string, version int, permissions []Permission, comments []string) *ApiKey {
 	currentTime := time.Now()
 	return &ApiKey{
 		Key:         key,
@@ -44,7 +44,7 @@ func NewApiKey(key string, version int, permissions []Permission, comments []str
 	}
 }
 
-func (apikey *ApiKey) GetDocument() *ApiKey {
+func (apikey *ApiKey) GetValue() *ApiKey {
 	return apikey
 }
 

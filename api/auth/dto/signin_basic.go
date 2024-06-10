@@ -15,7 +15,7 @@ func EmptySignInBasic() *SignInBasic {
 	return &SignInBasic{}
 }
 
-func (d *SignInBasic) Payload() *SignInBasic {
+func (d *SignInBasic) GetValue() *SignInBasic {
 	return d
 }
 

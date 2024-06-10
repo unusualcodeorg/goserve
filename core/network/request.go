@@ -20,7 +20,7 @@ func ReqBody[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
 		e := processErrors(dto, err)
 		return nil, e
 	}
-	return dto.Payload(), nil
+	return dto.GetValue(), nil
 }
 
 func ReqQuery[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
@@ -34,7 +34,7 @@ func ReqQuery[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
 		return nil, e
 	}
 
-	return dto.Payload(), nil
+	return dto.GetValue(), nil
 }
 
 func ReqParams[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
@@ -48,7 +48,7 @@ func ReqParams[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
 		return nil, e
 	}
 
-	return dto.Payload(), nil
+	return dto.GetValue(), nil
 }
 
 func ReqHeaders[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
@@ -62,7 +62,7 @@ func ReqHeaders[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
 		return nil, e
 	}
 
-	return dto.Payload(), nil
+	return dto.GetValue(), nil
 }
 
 func MapToDto[T any, V any](modelObj *V) (*T, error) {

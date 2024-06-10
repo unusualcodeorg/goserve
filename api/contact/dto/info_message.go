@@ -18,7 +18,7 @@ func EmptyInfoMessage() *InfoMessage {
 	return &InfoMessage{}
 }
 
-func (d *InfoMessage) Payload() *InfoMessage {
+func (d *InfoMessage) GetValue() *InfoMessage {
 	return d
 }
 

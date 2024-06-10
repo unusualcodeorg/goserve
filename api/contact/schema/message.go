@@ -19,7 +19,7 @@ type Message struct {
 	UpdatedAt time.Time          `bson:"updatedAt" validate:"required"`
 }
 
-func NewMessage(msgType string, msgTxt string) (mongo.Schema[Message], error) {
+func NewMessage(msgType string, msgTxt string) (*Message, error) {
 	time := time.Now()
 	m := Message{
 		Type:      msgType,
@@ -34,7 +34,7 @@ func NewMessage(msgType string, msgTxt string) (mongo.Schema[Message], error) {
 	return &m, nil
 }
 
-func (message *Message) GetDocument() *Message {
+func (message *Message) GetValue() *Message {
 	return message
 }
 

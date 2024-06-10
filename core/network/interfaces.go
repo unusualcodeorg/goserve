@@ -23,7 +23,7 @@ type Controller interface {
 }
 
 type Dto[T any] interface {
-	Payload() *T
+	GetValue() *T
 	ValidateErrors(errs validator.ValidationErrors) ([]string, error)
 }
 

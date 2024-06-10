@@ -20,7 +20,7 @@ func NewUserAuthDto(user schema.User, tokens *UserTokens) *UserAuth {
 	}
 }
 
-func (d *UserAuth) Payload() *UserAuth {
+func (d *UserAuth) GetValue() *UserAuth {
 	return d
 }
 

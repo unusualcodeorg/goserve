@@ -16,7 +16,7 @@ type MongoId struct {
 	ID primitive.ObjectID `uri:"-" validate:"-"`
 }
 
-func (d *MongoId) Payload() *MongoId {
+func (d *MongoId) GetValue() *MongoId {
 	id, err := mongo.NewObjectID(d.Id)
 	if err != nil {
 		panic(network.BadRequestError("id is invalid", errors.New("mongo id is invalid")))

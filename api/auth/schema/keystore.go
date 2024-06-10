@@ -23,7 +23,7 @@ type Keystore struct {
 	UpdatedAt    time.Time          `bson:"updatedAt" validate:"required"`
 }
 
-func NewKeystore(clientID primitive.ObjectID, primaryKey string, secondaryKey string) (mongo.Schema[Keystore], error) {
+func NewKeystore(clientID primitive.ObjectID, primaryKey string, secondaryKey string) (*Keystore, error) {
 	now := time.Now()
 	k := Keystore{
 		Client:       clientID,
@@ -39,7 +39,7 @@ func NewKeystore(clientID primitive.ObjectID, primaryKey string, secondaryKey st
 	return &k, nil
 }
 
-func (keystore *Keystore) GetDocument() *Keystore {
+func (keystore *Keystore) GetValue() *Keystore {
 	return keystore
 }
 

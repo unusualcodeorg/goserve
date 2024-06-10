@@ -62,7 +62,7 @@ func NewUser(
 	return &u, nil
 }
 
-func (user *User) GetDocument() *User {
+func (user *User) GetValue() *User {
 	return user
 }
 

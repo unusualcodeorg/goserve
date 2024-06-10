@@ -15,7 +15,7 @@ func EmptyCreateMessage() *CreateMessage {
 	return &CreateMessage{}
 }
 
-func (d *CreateMessage) Payload() *CreateMessage {
+func (d *CreateMessage) GetValue() *CreateMessage {
 	return d
 }
 

@@ -12,7 +12,7 @@ type Pagination struct {
 	Limit int64 `form:"limit" binding:"required" validate:"required,min=1,max=1000"`
 }
 
-func (d *Pagination) Payload() *Pagination {
+func (d *Pagination) GetValue() *Pagination {
 	return d
 }
 

@@ -90,7 +90,7 @@ func (s *service) createKeystore(client *userSchema.User, primaryKey string, sec
 		return nil, err
 	}
 
-	doc := keystore.GetDocument()
+	doc := keystore.GetValue()
 
 	id, err := s.keystoreQuery.InsertOne(ctx, doc)
 	if err != nil {

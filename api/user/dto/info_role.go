@@ -24,7 +24,7 @@ func EmptyInfoRole() *InfoRole {
 	return &InfoRole{}
 }
 
-func (d *InfoRole) Payload() *InfoRole {
+func (d *InfoRole) GetValue() *InfoRole {
 	return d
 }
 
