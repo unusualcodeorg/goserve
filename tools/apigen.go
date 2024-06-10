@@ -16,42 +16,57 @@ func capitalizeFirstLetter(str string) string {
 	return strings.ToUpper(string(str[0])) + str[1:]
 }
 
-func generateFeature(featureTemplate string) error {
-	if featureTemplate == "" {
+func createApiDirIfNotExists(api string) (string, error) {
+	if api == "" {
+		return "", errors.New("api name should be a non-empty string")
+	}
+
+	apiName := strings.ToLower(api)
+	apiDir := filepath.Join("api", apiName)
+
+	if _, err := os.Stat(apiDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(apiDir, os.ModePerm); err != nil {
+			return "", err
+		}
+	}
+	return apiDir, nil
+}
+
+func generateApi(api string) error {
+	if api == "" {
 		return errors.New("api name should be a non-empty string")
 	}
 
-	featureName := strings.ToLower(featureTemplate)
-	featureDir := filepath.Join("api", featureName)
-	if _, err := os.Stat(featureDir); err == nil {
-		fmt.Println(featureName, "already exists")
+	apiName := strings.ToLower(api)
+	apiDir := filepath.Join("api", apiName)
+	if _, err := os.Stat(apiDir); err == nil {
+		fmt.Println(apiName, "already exists")
 		return nil
 	}
 
-	// Create api directory
-	if err := os.MkdirAll(featureDir, os.ModePerm); err != nil {
+	if err := os.MkdirAll(apiDir, os.ModePerm); err != nil {
 		return err
 	}
 
-	if err := generateDto(featureDir, featureName); err != nil {
+	if err := generateDto(apiDir, apiName); err != nil {
 		return err
 	}
-	if err := generateSchema(featureDir, featureName); err != nil {
+	if err := generateSchema(apiDir, apiName); err != nil {
 		return err
 	}
-	if err := generateService(featureDir, featureName); err != nil {
+	if err := generateService(apiDir, apiName); err != nil {
 		return err
 	}
-	if err := generateController(featureDir, featureName); err != nil {
+	if err := generateController(apiDir, apiName); err != nil {
 		return err
 	}
 	return nil
 }
 
-func generateService(featureDir, featureName string) error {
-	featureLower := strings.ToLower(featureName)
-	featureCaps := capitalizeFirstLetter(featureName)
-	servicePath := filepath.Join(featureDir, fmt.Sprintf("%sservice.go", ""))
+func generateService(apiDir, apiName string) error {
+	apiLower := strings.ToLower(apiName)
+	apiCaps := capitalizeFirstLetter(apiName)
+	servicePath := filepath.Join(apiDir, fmt.Sprintf("%sservice.go", ""))
 
 	template := fmt.Sprintf(`package %s
 
@@ -95,15 +110,15 @@ func (s *service) Find%s(id primitive.ObjectID) (*schema.%s, error) {
 
 	return msg, nil
 }
-`, featureLower, featureLower, featureCaps, featureCaps, featureCaps, featureLower, featureCaps, featureCaps, featureCaps, featureLower, featureCaps, featureCaps, featureCaps, featureLower)
+`, apiLower, apiLower, apiCaps, apiCaps, apiCaps, apiLower, apiCaps, apiCaps, apiCaps, apiLower, apiCaps, apiCaps, apiCaps, apiLower)
 
 	return os.WriteFile(servicePath, []byte(template), os.ModePerm)
 }
 
-func generateController(featureDir, featureName string) error {
-	featureLower := strings.ToLower(featureName)
-	featureCaps := capitalizeFirstLetter(featureName)
-	controllerPath := filepath.Join(featureDir, fmt.Sprintf("%scontroller.go", ""))
+func generateController(apiDir, apiName string) error {
+	apiLower := strings.ToLower(apiName)
+	apiCaps := capitalizeFirstLetter(apiName)
+	controllerPath := filepath.Join(apiDir, fmt.Sprintf("%scontroller.go", ""))
 
 	template := fmt.Sprintf(`package %s
 
@@ -153,20 +168,20 @@ func (c *controller) get%sHandler(ctx *gin.Context) {
 
 	network.SuccessResponse("success", data).Send(ctx)
 }
-`, featureLower, featureLower, featureLower, featureCaps, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureLower, featureCaps, featureLower)
+`, apiLower, apiLower, apiLower, apiCaps, apiCaps, apiCaps, apiLower, apiLower, apiCaps, apiCaps, apiLower, apiLower, apiCaps, apiLower, apiCaps, apiLower)
 
 	return os.WriteFile(controllerPath, []byte(template), os.ModePerm)
 }
 
-func generateSchema(featureDir, featureName string) error {
-	schemaDirPath := filepath.Join(featureDir, "schema")
+func generateSchema(apiDir, apiName string) error {
+	schemaDirPath := filepath.Join(apiDir, "schema")
 	if err := os.MkdirAll(schemaDirPath, os.ModePerm); err != nil {
 		return err
 	}
 
-	featureLower := strings.ToLower(featureName)
-	featureCaps := capitalizeFirstLetter(featureName)
-	schemaPath := filepath.Join(featureDir, fmt.Sprintf("schema/%s.go", featureLower))
+	apiLower := strings.ToLower(apiName)
+	apiCaps := capitalizeFirstLetter(apiName)
+	schemaPath := filepath.Join(apiDir, fmt.Sprintf("schema/%s.go", apiLower))
 
 	tStr := `package schema
 
@@ -229,20 +244,20 @@ func (*%s) EnsureIndexes(db mongo.Database) {
 
 `
 
-	template := fmt.Sprintf(tStr, featureLower, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps)
+	template := fmt.Sprintf(tStr, apiLower, apiCaps, apiCaps, apiCaps, apiCaps, apiCaps, apiCaps, apiCaps, apiCaps, apiCaps)
 
 	return os.WriteFile(schemaPath, []byte(template), os.ModePerm)
 }
 
-func generateDto(featureDir, featureName string) error {
-	dtoDirPath := filepath.Join(featureDir, "dto")
+func generateDto(apiDir, apiName string) error {
+	dtoDirPath := filepath.Join(apiDir, "dto")
 	if err := os.MkdirAll(dtoDirPath, os.ModePerm); err != nil {
 		return err
 	}
 
-	featureLower := strings.ToLower(featureName)
-	featureCaps := capitalizeFirstLetter(featureName)
-	dtoPath := filepath.Join(featureDir, fmt.Sprintf("dto/create_%s.go", featureLower))
+	apiLower := strings.ToLower(apiName)
+	apiCaps := capitalizeFirstLetter(apiName)
+	dtoPath := filepath.Join(apiDir, fmt.Sprintf("dto/create_%s.go", apiLower))
 
 	tStr := `package dto
 
@@ -285,19 +300,107 @@ func (d *Info%s) ValidateErrors(errs validator.ValidationErrors) ([]string, erro
 	return msgs, nil
 }
 `
-	template := fmt.Sprintf(tStr, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps)
+	template := fmt.Sprintf(tStr, apiCaps, apiCaps, apiCaps, apiCaps, apiCaps, apiCaps, apiCaps)
 
 	return os.WriteFile(dtoPath, []byte(template), os.ModePerm)
 }
 
+type Command string
+
+const (
+	Api        Command = "api"
+	Controller Command = "controller"
+	Service    Command = "service"
+	Dto        Command = "dto"
+	Schema     Command = "schema"
+)
+
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("api name should be non-empty string")
+		fmt.Printf("Error: command from [%s, %s, %s, %s, %s] is required", Api, Controller, Service, Dto, Schema)
 		return
 	}
 
-	featureName := os.Args[1]
-	if err := generateFeature(featureName); err != nil {
-		fmt.Println("Error:", err)
+	cmd := Command(os.Args[1])
+
+	switch cmd {
+	case Api, Controller, Service, Dto, Schema:
+	default:
+		fmt.Printf("Error: cmd must be from [%s, %s, %s, %s, %s]", Api, Controller, Service, Dto, Schema)
+		return
 	}
+
+	if len(os.Args) < 3 {
+		switch cmd {
+		case Api:
+			fmt.Println("Error: api name is required")
+			return
+		case Controller, Service, Dto, Schema:
+			fmt.Println("Error: api name for " + cmd + " is required")
+			return
+		}
+	}
+
+	apiName := os.Args[2]
+
+	if ok := validateName(apiName); !ok {
+		fmt.Println("Error: api {" + apiName + "} should starts with a-z")
+	}
+
+	switch cmd {
+	case Api:
+		if err := generateApi(apiName); err != nil {
+			fmt.Println("Error: ", err)
+			return
+		}
+	case Controller:
+		dirName, err := createApiDirIfNotExists(apiName)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		if err := generateController(dirName, apiName); err != nil {
+			fmt.Println("Error: ", err)
+			return
+		}
+	case Service:
+		dirName, err := createApiDirIfNotExists(apiName)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		if err := generateService(dirName, apiName); err != nil {
+			fmt.Println("Error: ", err)
+			return
+		}
+	case Dto:
+		dirName, err := createApiDirIfNotExists(apiName)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		if err := generateDto(dirName, apiName); err != nil {
+			fmt.Println("Error: ", err)
+			return
+		}
+	case Schema:
+		dirName, err := createApiDirIfNotExists(apiName)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		if err := generateSchema(dirName, apiName); err != nil {
+			fmt.Println("Error: ", err)
+			return
+		}
+	}
+}
+
+func validateName(s string) bool {
+	for _, char := range s[:1] {
+		if char < 'a' || char > 'z' {
+			return false
+		}
+	}
+	return true
 }
