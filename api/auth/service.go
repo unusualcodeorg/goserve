@@ -93,7 +93,7 @@ func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
 		return nil, err
 	}
 
-	user, err := userSchema.NewUser(signupDto.Email, string(hashed), &signupDto.Name, &signupDto.Password, roles)
+	user, err := userSchema.NewUser(signupDto.Email, string(hashed), &signupDto.Name, signupDto.ProfilePicUrl, roles)
 	if err != nil {
 		return nil, err
 	}
