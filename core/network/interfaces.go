@@ -41,6 +41,7 @@ type GroupMiddlewareFunc func() GroupMiddleware
 
 type Router interface {
 	GetEngine() *gin.Engine
+	RegisterValidationParsers(tagNameFunc validator.TagNameFunc)
 	LoadControllers(controllers ...Controller)
 	LoadRootMiddlewares(middlewares ...RootMiddleware)
 	Start(ip string, port uint16)

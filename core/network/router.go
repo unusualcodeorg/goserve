@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 type router struct {
@@ -12,9 +14,9 @@ type router struct {
 
 func NewRouter(mode string) Router {
 	gin.SetMode(mode)
-	e := gin.Default()
+	eng := gin.Default()
 	r := router{
-		engine: e,
+		engine: eng,
 	}
 	return &r
 }
@@ -39,4 +41,10 @@ func (r *router) LoadRootMiddlewares(middlewares ...RootMiddleware) {
 func (r *router) Start(ip string, port uint16) {
 	address := fmt.Sprintf("%s:%d", ip, port)
 	r.engine.Run(address)
+}
+
+func (r *router) RegisterValidationParsers(tagNameFunc validator.TagNameFunc) {
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterTagNameFunc(tagNameFunc)
+	}
 }

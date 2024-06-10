@@ -16,7 +16,7 @@ type InfoPrivateUser struct {
 	Roles         []*InfoRole    `json:"roles" validate:"required,dive,required"`
 }
 
-func NewInfoPrivateUser(user schema.User) *InfoPrivateUser {
+func NewInfoPrivateUser(user *schema.User) *InfoPrivateUser {
 	roles := make([]*InfoRole, len(user.Roles))
 	for i, role := range user.RoleDocs {
 		roles[i] = NewInfoRole(role)

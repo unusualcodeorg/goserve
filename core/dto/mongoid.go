@@ -3,7 +3,6 @@ package coredto
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
@@ -25,17 +24,16 @@ func (d *MongoId) GetValue() *MongoId {
 	return d
 }
 
-// strings.ToLower because gin query param validation does not give back form:"page"
 func (d *MongoId) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
 	var msgs []string
 	for _, err := range errs {
 		switch err.Tag() {
 		case "required":
-			msgs = append(msgs, fmt.Sprintf("%s is required", strings.ToLower(err.Field())))
+			msgs = append(msgs, fmt.Sprintf("%s is required", err.Field()))
 		case "len":
-			msgs = append(msgs, fmt.Sprintf("%s must be of length %s", strings.ToLower(err.Field()), err.Param()))
+			msgs = append(msgs, fmt.Sprintf("%s must be of length %s", err.Field(), err.Param()))
 		default:
-			msgs = append(msgs, fmt.Sprintf("%s is invalid", strings.ToLower(err.Field())))
+			msgs = append(msgs, fmt.Sprintf("%s is invalid", err.Field()))
 		}
 	}
 	return msgs, nil

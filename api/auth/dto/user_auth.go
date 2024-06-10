@@ -13,7 +13,7 @@ type UserAuth struct {
 	Tokens *UserTokens          `json:"tokens" validate:"required"`
 }
 
-func NewUserAuthDto(user schema.User, tokens *UserTokens) *UserAuth {
+func NewUserAuth(user *schema.User, tokens *UserTokens) *UserAuth {
 	return &UserAuth{
 		User:   dto.NewInfoPrivateUser(user),
 		Tokens: tokens,

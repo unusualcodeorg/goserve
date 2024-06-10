@@ -9,10 +9,12 @@ import (
 )
 
 type errorHandler struct {
+	debug bool
 }
 
 func NewErrorHandler() network.RootMiddleware {
-	m := errorHandler{}
+	debug := gin.Mode() == gin.DebugMode
+	m := errorHandler{debug: debug}
 	return &m
 }
 
@@ -20,7 +22,7 @@ func (m *errorHandler) Attach(engine *gin.Engine) {
 	engine.Use(m.Handler)
 }
 
-func (*errorHandler) Handler(ctx *gin.Context) {
+func (m *errorHandler) Handler(ctx *gin.Context) {
 	defer func() {
 		if r := recover(); r != nil {
 			var apiError *network.ApiError
@@ -35,9 +37,17 @@ func (*errorHandler) Handler(ctx *gin.Context) {
 				case http.StatusNotFound:
 					network.NotFoundResponse(apiError.Message).Send(ctx)
 				case http.StatusInternalServerError:
-					network.BadRequestResponse(apiError.Message).Send(ctx)
+					if m.debug {
+						network.InternalServerErrorResponse(apiError.Message).Send(ctx)
+					} else {
+						network.InternalServerErrorResponse("An unexpected error occurred. Please try again later.").Send(ctx)
+					}
 				default:
-					network.InternalServerErrorResponse("An unexpected error occurred. Please try again later.").Send(ctx)
+					if m.debug {
+						network.InternalServerErrorResponse(apiError.Message).Send(ctx)
+					} else {
+						network.InternalServerErrorResponse("An unexpected error occurred. Please try again later.").Send(ctx)
+					}
 				}
 			} else {
 				network.InternalServerErrorResponse("An unexpected error occurred. Please try again later.").Send(ctx)

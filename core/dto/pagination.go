@@ -2,7 +2,6 @@ package coredto
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -22,13 +21,13 @@ func (d *Pagination) ValidateErrors(errs validator.ValidationErrors) ([]string, 
 	for _, err := range errs {
 		switch err.Tag() {
 		case "required":
-			msgs = append(msgs, fmt.Sprintf("%s is required", strings.ToLower(err.Field())))
+			msgs = append(msgs, fmt.Sprintf("%s is required", err.Field()))
 		case "min":
-			msgs = append(msgs, fmt.Sprintf("%s must be min %s", strings.ToLower(err.Field()), err.Param()))
+			msgs = append(msgs, fmt.Sprintf("%s must be min %s", err.Field()), err.Param())
 		case "max":
-			msgs = append(msgs, fmt.Sprintf("%s must be max%s", strings.ToLower(err.Field()), err.Param()))
+			msgs = append(msgs, fmt.Sprintf("%s must be max%s", err.Field()), err.Param())
 		default:
-			msgs = append(msgs, fmt.Sprintf("%s is invalid", strings.ToLower(err.Field())))
+			msgs = append(msgs, fmt.Sprintf("%s is invalid", err.Field()))
 		}
 	}
 	return msgs, nil

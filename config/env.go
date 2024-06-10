@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/spf13/viper"
 	"log"
+
+	"github.com/spf13/viper"
 )
 
 type Env struct {
@@ -20,11 +21,11 @@ type Env struct {
 	DBMaxPoolSize  uint16 `mapstructure:"DB_MAX_POOL_SIZE"`
 	DBQueryTimeout uint16 `mapstructure:"DB_QUERY_TIMEOUT_SEC"`
 	// keys
-	RSAPrivateKey string `mapstructure:"RSA_PRIVATE_KEY"`
-	RSAPublicKey  string `mapstructure:"RSA_PUBLIC_KEY"`
+	RSAPrivateKeyPath string `mapstructure:"RSA_PRIVATE_KEY_PATH"`
+	RSAPublicKeyPath  string `mapstructure:"RSA_PUBLIC_KEY_PATH"`
 	// Token
-	AccessTokenValiditySec  string `mapstructure:"ACCESS_TOKEN_VALIDITY_SEC"`
-	RefreshTokenValiditySec string `mapstructure:"REFRESH_TOKEN_VALIDITY_SEC"`
+	AccessTokenValiditySec  uint64 `mapstructure:"ACCESS_TOKEN_VALIDITY_SEC"`
+	RefreshTokenValiditySec uint64 `mapstructure:"REFRESH_TOKEN_VALIDITY_SEC"`
 	TokenIssuer             string `mapstructure:"TOKEN_ISSUER"`
 	TokenAudience           string `mapstructure:"TOKEN_AUDIENCE"`
 }

@@ -29,6 +29,6 @@ go.work.sum
 #keys
 keys/*
 !keys/*.md
-!keys/*.example
+*.pem
 
 __debug*

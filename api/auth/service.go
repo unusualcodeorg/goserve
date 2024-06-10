@@ -1,24 +1,25 @@
 package auth
 
 import (
-	"errors"
+	"crypto/rsa"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/schema"
-	authschema "github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/schema"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user"
 	userSchema "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/schema"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService interface {
+	IsEmailRegisted(email string) bool
 	SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
-	generateToken(user userSchema.User) (*dto.UserTokens, error)
+	generateToken(user *userSchema.User) (*dto.UserTokens, error)
 	createKeystore(client *userSchema.User, primaryKey string, secondaryKey string) (*schema.Keystore, error)
 	verifyToken(tokenStr string) (*jwt.RegisteredClaims, error)
 	decodeToken(tokenStr string) (*jwt.RegisteredClaims, error)
@@ -27,40 +28,59 @@ type AuthService interface {
 
 type service struct {
 	network.BaseService
-	keystoreQuery mongo.Query[authschema.Keystore]
+	keystoreQuery mongo.Query[schema.Keystore]
 	userService   user.UserService
 	// token
-	rsaPrivateKey           string
-	rsaPublicKey            string
-	accessTokenValiditySec  string
-	refreshTokenValiditySec string
-	tokenIssuer             string
-	TokenAudience           string
+	rsaPrivateKey        *rsa.PrivateKey
+	rsaPublicKey         *rsa.PublicKey
+	accessTokenValidity  time.Duration
+	refreshTokenValidity time.Duration
+	tokenIssuer          string
+	tokenAudience        string
 }
 
 func NewAuthService(db mongo.Database, dbQueryTimeout time.Duration, env *config.Env, userService user.UserService) AuthService {
+	privatePem, err := utils.LoadPEMFileInto(env.RSAPrivateKeyPath)
+	if err != nil {
+		panic(err)
+	}
+	rsaPrivateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privatePem)
+	if err != nil {
+		panic(err)
+	}
+
+	publicPem, err := utils.LoadPEMFileInto(env.RSAPublicKeyPath)
+	if err != nil {
+		panic(err)
+	}
+
+	rsaPublicKey, err := jwt.ParseRSAPublicKeyFromPEM(publicPem)
+	if err != nil {
+		panic(err)
+	}
+
 	s := service{
 		BaseService:   network.NewBaseService(dbQueryTimeout),
-		keystoreQuery: mongo.NewQuery[authschema.Keystore](db, authschema.KeystoreCollectionName),
+		keystoreQuery: mongo.NewQuery[schema.Keystore](db, schema.KeystoreCollectionName),
 		userService:   userService,
-		// token
-		rsaPrivateKey:           env.RSAPrivateKey,
-		rsaPublicKey:            env.RSAPublicKey,
-		accessTokenValiditySec:  env.AccessTokenValiditySec,
-		refreshTokenValiditySec: env.RefreshTokenValiditySec,
-		tokenIssuer:             env.TokenIssuer,
-		TokenAudience:           env.TokenAudience,
+		// token key
+		rsaPrivateKey: rsaPrivateKey,
+		rsaPublicKey:  rsaPublicKey,
+		// token claim
+		accessTokenValidity:  time.Duration(env.AccessTokenValiditySec),
+		refreshTokenValidity: time.Duration(env.RefreshTokenValiditySec),
+		tokenIssuer:          env.TokenIssuer,
+		tokenAudience:        env.TokenAudience,
 	}
 	return &s
 }
 
-func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error) {
-	user, _ := s.userService.FindUserByEmail(signupDto.Email)
-	if user != nil {
-		e := errors.New("user already exists")
-		return nil, network.BadRequestError(e.Error(), e)
-	}
+func (s *service) IsEmailRegisted(email string) bool {
+	user, _ := s.userService.FindUserByEmail(email)
+	return user != nil
+}
 
+func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error) {
 	role, err := s.userService.FindRoleByCode(userSchema.RoleCodeLearner)
 	if err != nil {
 		return nil, err
@@ -73,24 +93,82 @@ func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
 		return nil, err
 	}
 
-	_, err = userSchema.NewUser(signupDto.Email, string(hashed), &signupDto.Name, &signupDto.Password, roles)
+	user, err := userSchema.NewUser(signupDto.Email, string(hashed), &signupDto.Name, &signupDto.Password, roles)
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	user, err = s.userService.CreateUser(user)
+	if err != nil {
+		return nil, err
+	}
+
+	tokens, err := s.generateToken(user)
+	if err != nil {
+		return nil, err
+	}
+
+	return dto.NewUserAuth(user, tokens), nil
+}
+
+func (s *service) generateToken(user *userSchema.User) (*dto.UserTokens, error) {
+	primaryKey, err := utils.GenerateRandomString(32)
+	if err != nil {
+		return nil, err
+	}
+	secondaryKey, err := utils.GenerateRandomString(32)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.createKeystore(user, primaryKey, secondaryKey)
+	if err != nil {
+		return nil, err
+	}
+
+	now := jwt.NewNumericDate(time.Now())
+
+	accessTokenClaims := jwt.RegisteredClaims{
+		Issuer:    s.tokenIssuer,
+		Subject:   user.ID.Hex(),
+		Audience:  []string{s.tokenAudience},
+		IssuedAt:  now,
+		NotBefore: now,
+		ExpiresAt: jwt.NewNumericDate(now.Add(s.accessTokenValidity * time.Second)),
+		ID:        primaryKey,
+	}
+
+	refreshTokenClaims := jwt.RegisteredClaims{
+		Issuer:    s.tokenIssuer,
+		Subject:   user.ID.Hex(),
+		Audience:  []string{s.tokenAudience},
+		IssuedAt:  now,
+		NotBefore: now,
+		ExpiresAt: jwt.NewNumericDate(now.Add(s.refreshTokenValidity * time.Second)),
+		ID:        secondaryKey,
+	}
+
+	accessToken, err := s.signToken(accessTokenClaims)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshToken, err := s.signToken(refreshTokenClaims)
+	if err != nil {
+		return nil, err
+	}
+
+	return dto.NewUserToken(accessToken, refreshToken), nil
 }
 
 func (s *service) createKeystore(client *userSchema.User, primaryKey string, secondaryKey string) (*schema.Keystore, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 
-	keystore, err := schema.NewKeystore(client.ID, primaryKey, secondaryKey)
+	doc, err := schema.NewKeystore(client.ID, primaryKey, secondaryKey)
 	if err != nil {
 		return nil, err
 	}
-
-	doc := keystore.GetValue()
 
 	id, err := s.keystoreQuery.InsertOne(ctx, doc)
 	if err != nil {
@@ -101,16 +179,8 @@ func (s *service) createKeystore(client *userSchema.User, primaryKey string, sec
 	return doc, nil
 }
 
-func (s *service) generateToken(user userSchema.User) (*dto.UserTokens, error) {
-	// accessTokenKey := utils.GenerateRandomString(32)
-	// refreshTokenKey := utils.GenerateRandomString(32)
-
-	return nil, nil
-}
-
 func (s *service) signToken(claims jwt.RegisteredClaims) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodRS512, claims)
-
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	signed, err := token.SignedString(s.rsaPrivateKey)
 	if err != nil {
 		return "", err

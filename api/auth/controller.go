@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
@@ -24,14 +26,26 @@ func NewAuthController(
 }
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
-	group.POST("/register/basic", c.registerBasicHandler)
+	group.POST("/signup/basic", c.singupBasicHandler)
 }
 
-func (c *controller) registerBasicHandler(ctx *gin.Context) {
+func (c *controller) singupBasicHandler(ctx *gin.Context) {
 	body, err := network.ReqBody(ctx, dto.EmptySignUpBasic())
 	if err != nil {
 		panic(network.BadRequestError(err.Error(), err))
 	}
 
-	network.SuccessResponse("success", body).Send(ctx)
+	exists := c.authService.IsEmailRegisted(body.Email)
+	if exists {
+		e := errors.New("user already exists")
+		panic(network.BadRequestError(e.Error(), e))
+	}
+
+	data, err := c.authService.SignUpBasic(body)
+
+	if err != nil {
+		panic(network.InternalServerError(err.Error(), err))
+	}
+
+	network.SuccessResponse("success", data).Send(ctx)
 }

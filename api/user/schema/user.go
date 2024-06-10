@@ -21,8 +21,8 @@ type User struct {
 	Password      *string              `bson:"password" validate:"required,min=6,max=100"`
 	ProfilePicURL *string              `bson:"profilePicUrl,omitempty" validate:"omitempty,max=500"`
 	Roles         []primitive.ObjectID `bson:"roles,omitempty" validate:"required"`
-	Verified      bool                 `bson:"verified" validate:"required"`
-	Status        bool                 `bson:"status" validate:"required"`
+	Verified      bool                 `bson:"verified" validate:"-"`
+	Status        bool                 `bson:"status" validate:"-"`
 	CreatedAt     time.Time            `bson:"createdAt" validate:"required"`
 	UpdatedAt     time.Time            `bson:"updatedAt" validate:"required"`
 
@@ -30,14 +30,7 @@ type User struct {
 	RoleDocs []Role `bson:"-" validate:"-"`
 }
 
-func NewUser(
-	email string,
-	pwdHash string,
-	name *string,
-	profilePicUrl *string,
-	roles []Role,
-) (mongo.Schema[User], error,
-) {
+func NewUser(email string, pwdHash string, name *string, profilePicUrl *string, roles []Role) (*User, error) {
 	roleIds := make([]primitive.ObjectID, len(roles))
 	for i, role := range roles {
 		roleIds[i] = role.ID

@@ -23,6 +23,7 @@ func Server() {
 	EnsureDbIndexes(db)
 
 	router := network.NewRouter(env.GoMode)
+	router.RegisterValidationParsers(network.CustomTagNameFunc())
 	dbQueryTimeout := time.Duration(env.DBQueryTimeout) * time.Second
 
 	coreService := core.NewCoreService(db, dbQueryTimeout)

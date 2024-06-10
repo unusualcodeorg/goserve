@@ -20,6 +20,14 @@ func ReqBody[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
 		e := processErrors(dto, err)
 		return nil, e
 	}
+
+	v := validator.New()
+	v.RegisterTagNameFunc(CustomTagNameFunc())
+	if err := v.Struct(dto); err != nil {
+		e := processErrors(dto, err)
+		return nil, e
+	}
+
 	return dto.GetValue(), nil
 }
 
@@ -29,7 +37,9 @@ func ReqQuery[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
 		return nil, e
 	}
 
-	if err := validator.New().Struct(dto); err != nil {
+	v := validator.New()
+	v.RegisterTagNameFunc(CustomTagNameFunc())
+	if err := v.Struct(dto); err != nil {
 		e := processErrors(dto, err)
 		return nil, e
 	}
@@ -43,7 +53,9 @@ func ReqParams[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
 		return nil, e
 	}
 
-	if err := validator.New().Struct(dto); err != nil {
+	v := validator.New()
+	v.RegisterTagNameFunc(CustomTagNameFunc())
+	if err := v.Struct(dto); err != nil {
 		e := processErrors(dto, err)
 		return nil, e
 	}
@@ -57,7 +69,9 @@ func ReqHeaders[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
 		return nil, e
 	}
 
-	if err := validator.New().Struct(dto); err != nil {
+	v := validator.New()
+	v.RegisterTagNameFunc(CustomTagNameFunc())
+	if err := v.Struct(dto); err != nil {
 		e := processErrors(dto, err)
 		return nil, e
 	}
