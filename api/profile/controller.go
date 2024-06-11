@@ -4,13 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/profile/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
+	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
 type controller struct {
 	network.BaseController
-	userService core.UserService
+	userService    core.UserService
 	profileService ProfileService
 }
 
@@ -23,7 +23,7 @@ func NewProfileController(
 	c := controller{
 		BaseController: network.NewBaseController("/profile", authProvider, authorizeProvider),
 		userService:    userService,
-		profileService:    profileService,
+		profileService: profileService,
 	}
 	return &c
 }
@@ -33,14 +33,12 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 }
 
 func (c *controller) getUserHandler(ctx *gin.Context) {
-	id := ctx.Param("id")
-
-	objectId, err := mongo.NewObjectID(id)
+	mongoId, err := network.ReqParams(ctx, &coredto.MongoId{})
 	if err != nil {
 		panic(network.BadRequestError(err.Error(), err))
 	}
 
-	msg, err := c.userService.FindUserById(objectId)
+	msg, err := c.userService.FindUserById(mongoId.ID)
 	if err != nil {
 		panic(network.NotFoundError("message not found", err))
 	}
