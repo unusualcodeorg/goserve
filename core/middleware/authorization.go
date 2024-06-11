@@ -5,18 +5,16 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
-type authorization struct {
+type authorizeProvider struct {
 }
 
-func NewAuthorization() network.GroupMiddleware {
-	m := authorization{}
+func NewAuthorizeProvider() network.MiddlewareProvider {
+	m := authorizeProvider{}
 	return &m
 }
 
-func (m *authorization) Attach(group *gin.RouterGroup) {
-	group.Use(m.Handler)
-}
-
-func (m *authorization) Handler(ctx *gin.Context) {
-	ctx.Next()
+func (m *authorizeProvider) Middleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ctx.Next()
+	}
 }

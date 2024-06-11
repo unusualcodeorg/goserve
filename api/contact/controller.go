@@ -13,12 +13,12 @@ type controller struct {
 }
 
 func NewContactController(
-	authMFunc network.GroupMiddlewareFunc,
-	authorizeMFunc network.GroupMiddlewareFunc,
+	authProvider network.MiddlewareProvider,
+	authorizeProvider network.MiddlewareProvider,
 	service ContactService,
 ) network.Controller {
 	c := controller{
-		BaseController: network.NewBaseController("/contact", authMFunc, authorizeMFunc),
+		BaseController: network.NewBaseController("/contact", authProvider, authorizeProvider),
 		contactService: service,
 	}
 	return &c

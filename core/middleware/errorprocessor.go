@@ -12,7 +12,7 @@ type errorHandle struct {
 	debug bool
 }
 
-func NewErrorHandle() network.RootMiddleware {
+func NewErrorProcessor() network.RootMiddleware {
 	debug := gin.Mode() == gin.DebugMode
 	m := errorHandle{debug: debug}
 	return &m

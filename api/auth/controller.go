@@ -14,12 +14,12 @@ type controller struct {
 }
 
 func NewAuthController(
-	authMFunc network.GroupMiddlewareFunc,
-	authorizeMFunc network.GroupMiddlewareFunc,
+	authProvider network.MiddlewareProvider,
+	authorizeProvider network.MiddlewareProvider,
 	service AuthService,
 ) network.Controller {
 	c := controller{
-		BaseController: network.NewBaseController("/auth", authMFunc, authorizeMFunc),
+		BaseController: network.NewBaseController("/auth", authProvider, authorizeProvider),
 		authService:    service,
 	}
 	return &c
@@ -29,7 +29,7 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 	group.POST("/signup/basic", c.singupBasicHandler)
 
 	logout := group.Group("/logout")
-	c.AuthenticationMiddleware().Attach(logout)
+	logout.Use(c.Authentication())
 	logout.DELETE("/", c.logoutBasicHandler)
 
 }

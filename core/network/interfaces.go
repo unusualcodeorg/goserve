@@ -9,8 +9,8 @@ import (
 
 type BaseController interface {
 	Path() string
-	AuthenticationMiddleware() GroupMiddleware
-	AuthorizationMiddleware() GroupMiddleware
+	Authentication() gin.HandlerFunc
+	Authorization() gin.HandlerFunc
 }
 
 type BaseService interface {
@@ -32,12 +32,9 @@ type RootMiddleware interface {
 	Handler(ctx *gin.Context)
 }
 
-type GroupMiddleware interface {
-	Attach(group *gin.RouterGroup)
-	Handler(ctx *gin.Context)
+type MiddlewareProvider interface {
+	Middleware() gin.HandlerFunc
 }
-
-type GroupMiddlewareFunc func() GroupMiddleware
 
 type Router interface {
 	GetEngine() *gin.Engine

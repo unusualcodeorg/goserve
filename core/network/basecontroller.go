@@ -1,28 +1,30 @@
 package network
 
+import "github.com/gin-gonic/gin"
+
 type baseController struct {
-	path               string
-	authenticationFunc GroupMiddlewareFunc
-	authorizationFunc  GroupMiddlewareFunc
+	basePath          string
+	authProvider      MiddlewareProvider
+	authorizeProvider MiddlewareProvider
 }
 
-func NewBaseController(path string, authMFunc GroupMiddlewareFunc, authorizeMFunc GroupMiddlewareFunc) BaseController {
+func NewBaseController(basePath string, authProvider MiddlewareProvider, authorizeProvider MiddlewareProvider) BaseController {
 	c := baseController{
-		path:               path,
-		authenticationFunc: authMFunc,
-		authorizationFunc:  authorizeMFunc,
+		basePath:          basePath,
+		authProvider:      authProvider,
+		authorizeProvider: authorizeProvider,
 	}
 	return &c
 }
 
 func (c *baseController) Path() string {
-	return c.path
+	return c.basePath
 }
 
-func (c *baseController) AuthenticationMiddleware() GroupMiddleware {
-	return c.authenticationFunc()
+func (c *baseController) Authentication() gin.HandlerFunc {
+	return c.authProvider.Middleware()
 }
 
-func (c *baseController) AuthorizationMiddleware() GroupMiddleware {
-	return c.authorizationFunc()
+func (c *baseController) Authorization() gin.HandlerFunc {
+	return c.authorizeProvider.Middleware()
 }
