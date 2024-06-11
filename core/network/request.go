@@ -7,12 +7,37 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/jinzhu/copier"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/schema"
 )
 
 const (
-	ReqPayloadApiKey string = "apikey"
-	ReqPayloadUser   string = "user"
+	reqPayloadApiKey string = "apikey"
+	reqPayloadUser   string = "user"
 )
+
+func ReqSetUser(ctx *gin.Context, user *schema.User) {
+	ctx.Set(reqPayloadUser, user)
+}
+
+func ReqGetUser(ctx *gin.Context) *schema.User {
+	user, ok := ctx.MustGet(reqPayloadUser).(*schema.User)
+	if !ok {
+		panic(errors.New("user missing for request"))
+	}
+	return user
+}
+
+func ReqSetApiKey(ctx *gin.Context, apikey *schema.ApiKey) {
+	ctx.Set(reqPayloadApiKey, apikey)
+}
+
+func ReqGetApiKey(ctx *gin.Context) *schema.ApiKey {
+	apikey, ok := ctx.MustGet(reqPayloadApiKey).(*schema.ApiKey)
+	if !ok {
+		panic(errors.New("apikey missing for request"))
+	}
+	return apikey
+}
 
 // ShouldBindJSON in gin internally used go-playground/validator i.e. why we have error with validaiton info
 func ReqBody[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {

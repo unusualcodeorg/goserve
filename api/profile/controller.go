@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/dto"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/profile/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
@@ -18,7 +18,7 @@ func NewUserController(
 	service UserService,
 ) network.Controller {
 	c := controller{
-		BaseController: network.NewBaseController("/user", authProvider, authorizeProvider),
+		BaseController: network.NewBaseController("/profile", authProvider, authorizeProvider),
 		userService:    service,
 	}
 	return &c

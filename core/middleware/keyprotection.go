@@ -32,7 +32,7 @@ func (m *keyProtection) Handler(ctx *gin.Context) {
 		panic(network.ForbiddenError("permission denied: invalid x-api-key", err))
 	}
 
-	ctx.Set(network.ReqPayloadApiKey, apikey)
+	network.ReqSetApiKey(ctx, apikey)
 
 	ctx.Next()
 }

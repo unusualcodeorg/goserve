@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/schema"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core/schema"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

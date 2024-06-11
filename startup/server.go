@@ -5,7 +5,7 @@ import (
 
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/profile"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core"
 	m "github.com/unusualcodeorg/go-lang-backend-architecture/core/middleware"

@@ -7,8 +7,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/schema"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user"
-	userSchema "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/schema"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/profile"
+	coreSchema "github.com/unusualcodeorg/go-lang-backend-architecture/core/schema"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
@@ -19,8 +19,8 @@ import (
 type AuthService interface {
 	IsEmailRegisted(email string) bool
 	SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
-	generateToken(user *userSchema.User) (*dto.UserTokens, error)
-	createKeystore(client *userSchema.User, primaryKey string, secondaryKey string) (*schema.Keystore, error)
+	generateToken(user *coreSchema.User) (*dto.UserTokens, error)
+	createKeystore(client *coreSchema.User, primaryKey string, secondaryKey string) (*schema.Keystore, error)
 	verifyToken(tokenStr string) (*jwt.RegisteredClaims, error)
 	decodeToken(tokenStr string) (*jwt.RegisteredClaims, error)
 	signToken(claims jwt.RegisteredClaims) (string, error)
@@ -81,11 +81,11 @@ func (s *service) IsEmailRegisted(email string) bool {
 }
 
 func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error) {
-	role, err := s.userService.FindRoleByCode(userSchema.RoleCodeLearner)
+	role, err := s.userService.FindRoleByCode(coreSchema.RoleCodeLearner)
 	if err != nil {
 		return nil, err
 	}
-	roles := make([]userSchema.Role, 1)
+	roles := make([]coreSchema.Role, 1)
 	roles[0] = *role
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(signupDto.Password), 5)
@@ -93,7 +93,7 @@ func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
 		return nil, err
 	}
 
-	user, err := userSchema.NewUser(signupDto.Email, string(hashed), &signupDto.Name, signupDto.ProfilePicUrl, roles)
+	user, err := coreSchema.NewUser(signupDto.Email, string(hashed), &signupDto.Name, signupDto.ProfilePicUrl, roles)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
 	return dto.NewUserAuth(user, tokens), nil
 }
 
-func (s *service) generateToken(user *userSchema.User) (*dto.UserTokens, error) {
+func (s *service) generateToken(user *coreSchema.User) (*dto.UserTokens, error) {
 	primaryKey, err := utils.GenerateRandomString(32)
 	if err != nil {
 		return nil, err
@@ -161,7 +161,7 @@ func (s *service) generateToken(user *userSchema.User) (*dto.UserTokens, error) 
 	return dto.NewUserToken(accessToken, refreshToken), nil
 }
 
-func (s *service) createKeystore(client *userSchema.User, primaryKey string, secondaryKey string) (*schema.Keystore, error) {
+func (s *service) createKeystore(client *coreSchema.User, primaryKey string, secondaryKey string) (*schema.Keystore, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 
