@@ -22,9 +22,11 @@ type AuthService interface {
 	SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
 	GenerateToken(user *userModel.User) (string, string, error)
 	CreateKeystore(client *userModel.User, primaryKey string, secondaryKey string) (*model.Keystore, error)
+	FindKeystore(client *userModel.User, primaryKey string) (*model.Keystore, error)
 	VerifyToken(tokenStr string) (*jwt.RegisteredClaims, error)
 	DecodeToken(tokenStr string) (*jwt.RegisteredClaims, error)
 	SignToken(claims jwt.RegisteredClaims) (string, error)
+	ValidateClaims(claims *jwt.RegisteredClaims) bool
 	FindApiKey(key string) (*model.ApiKey, error)
 }
 
@@ -189,6 +191,13 @@ func (s *service) CreateKeystore(client *userModel.User, primaryKey string, seco
 	return doc, nil
 }
 
+func (s *service) FindKeystore(client *userModel.User, primaryKey string) (*model.Keystore, error) {
+	ctx, cancel := s.Context()
+	defer cancel()
+	filter := bson.M{"client": client.ID, "primaryKey": primaryKey, "status": true}
+	return s.keystoreQuery.FindOne(ctx, filter, nil)
+}
+
 func (s *service) SignToken(claims jwt.RegisteredClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	signed, err := token.SignedString(s.rsaPrivateKey)
@@ -199,17 +208,16 @@ func (s *service) SignToken(claims jwt.RegisteredClaims) (string, error) {
 }
 
 func (s *service) VerifyToken(tokenStr string) (*jwt.RegisteredClaims, error) {
-	token, err := jwt.Parse(tokenStr, func(tkn *jwt.Token) (any, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(tkn *jwt.Token) (any, error) {
 		return s.rsaPublicKey, nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
 
 	if token.Valid {
-		if claims, ok := token.Claims.(jwt.RegisteredClaims); ok {
-			return &claims, nil
+		if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok {
+			return claims, nil
 		}
 	}
 
@@ -232,6 +240,18 @@ func (s *service) DecodeToken(tokenStr string) (*jwt.RegisteredClaims, error) {
 	}
 
 	return nil, jwt.ErrTokenMalformed
+}
+
+func (s *service) ValidateClaims(claims *jwt.RegisteredClaims) bool {
+	invalid := claims.Issuer != s.tokenIssuer ||
+		claims.Subject == "" ||
+		len(claims.Audience) == 0 ||
+		claims.Audience[0] != s.tokenAudience ||
+		claims.NotBefore == nil ||
+		claims.ExpiresAt == nil ||
+		claims.ID == ""
+
+	return !invalid
 }
 
 func (s *service) FindApiKey(key string) (*model.ApiKey, error) {

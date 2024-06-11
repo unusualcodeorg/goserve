@@ -38,7 +38,7 @@ func Server() {
 		coreMW.NewNotFound(),
 	)
 
-	authProvider := authMW.NewAuthenticationProvider(authService)
+	authProvider := authMW.NewAuthenticationProvider(authService, userService)
 	authorizeProvider := authMW.NewAuthorizationProvider()
 
 	router.LoadControllers(

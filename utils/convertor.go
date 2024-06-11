@@ -3,7 +3,9 @@ package utils
 import (
 	"reflect"
 	"strconv"
+	"strings"
 
+	"github.com/jinzhu/copier"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -56,3 +58,41 @@ func IsValidObjectID(id string) bool {
 	_, err := primitive.ObjectIDFromHex(id)
 	return err == nil
 }
+
+func MapTo[T any, V any](v *V) (*T, error) {
+	var obj T
+	err := copier.Copy(&v, obj)
+	if err != nil {
+		return nil, err
+	}
+	return &obj, nil
+}
+
+func ExtractBearerToken(authHeader string) string {
+	const prefix = "Bearer "
+	tokenIndex := strings.Index(authHeader, prefix)
+	if tokenIndex == -1 || tokenIndex != 0 {
+		return ""
+	}
+	return authHeader[tokenIndex+len(prefix):]
+}
+
+// func MapClaimsToRegisteredClaims(mapClaims jwt.MapClaims) *jwt.RegisteredClaims {
+// 	subject, _ := mapClaims["sub"].(string)
+// 	issuer, _ := mapClaims["iss"].(string)
+// 	audience, _ := mapClaims["aud"].(string)
+// 	expiresAt := jwt.NewNumericDate(time.Unix(int64(mapClaims["exp"].(float64)), 0))
+// 	notBefore := jwt.NewNumericDate(time.Unix(int64(mapClaims["nbf"].(float64)), 0))
+// 	issuedAt := jwt.NewNumericDate(time.Unix(int64(mapClaims["iat"].(float64)), 0))
+// 	jwtID, _ := mapClaims["jti"].(string)
+
+// 	return &jwt.RegisteredClaims{
+// 		Subject:   subject,
+// 		Issuer:    issuer,
+// 		Audience:  []string{audience},
+// 		ExpiresAt: expiresAt,
+// 		NotBefore: notBefore,
+// 		IssuedAt:  issuedAt,
+// 		ID:        jwtID,
+// 	}
+// }

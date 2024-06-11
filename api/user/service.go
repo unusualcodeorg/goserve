@@ -47,7 +47,7 @@ func (s *service) FindRoleByCode(code model.RoleCode) (*model.Role, error) {
 
 func (s *service) FindRoles(roleIds []primitive.ObjectID) ([]model.Role, error) {
 	ctx, cancel := s.Context()
-	cancel()
+	defer cancel()
 	filter := bson.M{"_id": bson.M{"$in": roleIds}}
 	return s.roleQuery.FindAll(ctx, filter, nil)
 }

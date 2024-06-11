@@ -54,7 +54,6 @@ func (*Keystore) EnsureIndexes(db mongo.Database) {
 			Keys: bson.D{
 				{Key: "client", Value: 1},
 				{Key: "primaryKey", Value: 1},
-				{Key: "secondaryKey", Value: 1},
 				{Key: "status", Value: 1},
 			},
 		},
