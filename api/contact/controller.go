@@ -3,7 +3,7 @@ package contact
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/schema"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
@@ -27,7 +27,7 @@ func NewContactController(
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
 	group.Use(c.Authentication())
-	group.Use(c.Authorization(string(schema.RoleCodeWriter)))
+	group.Use(c.Authorization(string(model.RoleCodeWriter)))
 	group.POST("/", c.createMessageHandler)
 	group.GET("/id/:id", c.getMessageHandler)
 	group.GET("/paginated", c.getMessagesPaginated)

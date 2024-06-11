@@ -20,7 +20,7 @@ func NewObjectID(id string) (primitive.ObjectID, error) {
 	return i, err
 }
 
-type Schema[T any] interface {
+type Document[T any] interface {
 	EnsureIndexes(Database)
 	GetValue() *T
 	Validate() error

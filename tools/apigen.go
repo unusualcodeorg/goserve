@@ -36,7 +36,7 @@ func generateFeature(featureTemplate string) error {
 	if err := generateDto(featureDir, featureName); err != nil {
 		return err
 	}
-	if err := generateSchema(featureDir, featureName); err != nil {
+	if err := generateModel(featureDir, featureName); err != nil {
 		return err
 	}
 	if err := generateService(featureDir, featureName); err != nil {
@@ -58,7 +58,7 @@ func generateService(featureDir, featureName string) error {
 import (
 	"time"
 
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/%s/schema"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/%s/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 	"go.mongodb.org/mongo-driver/bson"
@@ -66,23 +66,23 @@ import (
 )
 
 type %sService interface {
-	Find%s(id primitive.ObjectID) (*schema.%s, error)
+	Find%s(id primitive.ObjectID) (*model.%s, error)
 }
 
 type service struct {
 	network.BaseService
-	%sQuery mongo.Query[schema.%s]
+	%sQuery mongo.Query[model.%s]
 }
 
 func New%sService(db mongo.Database, dbQueryTimeout time.Duration) %sService {
 	s := service{
 		BaseService:  network.NewBaseService(dbQueryTimeout),
-		%sQuery: mongo.NewQuery[schema.%s](db, schema.CollectionName),
+		%sQuery: mongo.NewQuery[model.%s](db, model.CollectionName),
 	}
 	return &s
 }
 
-func (s *service) Find%s(id primitive.ObjectID) (*schema.%s, error) {
+func (s *service) Find%s(id primitive.ObjectID) (*model.%s, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 
@@ -158,17 +158,17 @@ func (c *controller) get%sHandler(ctx *gin.Context) {
 	return os.WriteFile(controllerPath, []byte(template), os.ModePerm)
 }
 
-func generateSchema(featureDir, featureName string) error {
-	schemaDirPath := filepath.Join(featureDir, "schema")
-	if err := os.MkdirAll(schemaDirPath, os.ModePerm); err != nil {
+func generateModel(featureDir, featureName string) error {
+	modelDirPath := filepath.Join(featureDir, "model")
+	if err := os.MkdirAll(modelDirPath, os.ModePerm); err != nil {
 		return err
 	}
 
 	featureLower := strings.ToLower(featureName)
 	featureCaps := capitalizeFirstLetter(featureName)
-	schemaPath := filepath.Join(featureDir, fmt.Sprintf("schema/%s.go", featureLower))
+	modelPath := filepath.Join(featureDir, fmt.Sprintf("model/%s.go", featureLower))
 
-	tStr := `package schema
+	tStr := `package model
 
 import (
 	"context"
@@ -231,7 +231,7 @@ func (*%s) EnsureIndexes(db mongo.Database) {
 
 	template := fmt.Sprintf(tStr, featureLower, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps)
 
-	return os.WriteFile(schemaPath, []byte(template), os.ModePerm)
+	return os.WriteFile(modelPath, []byte(template), os.ModePerm)
 }
 
 func generateDto(featureDir, featureName string) error {

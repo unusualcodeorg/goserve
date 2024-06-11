@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/schema"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/model"
 	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
@@ -13,29 +13,29 @@ import (
 )
 
 type ContactService interface {
-	SaveMessage(d *dto.CreateMessage) (*schema.Message, error)
-	FindMessage(id primitive.ObjectID) (*schema.Message, error)
-	FindPaginatedMessage(p *coredto.Pagination) ([]schema.Message, error)
+	SaveMessage(d *dto.CreateMessage) (*model.Message, error)
+	FindMessage(id primitive.ObjectID) (*model.Message, error)
+	FindPaginatedMessage(p *coredto.Pagination) ([]model.Message, error)
 }
 
 type service struct {
 	network.BaseService
-	messageQuery mongo.Query[schema.Message]
+	messageQuery mongo.Query[model.Message]
 }
 
 func NewContactService(db mongo.Database, dbQueryTimeout time.Duration) ContactService {
 	s := service{
 		BaseService:  network.NewBaseService(dbQueryTimeout),
-		messageQuery: mongo.NewQuery[schema.Message](db, schema.CollectionName),
+		messageQuery: mongo.NewQuery[model.Message](db, model.CollectionName),
 	}
 	return &s
 }
 
-func (s *service) SaveMessage(d *dto.CreateMessage) (*schema.Message, error) {
+func (s *service) SaveMessage(d *dto.CreateMessage) (*model.Message, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 
-	msg, err := schema.NewMessage(d.Type, d.Msg)
+	msg, err := model.NewMessage(d.Type, d.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (s *service) SaveMessage(d *dto.CreateMessage) (*schema.Message, error) {
 	return result, nil
 }
 
-func (s *service) FindMessage(id primitive.ObjectID) (*schema.Message, error) {
+func (s *service) FindMessage(id primitive.ObjectID) (*model.Message, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 
@@ -62,7 +62,7 @@ func (s *service) FindMessage(id primitive.ObjectID) (*schema.Message, error) {
 	return msg, nil
 }
 
-func (s *service) FindPaginatedMessage(p *coredto.Pagination) ([]schema.Message, error) {
+func (s *service) FindPaginatedMessage(p *coredto.Pagination) ([]model.Message, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 

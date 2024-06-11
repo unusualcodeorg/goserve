@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/schema"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 )
 
 type UserAuth struct {
@@ -13,7 +13,7 @@ type UserAuth struct {
 	Tokens *UserTokens          `json:"tokens" validate:"required"`
 }
 
-func NewUserAuth(user *schema.User, tokens *UserTokens) *UserAuth {
+func NewUserAuth(user *model.User, tokens *UserTokens) *UserAuth {
 	return &UserAuth{
 		User:   dto.NewInfoPrivateUser(user),
 		Tokens: tokens,

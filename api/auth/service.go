@@ -6,9 +6,9 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/schema"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user"
-	userSchema "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/schema"
+	userModel "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
@@ -20,18 +20,18 @@ import (
 type AuthService interface {
 	IsEmailRegisted(email string) bool
 	SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
-	GenerateToken(user *userSchema.User) (string, string, error)
-	CreateKeystore(client *userSchema.User, primaryKey string, secondaryKey string) (*schema.Keystore, error)
+	GenerateToken(user *userModel.User) (string, string, error)
+	CreateKeystore(client *userModel.User, primaryKey string, secondaryKey string) (*model.Keystore, error)
 	VerifyToken(tokenStr string) (*jwt.RegisteredClaims, error)
 	DecodeToken(tokenStr string) (*jwt.RegisteredClaims, error)
 	SignToken(claims jwt.RegisteredClaims) (string, error)
-	FindApiKey(key string) (*schema.ApiKey, error)
+	FindApiKey(key string) (*model.ApiKey, error)
 }
 
 type service struct {
 	network.BaseService
-	keystoreQuery mongo.Query[schema.Keystore]
-	apikeyQuery   mongo.Query[schema.ApiKey]
+	keystoreQuery mongo.Query[model.Keystore]
+	apikeyQuery   mongo.Query[model.ApiKey]
 	userService   user.UserService
 	// token
 	rsaPrivateKey        *rsa.PrivateKey
@@ -69,9 +69,9 @@ func NewAuthService(
 
 	s := service{
 		BaseService:   network.NewBaseService(dbQueryTimeout),
-		userService: userService,
-		keystoreQuery: mongo.NewQuery[schema.Keystore](db, schema.KeystoreCollectionName),
-		apikeyQuery:   mongo.NewQuery[schema.ApiKey](db, schema.CollectionName),
+		userService:   userService,
+		keystoreQuery: mongo.NewQuery[model.Keystore](db, model.KeystoreCollectionName),
+		apikeyQuery:   mongo.NewQuery[model.ApiKey](db, model.CollectionName),
 		// token key
 		rsaPrivateKey: rsaPrivateKey,
 		rsaPublicKey:  rsaPublicKey,
@@ -90,11 +90,11 @@ func (s *service) IsEmailRegisted(email string) bool {
 }
 
 func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error) {
-	role, err := s.userService.FindRoleByCode(userSchema.RoleCodeLearner)
+	role, err := s.userService.FindRoleByCode(userModel.RoleCodeLearner)
 	if err != nil {
 		return nil, err
 	}
-	roles := make([]userSchema.Role, 1)
+	roles := make([]userModel.Role, 1)
 	roles[0] = *role
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(signupDto.Password), 5)
@@ -102,7 +102,7 @@ func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
 		return nil, err
 	}
 
-	user, err := userSchema.NewUser(signupDto.Email, string(hashed), &signupDto.Name, signupDto.ProfilePicUrl, roles)
+	user, err := userModel.NewUser(signupDto.Email, string(hashed), &signupDto.Name, signupDto.ProfilePicUrl, roles)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
 	return dto.NewUserAuth(user, tokens), nil
 }
 
-func (s *service) GenerateToken(user *userSchema.User) (string, string, error) {
+func (s *service) GenerateToken(user *userModel.User) (string, string, error) {
 	primaryKey, err := utils.GenerateRandomString(32)
 	if err != nil {
 		return "", "", err
@@ -171,11 +171,11 @@ func (s *service) GenerateToken(user *userSchema.User) (string, string, error) {
 	return accessToken, refreshToken, nil
 }
 
-func (s *service) CreateKeystore(client *userSchema.User, primaryKey string, secondaryKey string) (*schema.Keystore, error) {
+func (s *service) CreateKeystore(client *userModel.User, primaryKey string, secondaryKey string) (*model.Keystore, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 
-	doc, err := schema.NewKeystore(client.ID, primaryKey, secondaryKey)
+	doc, err := model.NewKeystore(client.ID, primaryKey, secondaryKey)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func (s *service) DecodeToken(tokenStr string) (*jwt.RegisteredClaims, error) {
 	return nil, jwt.ErrTokenMalformed
 }
 
-func (s *service) FindApiKey(key string) (*schema.ApiKey, error) {
+func (s *service) FindApiKey(key string) (*model.ApiKey, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 

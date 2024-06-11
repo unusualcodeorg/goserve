@@ -4,16 +4,16 @@ import (
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/schema"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type InfoRole struct {
 	ID   primitive.ObjectID `json:"_id" binding:"required" validate:"required"`
-	Code schema.RoleCode    `json:"code" binding:"required" validate:"required,rolecode"`
+	Code model.RoleCode     `json:"code" binding:"required" validate:"required,rolecode"`
 }
 
-func NewInfoRole(role schema.Role) *InfoRole {
+func NewInfoRole(role model.Role) *InfoRole {
 	return &InfoRole{
 		ID:   role.ID,
 		Code: role.Code,

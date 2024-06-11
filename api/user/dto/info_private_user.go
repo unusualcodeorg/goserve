@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/schema"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -13,10 +13,10 @@ type InfoPrivateUser struct {
 	Email         string             `json:"email" binding:"required" validate:"required,email"`
 	Name          *string            `json:"name,omitempty"`
 	ProfilePicURL *string            `json:"profilePicUrl,omitempty" validate:"omitempty,url"`
-	Roles         []*InfoRole    `json:"roles" validate:"required,dive,required"`
+	Roles         []*InfoRole        `json:"roles" validate:"required,dive,required"`
 }
 
-func NewInfoPrivateUser(user *schema.User) *InfoPrivateUser {
+func NewInfoPrivateUser(user *model.User) *InfoPrivateUser {
 	roles := make([]*InfoRole, len(user.Roles))
 	for i, role := range user.RoleDocs {
 		roles[i] = NewInfoRole(role)
