@@ -39,7 +39,7 @@ func Server() {
 		m.NewNotFound(),
 	)
 
-	authProvider := m.NewAuthProvider()
+	authProvider := m.NewAuthProvider(userService, tokenService)
 	authorizeProvider := m.NewAuthorizeProvider()
 
 	router.LoadControllers(

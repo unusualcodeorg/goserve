@@ -2,14 +2,20 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
 type authProvider struct {
+	userService core.UserService
+	tokenService core.TokenService
 }
 
-func NewAuthProvider() network.AuthenticationProvider {
-	m := authProvider{}
+func NewAuthProvider(userService core.UserService, tokenService core.TokenService) network.AuthenticationProvider {
+	m := authProvider{
+		userService: userService,
+		tokenService: tokenService,
+	}
 	return &m
 }
 
