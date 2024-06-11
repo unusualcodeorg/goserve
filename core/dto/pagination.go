@@ -15,7 +15,6 @@ func (d *Pagination) GetValue() *Pagination {
 	return d
 }
 
-// strings.ToLower because gin query param validation does not give back form:"page"
 func (d *Pagination) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
 	var msgs []string
 	for _, err := range errs {
@@ -23,9 +22,9 @@ func (d *Pagination) ValidateErrors(errs validator.ValidationErrors) ([]string, 
 		case "required":
 			msgs = append(msgs, fmt.Sprintf("%s is required", err.Field()))
 		case "min":
-			msgs = append(msgs, fmt.Sprintf("%s must be min %s", err.Field()), err.Param())
+			msgs = append(msgs, fmt.Sprintf("%s must be min %s", err.Field(), err.Param()))
 		case "max":
-			msgs = append(msgs, fmt.Sprintf("%s must be max%s", err.Field()), err.Param())
+			msgs = append(msgs, fmt.Sprintf("%s must be max%s", err.Field(), err.Param()))
 		default:
 			msgs = append(msgs, fmt.Sprintf("%s is invalid", err.Field()))
 		}
