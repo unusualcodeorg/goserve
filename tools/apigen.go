@@ -120,8 +120,8 @@ type controller struct {
 }
 
 func New%sController(
-	authMFunc network.GroupMiddlewareFunc,
-	authorizeMFunc network.GroupMiddlewareFunc,
+	authMFunc network.AuthenticationProvider,
+	authorizeMFunc network.AuthorizationProvider,
 	service %sService,
 ) network.Controller {
 	c := controller{
@@ -151,7 +151,7 @@ func (c *controller) get%sHandler(ctx *gin.Context) {
 		panic(network.InternalServerError("something went wrong", err))
 	}
 
-	network.SuccessResponse("success", data).Send(ctx)
+	network.SuccessDataResponse(ctx, "success", data)
 }
 `, featureLower, featureLower, featureLower, featureCaps, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureLower, featureCaps, featureLower)
 
