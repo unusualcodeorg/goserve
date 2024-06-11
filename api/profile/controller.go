@@ -1,25 +1,29 @@
-package user
+package profile
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/profile/dto"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/core"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
 type controller struct {
 	network.BaseController
-	userService UserService
+	userService core.UserService
+	profileService ProfileService
 }
 
-func NewUserController(
+func NewProfileController(
 	authProvider network.AuthenticationProvider,
 	authorizeProvider network.AuthorizationProvider,
-	service UserService,
+	userService core.UserService,
+	profileService ProfileService,
 ) network.Controller {
 	c := controller{
 		BaseController: network.NewBaseController("/profile", authProvider, authorizeProvider),
-		userService:    service,
+		userService:    userService,
+		profileService:    profileService,
 	}
 	return &c
 }

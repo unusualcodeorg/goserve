@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/profile"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
@@ -20,14 +19,14 @@ type AuthService interface {
 type service struct {
 	network.BaseService
 	keystoreQuery mongo.Query[schema.Keystore]
-	userService   user.UserService
+	userService   core.UserService
 	tokenService  core.TokenService
 }
 
 func NewAuthService(
 	db mongo.Database,
 	dbQueryTimeout time.Duration,
-	userService user.UserService,
+	userService core.UserService,
 	tokenService core.TokenService,
 ) AuthService {
 	s := service{

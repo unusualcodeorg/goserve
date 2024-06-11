@@ -28,7 +28,8 @@ func Server() {
 
 	secretService := core.NewSecretService(db, dbQueryTimeout)
 	tokenService := core.NewTokenService(db, dbQueryTimeout, env)
-	userService := user.NewUserService(db, dbQueryTimeout)
+	userService := core.NewUserService(db, dbQueryTimeout)
+	profileService := profile.NewProfileService(db, dbQueryTimeout)
 	authService := auth.NewAuthService(db, dbQueryTimeout, userService, tokenService)
 	contactService := contact.NewContactService(db, dbQueryTimeout)
 
@@ -43,7 +44,7 @@ func Server() {
 
 	router.LoadControllers(
 		auth.NewAuthController(authProvider, authorizeProvider, authService),
-		user.NewUserController(authProvider, authorizeProvider, userService),
+		profile.NewProfileController(authProvider, authorizeProvider, userService, profileService),
 		contact.NewContactController(authProvider, authorizeProvider, contactService),
 	)
 
