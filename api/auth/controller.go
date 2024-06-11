@@ -52,9 +52,9 @@ func (c *controller) singupBasicHandler(ctx *gin.Context) {
 		panic(network.InternalServerError(err.Error(), err))
 	}
 
-	network.SuccessResponse("success", data).Send(ctx)
+	network.ResSuccessData(ctx, "success", data)
 }
 
 func (c *controller) logoutBasicHandler(ctx *gin.Context) {
-	network.SuccessMsgResponse("logout not working!").Send(ctx)
+	network.ResSuccessMsg(ctx, "logout not working!")
 }

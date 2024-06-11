@@ -8,6 +8,11 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/schema"
 )
 
+type Response[T any] interface {
+	GetValue() *T
+	send(ctx *gin.Context)
+}
+
 type BaseController interface {
 	Path() string
 	Authentication() gin.HandlerFunc

@@ -49,7 +49,7 @@ func (c *controller) createMessageHandler(ctx *gin.Context) {
 		panic(network.InternalServerError("something went wrong", err))
 	}
 
-	network.SuccessResponse("message received successfully!", data).Send(ctx)
+	network.ResSuccessData(ctx, "message received successfully!", data)
 }
 
 func (c *controller) getMessageHandler(ctx *gin.Context) {
@@ -68,7 +68,7 @@ func (c *controller) getMessageHandler(ctx *gin.Context) {
 		panic(network.InternalServerError("something went wrong", err))
 	}
 
-	network.SuccessResponse("success", data).Send(ctx)
+	network.ResSuccessData(ctx, "success", data)
 }
 
 func (c *controller) getMessagesPaginated(ctx *gin.Context) {
@@ -87,5 +87,5 @@ func (c *controller) getMessagesPaginated(ctx *gin.Context) {
 	if err != nil {
 		panic(network.InternalServerError("something went wrong", err))
 	}
-	network.SuccessResponse("success", data).Send(ctx)
+	network.ResSuccessData(ctx, "success", data)
 }

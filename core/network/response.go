@@ -6,93 +6,111 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ResponseCode string
+type ResCode string
 
 const (
-	success_code              ResponseCode = "10000"
-	failue_code               ResponseCode = "10001"
-	retry_code                ResponseCode = "10002"
-	invalid_access_token_code ResponseCode = "10003"
+	success_code              ResCode = "10000"
+	failue_code               ResCode = "10001"
+	retry_code                ResCode = "10002"
+	invalid_access_token_code ResCode = "10003"
 )
 
-type Response interface {
-	Send(ctx *gin.Context)
+type responseMessage struct {
+	ResCode ResCode `json:"code" binding:"required"`
+	Status  int     `json:"status" binding:"required"`
+	Message string  `json:"message" binding:"required"`
 }
 
-type messageResponse struct {
-	ResCode ResponseCode `json:"code" binding:"required"`
-	Status  int          `json:"status" binding:"required"`
-	Message string       `json:"message" binding:"required"`
+func (r *responseMessage) GetValue() *responseMessage {
+	return r
 }
 
-func (r *messageResponse) Send(c *gin.Context) {
-	c.JSON(int(r.Status), r)
+func (r *responseMessage) send(ctx *gin.Context) {
+	ctx.JSON(int(r.Status), r)
 }
 
-type dataResponse struct {
-	ResCode ResponseCode `json:"code" binding:"required"`
-	Status  int          `json:"status" binding:"required"`
-	Message string       `json:"message" binding:"required"`
-	Data    any          `json:"data" binding:"required"`
+type responseData struct {
+	ResCode ResCode `json:"code" binding:"required"`
+	Status  int     `json:"status" binding:"required"`
+	Message string  `json:"message" binding:"required"`
+	Data    any     `json:"data" binding:"required"`
 }
 
-func (r *dataResponse) Send(c *gin.Context) {
-	c.JSON(int(r.Status), r)
+func (r *responseData) GetValue() *responseData {
+	return r
 }
 
-func SuccessResponse(message string, data any) Response {
-	return &dataResponse{
+func (r *responseData) send(ctx *gin.Context) {
+	ctx.JSON(int(r.Status), r)
+}
+
+func ResSuccessData(ctx *gin.Context, message string, data any) Response[responseData] {
+	r := &responseData{
 		ResCode: success_code,
 		Status:  http.StatusOK,
 		Message: message,
 		Data:    data,
 	}
+	r.send(ctx)
+	return r
 }
 
-func SuccessMsgResponse(message string) Response {
-	return &messageResponse{
+func ResSuccessMsg(ctx *gin.Context, message string) Response[responseMessage] {
+	r := &responseMessage{
 		ResCode: success_code,
 		Status:  http.StatusOK,
 		Message: message,
 	}
+	r.send(ctx)
+	return r
 }
 
-func BadRequestResponse(message string) Response {
-	return &messageResponse{
+func ResBadRequest(ctx *gin.Context, message string) Response[responseMessage] {
+	r := &responseMessage{
 		ResCode: failue_code,
 		Status:  http.StatusBadRequest,
 		Message: message,
 	}
+	r.send(ctx)
+	return r
 }
 
-func ForbiddenResponse(message string) Response {
-	return &messageResponse{
+func ResForbidden(ctx *gin.Context, message string) Response[responseMessage] {
+	r := &responseMessage{
 		ResCode: failue_code,
 		Status:  http.StatusForbidden,
 		Message: message,
 	}
+	r.send(ctx)
+	return r
 }
 
-func UnauthorizedResponse(message string) Response {
-	return &messageResponse{
+func ResUnauthorized(ctx *gin.Context, message string) Response[responseMessage] {
+	r := &responseMessage{
 		ResCode: failue_code,
 		Status:  http.StatusUnauthorized,
 		Message: message,
 	}
+	r.send(ctx)
+	return r
 }
 
-func NotFoundResponse(message string) Response {
-	return &messageResponse{
+func ResNotFound(ctx *gin.Context, message string) Response[responseMessage] {
+	r := &responseMessage{
 		ResCode: failue_code,
 		Status:  http.StatusNotFound,
 		Message: message,
 	}
+	r.send(ctx)
+	return r
 }
 
-func InternalServerErrorResponse(message string) Response {
-	return &messageResponse{
+func ResInternalServerError(ctx *gin.Context, message string) Response[responseMessage] {
+	r := &responseMessage{
 		ResCode: failue_code,
 		Status:  http.StatusInternalServerError,
 		Message: message,
 	}
+	r.send(ctx)
+	return r
 }

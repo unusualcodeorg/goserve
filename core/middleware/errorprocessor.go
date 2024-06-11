@@ -29,28 +29,28 @@ func (m *errorHandle) Handler(ctx *gin.Context) {
 			if errors.As(r.(error), &apiError) {
 				switch apiError.Code {
 				case http.StatusBadRequest:
-					network.BadRequestResponse(apiError.Message).Send(ctx)
+					network.ResBadRequest(ctx, apiError.Message)
 				case http.StatusForbidden:
-					network.ForbiddenResponse(apiError.Message).Send(ctx)
+					network.ResForbidden(ctx, apiError.Message)
 				case http.StatusUnauthorized:
-					network.UnauthorizedResponse(apiError.Message).Send(ctx)
+					network.ResUnauthorized(ctx, apiError.Message)
 				case http.StatusNotFound:
-					network.NotFoundResponse(apiError.Message).Send(ctx)
+					network.ResNotFound(ctx, apiError.Message)
 				case http.StatusInternalServerError:
 					if m.debug {
-						network.InternalServerErrorResponse(apiError.Message).Send(ctx)
+						network.ResInternalServerError(ctx, apiError.Message)
 					} else {
-						network.InternalServerErrorResponse("An unexpected error occurred. Please try again later.").Send(ctx)
+						network.ResInternalServerError(ctx, "An unexpected error occurred. Please try again later.")
 					}
 				default:
 					if m.debug {
-						network.InternalServerErrorResponse(apiError.Message).Send(ctx)
+						network.ResInternalServerError(ctx, apiError.Message)
 					} else {
-						network.InternalServerErrorResponse("An unexpected error occurred. Please try again later.").Send(ctx)
+						network.ResInternalServerError(ctx, "An unexpected error occurred. Please try again later.")
 					}
 				}
 			} else {
-				network.InternalServerErrorResponse("An unexpected error occurred. Please try again later.").Send(ctx)
+				network.ResInternalServerError(ctx, "An unexpected error occurred. Please try again later.")
 			}
 			ctx.Abort()
 		}
