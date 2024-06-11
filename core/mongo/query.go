@@ -25,29 +25,24 @@ type Query[T any] interface {
 }
 
 type query[T any] struct {
-	db             Database
-	collectionName string
+	collection *mongo.Collection
 }
 
 func NewQuery[T any](db Database, collectionName string) Query[T] {
 	return &query[T]{
-		db:             db,
-		collectionName: collectionName,
+		collection: db.GetInstance().Collection(collectionName),
 	}
 }
 
 func (q *query[T]) CreateIndexes(ctx context.Context, indexes []mongo.IndexModel) error {
-	fmt.Println("database creating index for: " + q.collectionName)
-	collection := q.db.Collection(q.collectionName)
-	_, err := collection.Indexes().CreateMany(ctx, indexes)
+	fmt.Println("database creating index for: " + q.collection.Name())
+	_, err := q.collection.Indexes().CreateMany(ctx, indexes)
 	return err
 }
 
 func (q *query[T]) FindOne(ctx context.Context, filter bson.M, opts *options.FindOneOptions) (*T, error) {
-	collection := q.db.Collection(q.collectionName)
-
 	var doc T
-	err := collection.FindOne(ctx, filter, opts).Decode(&doc)
+	err := q.collection.FindOne(ctx, filter, opts).Decode(&doc)
 	if err != nil {
 		return nil, err
 	}
@@ -56,9 +51,7 @@ func (q *query[T]) FindOne(ctx context.Context, filter bson.M, opts *options.Fin
 }
 
 func (q *query[T]) FindAll(ctx context.Context, filter bson.M, opts *options.FindOptions) ([]T, error) {
-	collection := q.db.Collection(q.collectionName)
-
-	cursor, err := collection.Find(ctx, filter, opts)
+	cursor, err := q.collection.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %w", err)
 	}
@@ -83,15 +76,13 @@ func (q *query[T]) FindAll(ctx context.Context, filter bson.M, opts *options.Fin
 }
 
 func (q *query[T]) FindPaginated(ctx context.Context, filter bson.M, page int64, limit int64, opts *options.FindOptions) ([]T, error) {
-	collection := q.db.Collection(q.collectionName)
-
 	skip := (page - 1) * limit
 
 	findOptions := options.Find()
 	findOptions.SetSkip(skip)
 	findOptions.SetLimit(int64(limit))
 
-	cursor, err := collection.Find(ctx, filter, findOptions)
+	cursor, err := q.collection.Find(ctx, filter, findOptions)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %w", err)
 	}
@@ -116,9 +107,7 @@ func (q *query[T]) FindPaginated(ctx context.Context, filter bson.M, page int64,
 }
 
 func (q *query[T]) InsertOne(ctx context.Context, doc *T) (*primitive.ObjectID, error) {
-	collection := q.db.Collection(q.collectionName)
-
-	result, err := collection.InsertOne(ctx, doc)
+	result, err := q.collection.InsertOne(ctx, doc)
 	if err != nil {
 		return nil, err
 	}
@@ -132,9 +121,7 @@ func (q *query[T]) InsertOne(ctx context.Context, doc *T) (*primitive.ObjectID, 
 }
 
 func (q *query[T]) InsertAndRetrieveOne(ctx context.Context, doc *T) (*T, error) {
-	collection := q.db.Collection(q.collectionName)
-
-	result, err := collection.InsertOne(ctx, doc)
+	result, err := q.collection.InsertOne(ctx, doc)
 	if err != nil {
 		return nil, err
 	}
@@ -149,14 +136,12 @@ func (q *query[T]) InsertAndRetrieveOne(ctx context.Context, doc *T) (*T, error)
 }
 
 func (q *query[T]) InsertMany(ctx context.Context, docs []T) ([]primitive.ObjectID, error) {
-	collection := q.db.Collection(q.collectionName)
-
 	var iDocs []interface{}
 	for _, doc := range docs {
 		iDocs = append(iDocs, doc)
 	}
 
-	result, err := collection.InsertMany(ctx, iDocs)
+	result, err := q.collection.InsertMany(ctx, iDocs)
 	if err != nil {
 		return nil, err
 	}
@@ -175,14 +160,12 @@ func (q *query[T]) InsertMany(ctx context.Context, docs []T) ([]primitive.Object
 }
 
 func (q *query[T]) InsertAndRetrieveMany(ctx context.Context, docs []T) ([]T, error) {
-	collection := q.db.Collection(q.collectionName)
-
 	var iDocs []interface{}
 	for _, doc := range docs {
 		iDocs = append(iDocs, doc)
 	}
 
-	result, err := collection.InsertMany(ctx, iDocs)
+	result, err := q.collection.InsertMany(ctx, iDocs)
 	if err != nil {
 		return nil, err
 	}
@@ -201,9 +184,7 @@ func (q *query[T]) InsertAndRetrieveMany(ctx context.Context, docs []T) ([]T, er
  * Example -> update := bson.M{"$set": bson.M{"field": "newValue"}}
  */
 func (q *query[T]) UpdateOne(ctx context.Context, filter bson.M, update bson.M) (int64, error) {
-	collection := q.db.Collection(q.collectionName)
-
-	result, err := collection.UpdateOne(ctx, filter, update)
+	result, err := q.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return 0, err
 	}
@@ -214,9 +195,7 @@ func (q *query[T]) UpdateOne(ctx context.Context, filter bson.M, update bson.M) 
  * Example -> update := bson.M{"$set": bson.M{"field": "newValue"}}
  */
 func (q *query[T]) UpdateMany(ctx context.Context, filter bson.M, update bson.M) (int64, error) {
-	collection := q.db.Collection(q.collectionName)
-
-	result, err := collection.UpdateMany(ctx, filter, update)
+	result, err := q.collection.UpdateMany(ctx, filter, update)
 	if err != nil {
 		return 0, err
 	}
@@ -224,9 +203,7 @@ func (q *query[T]) UpdateMany(ctx context.Context, filter bson.M, update bson.M)
 }
 
 func (q *query[T]) DeleteOne(ctx context.Context, filter bson.M) (int64, error) {
-	collection := q.db.Collection(q.collectionName)
-
-	result, err := collection.DeleteOne(ctx, filter)
+	result, err := q.collection.DeleteOne(ctx, filter)
 	if err != nil {
 		return 0, err
 	}

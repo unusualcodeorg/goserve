@@ -27,13 +27,13 @@ type Schema[T any] interface {
 }
 
 type Database interface {
-	GetClient() *mongo.Client
-	Collection(name string) *mongo.Collection
+	GetInstance() *database
 	Connect()
 	Disconnect()
 }
 
 type database struct {
+	*mongo.Database
 	context     context.Context
 	user        string
 	pwd         string
@@ -42,7 +42,6 @@ type database struct {
 	name        string
 	minPoolSize uint16
 	maxPoolSize uint16
-	client      *mongo.Client
 }
 
 func NewDatabase(ctx context.Context, env *config.Env) Database {
@@ -57,6 +56,10 @@ func NewDatabase(ctx context.Context, env *config.Env) Database {
 		maxPoolSize: env.DBMaxPoolSize,
 	}
 	return &db
+}
+
+func (db *database) GetInstance() *database {
+	return db
 }
 
 func (db *database) Connect() {
@@ -81,21 +84,13 @@ func (db *database) Connect() {
 	}
 	fmt.Println("Connected to Mongo!")
 
-	db.client = client
-}
-
-func (db *database) Collection(name string) *mongo.Collection {
-	return db.client.Database(db.name).Collection(name)
+	db.Database = client.Database(db.name)
 }
 
 func (db *database) Disconnect() {
 	fmt.Println("Disconnecting Mongo...")
-	err := db.client.Disconnect(db.context)
+	err := db.Client().Disconnect(db.context)
 	if err != nil {
 		log.Panic(err)
 	}
-}
-
-func (db *database) GetClient() *mongo.Client {
-	return db.client
 }
