@@ -48,5 +48,5 @@ func (c *controller) getUserHandler(ctx *gin.Context) {
 		panic(network.InternalServerError("something went wrong", err))
 	}
 
-	network.ResSuccessData(ctx, "success", data)
+	network.SuccessDataResponse(ctx, "success", data)
 }

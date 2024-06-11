@@ -15,37 +15,37 @@ const (
 	invalid_access_token_code ResCode = "10003"
 )
 
-type responseMessage struct {
+type messageResponse struct {
 	ResCode ResCode `json:"code" binding:"required"`
 	Status  int     `json:"status" binding:"required"`
 	Message string  `json:"message" binding:"required"`
 }
 
-func (r *responseMessage) GetValue() *responseMessage {
+func (r *messageResponse) GetValue() *messageResponse {
 	return r
 }
 
-func (r *responseMessage) send(ctx *gin.Context) {
+func (r *messageResponse) send(ctx *gin.Context) {
 	ctx.JSON(int(r.Status), r)
 }
 
-type responseData struct {
+type dataResponse struct {
 	ResCode ResCode `json:"code" binding:"required"`
 	Status  int     `json:"status" binding:"required"`
 	Message string  `json:"message" binding:"required"`
 	Data    any     `json:"data" binding:"required"`
 }
 
-func (r *responseData) GetValue() *responseData {
+func (r *dataResponse) GetValue() *dataResponse {
 	return r
 }
 
-func (r *responseData) send(ctx *gin.Context) {
+func (r *dataResponse) send(ctx *gin.Context) {
 	ctx.JSON(int(r.Status), r)
 }
 
-func ResSuccessData(ctx *gin.Context, message string, data any) Response[responseData] {
-	r := &responseData{
+func SuccessDataResponse(ctx *gin.Context, message string, data any) Response[dataResponse] {
+	r := &dataResponse{
 		ResCode: success_code,
 		Status:  http.StatusOK,
 		Message: message,
@@ -55,8 +55,8 @@ func ResSuccessData(ctx *gin.Context, message string, data any) Response[respons
 	return r
 }
 
-func ResSuccessMsg(ctx *gin.Context, message string) Response[responseMessage] {
-	r := &responseMessage{
+func SuccessMsgResponse(ctx *gin.Context, message string) Response[messageResponse] {
+	r := &messageResponse{
 		ResCode: success_code,
 		Status:  http.StatusOK,
 		Message: message,
@@ -65,8 +65,8 @@ func ResSuccessMsg(ctx *gin.Context, message string) Response[responseMessage] {
 	return r
 }
 
-func ResBadRequest(ctx *gin.Context, message string) Response[responseMessage] {
-	r := &responseMessage{
+func BadRequestResponse(ctx *gin.Context, message string) Response[messageResponse] {
+	r := &messageResponse{
 		ResCode: failue_code,
 		Status:  http.StatusBadRequest,
 		Message: message,
@@ -75,8 +75,8 @@ func ResBadRequest(ctx *gin.Context, message string) Response[responseMessage] {
 	return r
 }
 
-func ResForbidden(ctx *gin.Context, message string) Response[responseMessage] {
-	r := &responseMessage{
+func ForbiddenResponse(ctx *gin.Context, message string) Response[messageResponse] {
+	r := &messageResponse{
 		ResCode: failue_code,
 		Status:  http.StatusForbidden,
 		Message: message,
@@ -85,8 +85,8 @@ func ResForbidden(ctx *gin.Context, message string) Response[responseMessage] {
 	return r
 }
 
-func ResUnauthorized(ctx *gin.Context, message string) Response[responseMessage] {
-	r := &responseMessage{
+func UnauthorizedResponse(ctx *gin.Context, message string) Response[messageResponse] {
+	r := &messageResponse{
 		ResCode: failue_code,
 		Status:  http.StatusUnauthorized,
 		Message: message,
@@ -95,8 +95,8 @@ func ResUnauthorized(ctx *gin.Context, message string) Response[responseMessage]
 	return r
 }
 
-func ResNotFound(ctx *gin.Context, message string) Response[responseMessage] {
-	r := &responseMessage{
+func NotFoundResponse(ctx *gin.Context, message string) Response[messageResponse] {
+	r := &messageResponse{
 		ResCode: failue_code,
 		Status:  http.StatusNotFound,
 		Message: message,
@@ -105,8 +105,8 @@ func ResNotFound(ctx *gin.Context, message string) Response[responseMessage] {
 	return r
 }
 
-func ResInternalServerError(ctx *gin.Context, message string) Response[responseMessage] {
-	r := &responseMessage{
+func InternalServerErrorResponse(ctx *gin.Context, message string) Response[messageResponse] {
+	r := &messageResponse{
 		ResCode: failue_code,
 		Status:  http.StatusInternalServerError,
 		Message: message,
