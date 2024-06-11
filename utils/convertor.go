@@ -76,23 +76,3 @@ func ExtractBearerToken(authHeader string) string {
 	}
 	return authHeader[tokenIndex+len(prefix):]
 }
-
-// func MapClaimsToRegisteredClaims(mapClaims jwt.MapClaims) *jwt.RegisteredClaims {
-// 	subject, _ := mapClaims["sub"].(string)
-// 	issuer, _ := mapClaims["iss"].(string)
-// 	audience, _ := mapClaims["aud"].(string)
-// 	expiresAt := jwt.NewNumericDate(time.Unix(int64(mapClaims["exp"].(float64)), 0))
-// 	notBefore := jwt.NewNumericDate(time.Unix(int64(mapClaims["nbf"].(float64)), 0))
-// 	issuedAt := jwt.NewNumericDate(time.Unix(int64(mapClaims["iat"].(float64)), 0))
-// 	jwtID, _ := mapClaims["jti"].(string)
-
-// 	return &jwt.RegisteredClaims{
-// 		Subject:   subject,
-// 		Issuer:    issuer,
-// 		Audience:  []string{audience},
-// 		ExpiresAt: expiresAt,
-// 		NotBefore: notBefore,
-// 		IssuedAt:  issuedAt,
-// 		ID:        jwtID,
-// 	}
-// }
