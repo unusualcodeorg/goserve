@@ -7,12 +7,12 @@ import (
 )
 
 type keyProtection struct {
-	coreService core.CoreService
+	secretService core.SecretService
 }
 
-func NewKeyProtection(coreService core.CoreService) network.RootMiddleware {
+func NewKeyProtection(secretService core.SecretService) network.RootMiddleware {
 	m := keyProtection{
-		coreService: coreService,
+		secretService: secretService,
 	}
 	return &m
 }
@@ -27,7 +27,7 @@ func (m *keyProtection) Handler(ctx *gin.Context) {
 		panic(network.UnauthorizedError("permission denied: missing x-api-key header", nil))
 	}
 
-	apikey, err := m.coreService.FindApiKey(key)
+	apikey, err := m.secretService.FindApiKey(key)
 	if err != nil {
 		panic(network.ForbiddenError("permission denied: invalid x-api-key", err))
 	}

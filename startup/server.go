@@ -26,14 +26,15 @@ func Server() {
 	router.RegisterValidationParsers(network.CustomTagNameFunc())
 	dbQueryTimeout := time.Duration(env.DBQueryTimeout) * time.Second
 
-	coreService := core.NewCoreService(db, dbQueryTimeout)
+	secretService := core.NewSecretService(db, dbQueryTimeout)
+	tokenService := core.NewTokenService(db, dbQueryTimeout, env)
 	userService := user.NewUserService(db, dbQueryTimeout)
-	authService := auth.NewAuthService(db, dbQueryTimeout, env, userService)
+	authService := auth.NewAuthService(db, dbQueryTimeout, userService, tokenService)
 	contactService := contact.NewContactService(db, dbQueryTimeout)
 
 	router.LoadRootMiddlewares(
 		m.NewErrorProcessor(), // NOTE: this should be the first handler to be mounted
-		m.NewKeyProtection(coreService),
+		m.NewKeyProtection(secretService),
 		m.NewNotFound(),
 	)
 

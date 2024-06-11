@@ -9,24 +9,24 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type CoreService interface {
+type SecretService interface {
 	FindApiKey(key string) (*schema.ApiKey, error)
 }
 
-type service struct {
+type secretService struct {
 	network.BaseService
 	apikeyQuery mongo.Query[schema.ApiKey]
 }
 
-func NewCoreService(db mongo.Database, dbQueryTimeout time.Duration) CoreService {
-	s := service{
+func NewSecretService(db mongo.Database, dbQueryTimeout time.Duration) SecretService {
+	s := secretService{
 		BaseService: network.NewBaseService(dbQueryTimeout),
 		apikeyQuery: mongo.NewQuery[schema.ApiKey](db, schema.CollectionName),
 	}
 	return &s
 }
 
-func (s *service) FindApiKey(key string) (*schema.ApiKey, error) {
+func (s *secretService) FindApiKey(key string) (*schema.ApiKey, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 
