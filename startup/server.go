@@ -1,6 +1,7 @@
 package startup
 
 import (
+	"context"
 	"time"
 
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth"
@@ -14,9 +15,10 @@ import (
 )
 
 func Server() {
+	ctx := context.Background()
 	env := config.NewEnv(".env")
 
-	db := mongo.NewDatabase(env)
+	db := mongo.NewDatabase(ctx, env)
 	defer db.Disconnect()
 	db.Connect()
 
