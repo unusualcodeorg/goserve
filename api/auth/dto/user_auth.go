@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/profile/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/schema"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/dto"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/schema"
 )
 
 type UserAuth struct {

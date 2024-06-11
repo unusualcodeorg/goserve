@@ -2,7 +2,6 @@ package network
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/schema"
 )
 
 type baseController struct {
@@ -28,6 +27,6 @@ func (c *baseController) Authentication() gin.HandlerFunc {
 	return c.authProvider.Middleware()
 }
 
-func (c *baseController) Authorization(roleCode schema.RoleCode) gin.HandlerFunc {
-	return c.authorizeProvider.Middleware(roleCode)
+func (c *baseController) Authorization(role string) gin.HandlerFunc {
+	return c.authorizeProvider.Middleware(role)
 }

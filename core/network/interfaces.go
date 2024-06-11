@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/schema"
 )
 
 type Response[T any] interface {
@@ -16,7 +15,7 @@ type Response[T any] interface {
 type BaseController interface {
 	Path() string
 	Authentication() gin.HandlerFunc
-	Authorization(roleCode schema.RoleCode) gin.HandlerFunc
+	Authorization(role string) gin.HandlerFunc
 }
 
 type BaseService interface {
@@ -55,7 +54,7 @@ type Param3MiddlewareProvider[T any, V any, W any] interface {
 }
 
 type AuthenticationProvider Param0MiddlewareProvider
-type AuthorizationProvider Param1MiddlewareProvider[schema.RoleCode]
+type AuthorizationProvider Param1MiddlewareProvider[string]
 
 type Router interface {
 	GetEngine() *gin.Engine

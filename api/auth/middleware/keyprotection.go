@@ -1,18 +1,19 @@
 package middleware
 
 import (
+
 	"github.com/gin-gonic/gin"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
 type keyProtection struct {
-	secretService core.SecretService
+	authService auth.AuthService
 }
 
-func NewKeyProtection(secretService core.SecretService) network.RootMiddleware {
+func NewKeyProtection(authService auth.AuthService) network.RootMiddleware {
 	m := keyProtection{
-		secretService: secretService,
+		authService: authService,
 	}
 	return &m
 }
@@ -27,7 +28,7 @@ func (m *keyProtection) Handler(ctx *gin.Context) {
 		panic(network.UnauthorizedError("permission denied: missing x-api-key header", nil))
 	}
 
-	apikey, err := m.secretService.FindApiKey(key)
+	apikey, err := m.authService.FindApiKey(key)
 	if err != nil {
 		panic(network.ForbiddenError("permission denied: invalid x-api-key", err))
 	}

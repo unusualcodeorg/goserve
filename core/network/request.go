@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/jinzhu/copier"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/schema"
 )
 
 const (
@@ -15,28 +14,29 @@ const (
 	reqPayloadUser   string = "user"
 )
 
-func ReqSetUser(ctx *gin.Context, user *schema.User) {
-	ctx.Set(reqPayloadUser, user)
+func ReqSetApiKey[T any](ctx *gin.Context, value *T) {
+	ctx.Set(reqPayloadApiKey, value)
 }
 
-func ReqGetUser(ctx *gin.Context) *schema.User {
-	user, ok := ctx.MustGet(reqPayloadUser).(*schema.User)
-	if !ok {
-		panic(errors.New("user missing for request"))
-	}
-	return user
-}
 
-func ReqSetApiKey(ctx *gin.Context, apikey *schema.ApiKey) {
-	ctx.Set(reqPayloadApiKey, apikey)
-}
-
-func ReqGetApiKey(ctx *gin.Context) *schema.ApiKey {
-	apikey, ok := ctx.MustGet(reqPayloadApiKey).(*schema.ApiKey)
+func ReqMustGetApiKey[T any](ctx *gin.Context) *T {
+	apikey, ok := ctx.MustGet(reqPayloadApiKey).(*T)
 	if !ok {
 		panic(errors.New("apikey missing for request"))
 	}
 	return apikey
+}
+
+func ReqSetUser[T any](ctx *gin.Context, value *T) {
+	ctx.Set(reqPayloadUser, value)
+}
+
+func ReqMustGetUser[T any](ctx *gin.Context) *T {
+	user, ok := ctx.MustGet(reqPayloadUser).(*T)
+	if !ok {
+		panic(errors.New("user missing for request"))
+	}
+	return user
 }
 
 // ShouldBindJSON in gin internally used go-playground/validator i.e. why we have error with validaiton info
