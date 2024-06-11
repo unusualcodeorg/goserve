@@ -8,7 +8,7 @@ import (
 type authProvider struct {
 }
 
-func NewAuthProvider() network.MiddlewareProvider {
+func NewAuthProvider() network.AuthenticationProvider {
 	m := authProvider{}
 	return &m
 }

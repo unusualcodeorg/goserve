@@ -3,6 +3,7 @@ package contact
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/schema"
 	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
@@ -13,8 +14,8 @@ type controller struct {
 }
 
 func NewContactController(
-	authProvider network.MiddlewareProvider,
-	authorizeProvider network.MiddlewareProvider,
+	authProvider network.AuthenticationProvider,
+	authorizeProvider network.AuthorizationProvider,
 	service ContactService,
 ) network.Controller {
 	c := controller{
@@ -25,6 +26,8 @@ func NewContactController(
 }
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
+	group.Use(c.Authentication())
+	group.Use(c.Authorization(string(schema.RoleCodeWriter)))
 	group.POST("/", c.createMessageHandler)
 	group.GET("/id/:id", c.getMessageHandler)
 	group.GET("/paginated", c.getMessagesPaginated)

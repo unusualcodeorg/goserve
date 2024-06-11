@@ -10,7 +10,7 @@ import (
 type BaseController interface {
 	Path() string
 	Authentication() gin.HandlerFunc
-	Authorization() gin.HandlerFunc
+	Authorization(roleCode string) gin.HandlerFunc
 }
 
 type BaseService interface {
@@ -35,6 +35,13 @@ type RootMiddleware interface {
 type MiddlewareProvider interface {
 	Middleware() gin.HandlerFunc
 }
+
+type ParamMiddlewareProvider[T any] interface {
+	Middleware(param T) gin.HandlerFunc
+}
+
+type AuthenticationProvider MiddlewareProvider
+type AuthorizationProvider ParamMiddlewareProvider[string]
 
 type Router interface {
 	GetEngine() *gin.Engine

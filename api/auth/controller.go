@@ -14,8 +14,8 @@ type controller struct {
 }
 
 func NewAuthController(
-	authProvider network.MiddlewareProvider,
-	authorizeProvider network.MiddlewareProvider,
+	authProvider network.AuthenticationProvider,
+	authorizeProvider network.AuthorizationProvider,
 	service AuthService,
 ) network.Controller {
 	c := controller{

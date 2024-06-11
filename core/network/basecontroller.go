@@ -4,11 +4,11 @@ import "github.com/gin-gonic/gin"
 
 type baseController struct {
 	basePath          string
-	authProvider      MiddlewareProvider
-	authorizeProvider MiddlewareProvider
+	authProvider      AuthenticationProvider
+	authorizeProvider AuthorizationProvider
 }
 
-func NewBaseController(basePath string, authProvider MiddlewareProvider, authorizeProvider MiddlewareProvider) BaseController {
+func NewBaseController(basePath string, authProvider AuthenticationProvider, authorizeProvider AuthorizationProvider) BaseController {
 	c := baseController{
 		basePath:          basePath,
 		authProvider:      authProvider,
@@ -25,6 +25,6 @@ func (c *baseController) Authentication() gin.HandlerFunc {
 	return c.authProvider.Middleware()
 }
 
-func (c *baseController) Authorization() gin.HandlerFunc {
-	return c.authorizeProvider.Middleware()
+func (c *baseController) Authorization(roleCode string) gin.HandlerFunc {
+	return c.authorizeProvider.Middleware(roleCode)
 }
