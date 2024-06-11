@@ -27,7 +27,7 @@ func NewContactController(
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
 	group.Use(c.Authentication())
-	group.Use(c.Authorization(string(model.RoleCodeWriter)))
+	group.Use(c.Authorization(string(model.RoleCodeLearner)))
 	group.POST("/", c.createMessageHandler)
 	group.GET("/id/:id", c.getMessageHandler)
 	group.GET("/paginated", c.getMessagesPaginated)

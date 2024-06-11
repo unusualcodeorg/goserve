@@ -53,8 +53,12 @@ type Param3MiddlewareProvider[T any, V any, W any] interface {
 	Middleware(param1 T, param2 V, param3 W) gin.HandlerFunc
 }
 
+type ParamNMiddlewareProvider[T any] interface {
+	Middleware(params ...T) gin.HandlerFunc
+}
+
 type AuthenticationProvider Param0MiddlewareProvider
-type AuthorizationProvider Param1MiddlewareProvider[string]
+type AuthorizationProvider ParamNMiddlewareProvider[string]
 
 type Router interface {
 	GetEngine() *gin.Engine
