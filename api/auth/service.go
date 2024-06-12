@@ -130,7 +130,23 @@ func (s *service) SignUpBasic(signUpDto *dto.SignUpBasic) (*dto.UserAuth, error)
 }
 
 func (s *service) SignInBasic(signInDto *dto.SignInBasic) (*dto.UserAuth, error) {
-	return nil, nil
+	user, err := s.userService.FindUserByEmail(signInDto.Email)
+	if err != nil {
+		return nil, network.NewNotFoundError("user not registerd", err)
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(*user.Password), []byte(signInDto.Password))
+	if err != nil {
+		return nil, network.NewUnauthorizedError("wrong password", err)
+	}
+
+	accessToken, refreshToken, err := s.GenerateToken(user)
+	if err != nil {
+		return nil, err
+	}
+
+	tokens := dto.NewUserToken(accessToken, refreshToken)
+	return dto.NewUserAuth(user, tokens), nil
 }
 
 func (s *service) GenerateToken(user *userModel.User) (string, string, error) {

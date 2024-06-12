@@ -53,13 +53,13 @@ func (c *controller) signInBasicHandler(ctx *gin.Context) {
 		return
 	}
 
-	exists := c.authService.IsEmailRegisted(body.Email)
-	if !exists {
-		c.Send(ctx).NotFoundError("user not registered", nil)
+	dto, err := c.authService.SignInBasic(body)
+	if err != nil {
+		c.Send(ctx).MixedError(err)
 		return
 	}
 
-	// bcrypt.CompareHashAndPassword()
+	c.Send(ctx).SuccessDataResponse("success", dto)
 }
 
 func (c *controller) signOutBasicHandler(ctx *gin.Context) {

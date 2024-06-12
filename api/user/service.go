@@ -57,7 +57,9 @@ func (s *service) FindUserById(id primitive.ObjectID) (*model.User, error) {
 	defer cancel()
 
 	userFilter := bson.M{"_id": id, "status": true}
-	user, err := s.userQuery.FindOne(ctx, userFilter, nil)
+	proj := bson.D{{Key: "password", Value: 0}}
+	opts := options.FindOne().SetProjection(proj)
+	user, err := s.userQuery.FindOne(ctx, userFilter, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +77,19 @@ func (s *service) FindUserByEmail(email string) (*model.User, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 	filter := bson.M{"email": email, "status": true}
-	return s.userQuery.FindOne(ctx, filter, nil)
+	user, err := s.userQuery.FindOne(ctx, filter, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	roles, err := s.FindRoles(user.Roles)
+	if err != nil {
+		return nil, err
+	}
+
+	user.RoleDocs = roles
+	return user, nil
 }
 
 func (s *service) CreateUser(user *model.User) (*model.User, error) {
@@ -93,7 +107,9 @@ func (s *service) FindUserPrivateProfile(user *model.User) (*model.User, error) 
 	ctx, cancel := s.Context()
 	defer cancel()
 	filter := bson.M{"_id": user.ID, "status": true}
-	return s.userQuery.FindOne(ctx, filter, nil)
+	projection := bson.D{{Key: "password", Value: 0}}
+	opts := options.FindOne().SetProjection(projection)
+	return s.userQuery.FindOne(ctx, filter, opts)
 }
 
 func (s *service) FindUserPubicProfile(user *model.User) (*model.User, error) {
