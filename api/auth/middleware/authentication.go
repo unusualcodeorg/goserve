@@ -68,6 +68,7 @@ func (m *authenticationProvider) Middleware() gin.HandlerFunc {
 		}
 
 		network.ReqSetUser(ctx, user)
+		network.ReqSetKeystore(ctx, keystore)
 
 		ctx.Next()
 	}

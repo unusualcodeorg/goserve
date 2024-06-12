@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	reqPayloadApiKey string = "apikey"
-	reqPayloadUser   string = "user"
+	reqPayloadApiKey   string = "apikey"
+	reqPayloadUser     string = "user"
+	reqPayloadKeystore string = "keystore"
 )
 
 func ReqSetApiKey[T any](ctx *gin.Context, value *T) {
@@ -34,6 +35,18 @@ func ReqMustGetUser[T any](ctx *gin.Context) *T {
 	user, ok := ctx.MustGet(reqPayloadUser).(*T)
 	if !ok {
 		panic(errors.New("user missing for request"))
+	}
+	return user
+}
+
+func ReqSetKeystore[T any](ctx *gin.Context, value *T) {
+	ctx.Set(reqPayloadKeystore, value)
+}
+
+func ReqMustGetKeystore[T any](ctx *gin.Context) *T {
+	user, ok := ctx.MustGet(reqPayloadKeystore).(*T)
+	if !ok {
+		panic(errors.New("keystore missing for request"))
 	}
 	return user
 }

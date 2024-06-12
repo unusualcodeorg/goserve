@@ -74,6 +74,9 @@ func (s *send) MixedError(err error) {
 
 func (s *send) sendResponse(response Response) {
 	s.context.JSON(int(response.GetStatus()), response)
+	// this is needed since gin calls ctx.Next() inside the resposne handeling
+	// ref: https://github.com/gin-gonic/gin/issues/2221
+	s.context.Abort() 
 }
 
 func (s *send) sendError(err ApiError) {

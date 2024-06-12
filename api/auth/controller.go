@@ -3,8 +3,8 @@ package auth
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/dto"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
-	// "golang.org/x/crypto/bcrypt"
 )
 
 type controller struct {
@@ -27,7 +27,7 @@ func NewAuthController(
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
 	group.POST("/signup/basic", c.signUpBasicHandler)
 	group.POST("/signin/basic", c.signInBasicHandler)
-	group.DELETE("/signout", c.Authentication(), c.signOutBasicHandler)
+	group.DELETE("/signout", c.Authentication(), c.signOutBasic)
 }
 
 func (c *controller) signUpBasicHandler(ctx *gin.Context) {
@@ -62,6 +62,14 @@ func (c *controller) signInBasicHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessDataResponse("success", dto)
 }
 
-func (c *controller) signOutBasicHandler(ctx *gin.Context) {
-	c.Send(ctx).SuccessMsgResponse("logout not working!")
+func (c *controller) signOutBasic(ctx *gin.Context) {
+	keystore := network.ReqMustGetKeystore[model.Keystore](ctx)
+
+	err := c.authService.SignOut(keystore)
+	if err != nil {
+		c.Send(ctx).InternalServerError("something went wrong", err)
+		return
+	}
+
+	c.Send(ctx).SuccessMsgResponse("signout success")
 }

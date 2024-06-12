@@ -21,6 +21,7 @@ type AuthService interface {
 	IsEmailRegisted(email string) bool
 	SignUpBasic(signUpDto *dto.SignUpBasic) (*dto.UserAuth, error)
 	SignInBasic(signInDto *dto.SignInBasic) (*dto.UserAuth, error)
+	SignOut(keystore *model.Keystore) error
 	GenerateToken(user *userModel.User) (string, string, error)
 	CreateKeystore(client *userModel.User, primaryKey string, secondaryKey string) (*model.Keystore, error)
 	FindKeystore(client *userModel.User, primaryKey string) (*model.Keystore, error)
@@ -147,6 +148,14 @@ func (s *service) SignInBasic(signInDto *dto.SignInBasic) (*dto.UserAuth, error)
 
 	tokens := dto.NewUserToken(accessToken, refreshToken)
 	return dto.NewUserAuth(user, tokens), nil
+}
+
+func (s *service) SignOut(keystore *model.Keystore) error {
+	ctx, cancel := s.Context()
+	defer cancel()
+	filter := bson.M{"_id": keystore.ID}
+	_, err := s.keystoreQuery.DeleteOne(ctx, filter)
+	return err
 }
 
 func (s *service) GenerateToken(user *userModel.User) (string, string, error) {
