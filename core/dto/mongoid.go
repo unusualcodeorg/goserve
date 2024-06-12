@@ -1,12 +1,10 @@
 package coredto
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -17,10 +15,9 @@ type MongoId struct {
 
 func (d *MongoId) GetValue() *MongoId {
 	id, err := mongo.NewObjectID(d.Id)
-	if err != nil {
-		panic(network.NewBadRequestError("id is invalid", errors.New("mongo id is invalid")))
+	if err == nil {
+		d.ID = id
 	}
-	d.ID = id
 	return d
 }
 
