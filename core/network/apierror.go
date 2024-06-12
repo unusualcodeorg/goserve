@@ -12,8 +12,12 @@ type apiError struct {
 	Err     error
 }
 
-func (e *apiError) GetValue() *apiError {
-	return e
+func (e *apiError) GetCode() int {
+	return e.Code
+}
+
+func (e *apiError) GetMessage() string {
+	return e.Message
 }
 
 func (e *apiError) Error() string {

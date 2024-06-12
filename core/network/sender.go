@@ -1,7 +1,6 @@
 package network
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +16,7 @@ func (m *sender) Debug() bool {
 	return gin.Mode() == gin.DebugMode
 }
 
-func (m *sender) Send(ctx *gin.Context) ResponseSend {
+func (m *sender) Send(ctx *gin.Context) SendResponse {
 	return &send{
 		debug:   m.Debug(),
 		context: ctx,
@@ -57,33 +56,29 @@ func (s *send) InternalServerError(message string, err error) {
 	s.sendError(NewInternalServerError(message, err))
 }
 
-func (s *send) sendResponse(response ApiResponse) {
-	s.context.JSON(int(response.GetValue().Status), response)
+func (s *send) sendResponse(response Response) {
+	s.context.JSON(int(response.GetStatus()), response)
 }
 
-func (s *send) sendError(err error) {
-	var res ApiResponse
-	var apiError ApiError
+func (s *send) sendError(err ApiError) {
+	var res Response
 
-	if errors.As(err, &apiError) {
-		e := apiError.GetValue()
-		switch e.Code {
-		case http.StatusBadRequest:
-			res = NewBadRequestResponse(e.Message)
-		case http.StatusForbidden:
-			res = NewForbiddenResponse(e.Message)
-		case http.StatusUnauthorized:
-			res = NewUnauthorizedResponse(e.Message)
-		case http.StatusNotFound:
-			res = NewNotFoundResponse(e.Message)
-		case http.StatusInternalServerError:
-			if s.debug {
-				res = NewInternalServerErrorResponse(apiError.Unwrap().Error())
-			}
-		default:
-			if s.debug {
-				res = NewInternalServerErrorResponse(apiError.Unwrap().Error())
-			}
+	switch err.GetCode() {
+	case http.StatusBadRequest:
+		res = NewBadRequestResponse(err.GetMessage())
+	case http.StatusForbidden:
+		res = NewForbiddenResponse(err.GetMessage())
+	case http.StatusUnauthorized:
+		res = NewUnauthorizedResponse(err.GetMessage())
+	case http.StatusNotFound:
+		res = NewNotFoundResponse(err.GetMessage())
+	case http.StatusInternalServerError:
+		if s.debug {
+			res = NewInternalServerErrorResponse(err.Unwrap().Error())
+		}
+	default:
+		if s.debug {
+			res = NewInternalServerErrorResponse(err.Unwrap().Error())
 		}
 	}
 

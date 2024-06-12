@@ -7,21 +7,20 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type Error[T any] interface {
-	GetValue() *T
-	Error() string
+type ApiError interface {
+	GetCode() int
+	GetMessage() string
 	Unwrap() error
 }
 
-type ApiError Error[apiError]
-
-type Response[T any] interface {
-	GetValue() *T
+type Response interface{
+	GetResCode() ResCode
+	GetStatus() int
+	GetMessage() string
+	GetData() any
 }
 
-type ApiResponse Response[responseModel]
-
-type ResponseSend interface {
+type SendResponse interface {
 	SuccessMsgResponse(message string)
 	SuccessDataResponse(message string, data any)
 	BadRequestError(message string, err error)
@@ -33,7 +32,7 @@ type ResponseSend interface {
 
 type ResponseSender interface {
 	Debug() bool
-	Send(ctx *gin.Context) ResponseSend
+	Send(ctx *gin.Context) SendResponse
 }
 
 type BaseController interface {
