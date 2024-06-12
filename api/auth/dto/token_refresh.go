@@ -6,23 +6,19 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type UserTokens struct {
-	AccessToken  string `json:"accessToken" binding:"required" validate:"required"`
+type TokenRefresh struct {
 	RefreshToken string `json:"refreshToken" binding:"required" validate:"required"`
 }
 
-func NewUserTokens(access string, refresh string) *UserTokens {
-	return &UserTokens{
-		AccessToken:  access,
-		RefreshToken: refresh,
-	}
+func EmptyTokenRefresh() *TokenRefresh {
+	return &TokenRefresh{}
 }
 
-func (d *UserTokens) GetValue() *UserTokens {
+func (d *TokenRefresh) GetValue() *TokenRefresh {
 	return d
 }
 
-func (d *UserTokens) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
+func (d *TokenRefresh) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
 	var msgs []string
 	for _, err := range errs {
 		switch err.Tag() {

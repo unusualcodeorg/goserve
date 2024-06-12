@@ -5,6 +5,7 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type controller struct {
@@ -27,6 +28,7 @@ func NewAuthController(
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
 	group.POST("/signup/basic", c.signUpBasicHandler)
 	group.POST("/signin/basic", c.signInBasicHandler)
+	group.POST("/token/refresh", c.tokenRefreshHandler)
 	group.DELETE("/signout", c.Authentication(), c.signOutBasic)
 }
 
@@ -72,4 +74,23 @@ func (c *controller) signOutBasic(ctx *gin.Context) {
 	}
 
 	c.Send(ctx).SuccessMsgResponse("signout success")
+}
+
+func (c *controller) tokenRefreshHandler(ctx *gin.Context) {
+	body, err := network.ReqBody(ctx, dto.EmptyTokenRefresh())
+	if err != nil {
+		c.Send(ctx).BadRequestError(err.Error(), err)
+		return
+	}
+
+	authHeader := ctx.GetHeader(network.AuthorizationHeader)
+	accessToken := utils.ExtractBearerToken(authHeader)
+
+	dto, err := c.authService.RenewToken(body, accessToken)
+	if err != nil {
+		c.Send(ctx).MixedError(err)
+		return
+	}
+
+	c.Send(ctx).SuccessDataResponse("success", dto)
 }

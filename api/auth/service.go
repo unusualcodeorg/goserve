@@ -18,13 +18,15 @@ import (
 )
 
 type AuthService interface {
-	IsEmailRegisted(email string) bool
 	SignUpBasic(signUpDto *dto.SignUpBasic) (*dto.UserAuth, error)
 	SignInBasic(signInDto *dto.SignInBasic) (*dto.UserAuth, error)
+	RenewToken(tokenRefreshDto *dto.TokenRefresh, accessToken string) (*dto.UserTokens, error)
 	SignOut(keystore *model.Keystore) error
+	IsEmailRegisted(email string) bool
 	GenerateToken(user *userModel.User) (string, string, error)
 	CreateKeystore(client *userModel.User, primaryKey string, secondaryKey string) (*model.Keystore, error)
 	FindKeystore(client *userModel.User, primaryKey string) (*model.Keystore, error)
+	FindRefreshKeystore(client *userModel.User, pKey string, sKey string) (*model.Keystore, error)
 	VerifyToken(tokenStr string) (*jwt.RegisteredClaims, error)
 	DecodeToken(tokenStr string) (*jwt.RegisteredClaims, error)
 	SignToken(claims jwt.RegisteredClaims) (string, error)
@@ -88,11 +90,6 @@ func NewAuthService(
 	return &s
 }
 
-func (s *service) IsEmailRegisted(email string) bool {
-	user, _ := s.userService.FindUserByEmail(email)
-	return user != nil
-}
-
 func (s *service) SignUpBasic(signUpDto *dto.SignUpBasic) (*dto.UserAuth, error) {
 	exists := s.IsEmailRegisted(signUpDto.Email)
 	if exists {
@@ -126,7 +123,7 @@ func (s *service) SignUpBasic(signUpDto *dto.SignUpBasic) (*dto.UserAuth, error)
 		return nil, err
 	}
 
-	tokens := dto.NewUserToken(accessToken, refreshToken)
+	tokens := dto.NewUserTokens(accessToken, refreshToken)
 	return dto.NewUserAuth(user, tokens), nil
 }
 
@@ -146,7 +143,7 @@ func (s *service) SignInBasic(signInDto *dto.SignInBasic) (*dto.UserAuth, error)
 		return nil, err
 	}
 
-	tokens := dto.NewUserToken(accessToken, refreshToken)
+	tokens := dto.NewUserTokens(accessToken, refreshToken)
 	return dto.NewUserAuth(user, tokens), nil
 }
 
@@ -156,6 +153,60 @@ func (s *service) SignOut(keystore *model.Keystore) error {
 	filter := bson.M{"_id": keystore.ID}
 	_, err := s.keystoreQuery.DeleteOne(ctx, filter)
 	return err
+}
+
+func (s *service) IsEmailRegisted(email string) bool {
+	user, _ := s.userService.FindUserByEmail(email)
+	return user != nil
+}
+
+func (s *service) RenewToken(tokenRefreshDto *dto.TokenRefresh, accessToken string) (*dto.UserTokens, error) {
+	accessClaims, err := s.DecodeToken(accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	valid := s.ValidateClaims(accessClaims)
+	if !valid {
+		return nil, network.NewUnauthorizedError("permission denied: invalid access claims", nil)
+	}
+
+	refreshClaims, err := s.VerifyToken(tokenRefreshDto.RefreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	valid = s.ValidateClaims(refreshClaims)
+	if !valid {
+		return nil, network.NewUnauthorizedError("permission denied: invalid refresh claims", nil)
+	}
+
+	if accessClaims.Subject != refreshClaims.Subject {
+		return nil, network.NewUnauthorizedError("permission denied: access and refresh claims mismatch", nil)
+	}
+
+	userId, _ := mongo.NewObjectID(refreshClaims.Subject)
+	user, err := s.userService.FindUserById(userId)
+	if err != nil {
+		return nil, network.NewUnauthorizedError("permission denied: invalid refresh claims subject", nil)
+	}
+
+	keystore, err := s.FindRefreshKeystore(user, accessClaims.ID, refreshClaims.ID)
+	if err != nil {
+		return nil, network.NewUnauthorizedError("permission denied: claims ids", nil)
+	}
+
+	err = s.SignOut(keystore)
+	if err != nil {
+		return nil, nil
+	}
+
+	accessToken, refreshToken, err := s.GenerateToken(user)
+	if err != nil {
+		return nil, err
+	}
+
+	return dto.NewUserTokens(accessToken, refreshToken), nil
 }
 
 func (s *service) GenerateToken(user *userModel.User) (string, string, error) {
@@ -229,7 +280,14 @@ func (s *service) CreateKeystore(client *userModel.User, primaryKey string, seco
 func (s *service) FindKeystore(client *userModel.User, primaryKey string) (*model.Keystore, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
-	filter := bson.M{"client": client.ID, "primaryKey": primaryKey, "status": true}
+	filter := bson.M{"client": client.ID, "pKey": primaryKey, "status": true}
+	return s.keystoreQuery.FindOne(ctx, filter, nil)
+}
+
+func (s *service) FindRefreshKeystore(client *userModel.User, primaryKey string, secondaryKey string) (*model.Keystore, error) {
+	ctx, cancel := s.Context()
+	defer cancel()
+	filter := bson.M{"client": client.ID, "pKey": primaryKey, "sKey": secondaryKey, "status": true}
 	return s.keystoreQuery.FindOne(ctx, filter, nil)
 }
 
@@ -260,18 +318,15 @@ func (s *service) VerifyToken(tokenStr string) (*jwt.RegisteredClaims, error) {
 }
 
 func (s *service) DecodeToken(tokenStr string) (*jwt.RegisteredClaims, error) {
-	token, err := jwt.Parse(tokenStr, func(tkn *jwt.Token) (any, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(tkn *jwt.Token) (any, error) {
 		return s.rsaPublicKey, nil
 	})
-
-	if token.Valid {
-		if claims, ok := token.Claims.(jwt.RegisteredClaims); ok {
-			return &claims, nil
-		}
+	if token == nil {
+		return nil, err
 	}
 
-	if err != nil {
-		return nil, err
+	if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok {
+		return claims, nil
 	}
 
 	return nil, jwt.ErrTokenMalformed
@@ -286,7 +341,11 @@ func (s *service) ValidateClaims(claims *jwt.RegisteredClaims) bool {
 		claims.ExpiresAt == nil ||
 		claims.ID == ""
 
-	return !invalid
+	if invalid {
+		return false
+	}
+
+	return utils.IsValidObjectID(claims.Subject)
 }
 
 func (s *service) FindApiKey(key string) (*model.ApiKey, error) {

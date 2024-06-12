@@ -16,8 +16,8 @@ const KeystoreCollectionName = "keystores"
 type Keystore struct {
 	ID           primitive.ObjectID `bson:"_id,omitempty"`
 	Client       primitive.ObjectID `bson:"client" validate:"required"`
-	PrimaryKey   string             `bson:"primaryKey" validate:"required"`
-	SecondaryKey string             `bson:"secondaryKey" validate:"required"`
+	PrimaryKey   string             `bson:"pKey" validate:"required"`
+	SecondaryKey string             `bson:"sKey" validate:"required"`
 	Status       bool               `bson:"status" validate:"-"`
 	CreatedAt    time.Time          `bson:"createdAt" validate:"required"`
 	UpdatedAt    time.Time          `bson:"updatedAt" validate:"required"`
@@ -53,7 +53,15 @@ func (*Keystore) EnsureIndexes(db mongo.Database) {
 		{
 			Keys: bson.D{
 				{Key: "client", Value: 1},
-				{Key: "primaryKey", Value: 1},
+				{Key: "pKey", Value: 1},
+				{Key: "status", Value: 1},
+			},
+		},
+		{
+			Keys: bson.D{
+				{Key: "client", Value: 1},
+				{Key: "pKey", Value: 1},
+				{Key: "sKey", Value: 1},
 				{Key: "status", Value: 1},
 			},
 		},
