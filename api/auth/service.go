@@ -93,6 +93,11 @@ func (s *service) IsEmailRegisted(email string) bool {
 }
 
 func (s *service) SignUpBasic(signUpDto *dto.SignUpBasic) (*dto.UserAuth, error) {
+	exists := s.IsEmailRegisted(signUpDto.Email)
+	if exists {
+		return nil, network.NewBadRequestError("user already registered", nil)
+	}
+
 	role, err := s.userService.FindRoleByCode(userModel.RoleCodeLearner)
 	if err != nil {
 		return nil, err

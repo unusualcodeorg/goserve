@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	// "golang.org/x/crypto/bcrypt"
 )
 
 type controller struct {
@@ -36,15 +37,9 @@ func (c *controller) signUpBasicHandler(ctx *gin.Context) {
 		return
 	}
 
-	exists := c.authService.IsEmailRegisted(body.Email)
-	if exists {
-		c.Send(ctx).BadRequestError("user already exists", nil)
-		return
-	}
-
 	data, err := c.authService.SignUpBasic(body)
 	if err != nil {
-		c.Send(ctx).InternalServerError(err.Error(), err)
+		c.Send(ctx).MixedError(err)
 		return
 	}
 

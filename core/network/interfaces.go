@@ -10,10 +10,11 @@ import (
 type ApiError interface {
 	GetCode() int
 	GetMessage() string
+	Error() string
 	Unwrap() error
 }
 
-type Response interface{
+type Response interface {
 	GetResCode() ResCode
 	GetStatus() int
 	GetMessage() string
@@ -28,6 +29,7 @@ type SendResponse interface {
 	UnauthorizedError(message string, err error)
 	NotFoundError(message string, err error)
 	InternalServerError(message string, err error)
+	MixedError(err error)
 }
 
 type ResponseSender interface {

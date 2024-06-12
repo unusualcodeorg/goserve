@@ -1,6 +1,7 @@
 package network
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -54,6 +55,21 @@ func (s *send) NotFoundError(message string, err error) {
 
 func (s *send) InternalServerError(message string, err error) {
 	s.sendError(NewInternalServerError(message, err))
+}
+
+func (s *send) MixedError(err error) {
+	if err == nil {
+		s.InternalServerError("something went wrong", err)
+		return
+	}
+
+	var apiError ApiError
+	if errors.As(err, &apiError) {
+		s.sendError(apiError)
+		return
+	}
+
+	s.InternalServerError(err.Error(), err)
 }
 
 func (s *send) sendResponse(response Response) {
