@@ -18,7 +18,7 @@ type MongoId struct {
 func (d *MongoId) GetValue() *MongoId {
 	id, err := mongo.NewObjectID(d.Id)
 	if err != nil {
-		panic(network.BadRequestError("id is invalid", errors.New("mongo id is invalid")))
+		panic(network.NewBadRequestError("id is invalid", errors.New("mongo id is invalid")))
 	}
 	d.ID = id
 	return d

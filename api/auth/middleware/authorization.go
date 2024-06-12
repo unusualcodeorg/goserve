@@ -7,19 +7,19 @@ import (
 )
 
 type authorizationProvider struct {
-	network.ApiResponseSender
+	network.ResponseSender
 }
 
 func NewAuthorizationProvider() network.AuthorizationProvider {
 	return &authorizationProvider{
-		ApiResponseSender: network.NewApiResponseSender(),
+		ResponseSender: network.NewResponseSender(),
 	}
 }
 
 func (m *authorizationProvider) Middleware(roleNames ...string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if len(roleNames) == 0 {
-			m.SendError(ctx, network.ForbiddenError("permission denied: role missing", nil))
+			m.Send(ctx).ForbiddenError("permission denied: role missing", nil)
 			return
 		}
 
@@ -39,7 +39,7 @@ func (m *authorizationProvider) Middleware(roleNames ...string) gin.HandlerFunc 
 		}
 
 		if !hasRole {
-			m.SendError(ctx, network.ForbiddenError("permission denied: does not have suffient role", nil))
+			m.Send(ctx).ForbiddenError("permission denied: does not have suffient role", nil)
 			return
 		}
 

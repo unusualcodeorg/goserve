@@ -7,14 +7,14 @@ import (
 )
 
 type keyProtection struct {
-	network.ApiResponseSender
+	network.ResponseSender
 	authService auth.AuthService
 }
 
 func NewKeyProtection(authService auth.AuthService) network.RootMiddleware {
 	return &keyProtection{
-		ApiResponseSender: network.NewApiResponseSender(),
-		authService:       authService,
+		ResponseSender: network.NewResponseSender(),
+		authService:    authService,
 	}
 }
 
@@ -25,13 +25,13 @@ func (m *keyProtection) Attach(engine *gin.Engine) {
 func (m *keyProtection) Handler(ctx *gin.Context) {
 	key := ctx.GetHeader(network.ApiKeyHeader)
 	if len(key) == 0 {
-		m.SendError(ctx, network.UnauthorizedError("permission denied: missing x-api-key header", nil))
+		m.Send(ctx).UnauthorizedError("permission denied: missing x-api-key header", nil)
 		return
 	}
 
 	apikey, err := m.authService.FindApiKey(key)
 	if err != nil {
-		m.SendError(ctx, network.ForbiddenError("permission denied: invalid x-api-key", err))
+		m.Send(ctx).ForbiddenError("permission denied: invalid x-api-key", err)
 		return
 	}
 

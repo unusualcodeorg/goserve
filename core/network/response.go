@@ -24,7 +24,7 @@ func (r *responseModel) GetValue() *responseModel {
 	return r
 }
 
-func SuccessDataResponse(message string, data any) ApiResponse {
+func NewSuccessDataResponse(message string, data any) ApiResponse {
 	return &responseModel{
 		ResCode: success_code,
 		Status:  http.StatusOK,
@@ -33,7 +33,7 @@ func SuccessDataResponse(message string, data any) ApiResponse {
 	}
 }
 
-func SuccessMsgResponse(message string) ApiResponse {
+func NewSuccessMsgResponse(message string) ApiResponse {
 	return &responseModel{
 		ResCode: success_code,
 		Status:  http.StatusOK,
@@ -41,7 +41,7 @@ func SuccessMsgResponse(message string) ApiResponse {
 	}
 }
 
-func BadRequestResponse(message string) ApiResponse {
+func NewBadRequestResponse(message string) ApiResponse {
 	return &responseModel{
 		ResCode: failue_code,
 		Status:  http.StatusBadRequest,
@@ -49,7 +49,7 @@ func BadRequestResponse(message string) ApiResponse {
 	}
 }
 
-func ForbiddenResponse(message string) ApiResponse {
+func NewForbiddenResponse(message string) ApiResponse {
 	return &responseModel{
 		ResCode: failue_code,
 		Status:  http.StatusForbidden,
@@ -57,7 +57,7 @@ func ForbiddenResponse(message string) ApiResponse {
 	}
 }
 
-func UnauthorizedResponse(message string) ApiResponse {
+func NewUnauthorizedResponse(message string) ApiResponse {
 	return &responseModel{
 		ResCode: failue_code,
 		Status:  http.StatusUnauthorized,
@@ -65,7 +65,7 @@ func UnauthorizedResponse(message string) ApiResponse {
 	}
 }
 
-func NotFoundResponse(message string) ApiResponse {
+func NewNotFoundResponse(message string) ApiResponse {
 	return &responseModel{
 		ResCode: failue_code,
 		Status:  http.StatusNotFound,
@@ -73,7 +73,7 @@ func NotFoundResponse(message string) ApiResponse {
 	}
 }
 
-func InternalServerErrorResponse(message string) ApiResponse {
+func NewInternalServerErrorResponse(message string) ApiResponse {
 	return &responseModel{
 		ResCode: failue_code,
 		Status:  http.StatusInternalServerError,

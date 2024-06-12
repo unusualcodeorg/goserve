@@ -21,16 +21,23 @@ type Response[T any] interface {
 
 type ApiResponse Response[responseModel]
 
-type ResponseSender[T any, V any] interface {
-	Debug() bool
-	SendResponse(ctx *gin.Context, response T)
-	SendError(ctx *gin.Context, err V)
+type ResponseSend interface {
+	SuccessMsgResponse(message string)
+	SuccessDataResponse(message string, data any)
+	BadRequestError(message string, err error)
+	ForbiddenError(message string, err error)
+	UnauthorizedError(message string, err error)
+	NotFoundError(message string, err error)
+	InternalServerError(message string, err error)
 }
 
-type ApiResponseSender ResponseSender[ApiResponse, ApiError]
+type ResponseSender interface {
+	Debug() bool
+	Send(ctx *gin.Context) ResponseSend
+}
 
 type BaseController interface {
-	ApiResponseSender
+	ResponseSender
 	Path() string
 	Authentication() gin.HandlerFunc
 	Authorization(role string) gin.HandlerFunc
@@ -51,7 +58,7 @@ type Dto[T any] interface {
 }
 
 type BaseMiddleware interface {
-	ApiResponseSender
+	ResponseSender
 	Debug() bool
 }
 

@@ -137,23 +137,23 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 func (c *controller) get%sHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, &coredto.MongoId{})
 	if err != nil {
-		c.SendError(ctx, network.BadRequestError(err.Error(), err))
+		c.Send(ctx).BadRequestError(err.Error(), err)
 		return
 	}
 
 	%s, err := c.%sService.Find%s(mongoId.ID)
 	if err != nil {
-		c.SendError(ctx, network.NotFoundError("%s not found", err))
+		c.Send(ctx).NotFoundError("%s not found", err)
 		return
 	}
 
 	data, err := network.MapToDto[dto.Info%s](%s)
 	if err != nil {
-		c.SendError(ctx, network.InternalServerError("something went wrong", err))
+		c.Send(ctx).InternalServerError("something went wrong", err)
 		return
 	}
 
-	c.SendResponse(ctx, network.SuccessDataResponse("success", data))
+	c.Send(ctx).SuccessDataResponse("success", data)
 }
 `, featureLower, featureLower, featureLower, featureCaps, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureLower, featureCaps, featureLower)
 

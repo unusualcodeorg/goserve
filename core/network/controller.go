@@ -5,7 +5,7 @@ import (
 )
 
 type baseController struct {
-	ApiResponseSender
+	ResponseSender
 	basePath          string
 	authProvider      AuthenticationProvider
 	authorizeProvider AuthorizationProvider
@@ -13,7 +13,7 @@ type baseController struct {
 
 func NewBaseController(basePath string, authProvider AuthenticationProvider, authorizeProvider AuthorizationProvider) BaseController {
 	return &baseController{
-		ApiResponseSender: NewApiResponseSender(),
+		ResponseSender:    NewResponseSender(),
 		basePath:          basePath,
 		authProvider:      authProvider,
 		authorizeProvider: authorizeProvider,

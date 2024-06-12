@@ -23,9 +23,9 @@ func (m *errorCatcher) Handler(ctx *gin.Context) {
 	defer func() {
 		if r := recover(); r != nil {
 			if err, ok := r.(error); ok {
-				m.SendError(ctx, network.InternalServerError(err.Error(), err))
+				m.Send(ctx).InternalServerError(err.Error(), err)
 			} else {
-				m.SendError(ctx, network.InternalServerError("something went wrong", err))
+				m.Send(ctx).InternalServerError("something went wrong", err)
 			}
 			ctx.Abort()
 		}

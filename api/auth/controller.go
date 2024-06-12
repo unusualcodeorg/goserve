@@ -32,35 +32,35 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 func (c *controller) signUpBasicHandler(ctx *gin.Context) {
 	body, err := network.ReqBody(ctx, dto.EmptySignUpBasic())
 	if err != nil {
-		c.SendError(ctx, network.BadRequestError(err.Error(), err))
+		c.Send(ctx).BadRequestError(err.Error(), err)
 		return
 	}
 
 	exists := c.authService.IsEmailRegisted(body.Email)
 	if exists {
-		c.SendError(ctx, network.BadRequestError("user already exists", nil))
+		c.Send(ctx).BadRequestError("user already exists", nil)
 		return
 	}
 
 	data, err := c.authService.SignUpBasic(body)
 	if err != nil {
-		c.SendError(ctx, network.InternalServerError(err.Error(), err))
+		c.Send(ctx).InternalServerError(err.Error(), err)
 		return
 	}
 
-	c.SendResponse(ctx, network.SuccessDataResponse("success", data))
+	c.Send(ctx).SuccessDataResponse("success", data)
 }
 
 func (c *controller) signInBasicHandler(ctx *gin.Context) {
 	body, err := network.ReqBody(ctx, dto.EmptySignInBasic())
 	if err != nil {
-		c.SendError(ctx, network.BadRequestError(err.Error(), err))
+		c.Send(ctx).BadRequestError(err.Error(), err)
 		return
 	}
 
 	exists := c.authService.IsEmailRegisted(body.Email)
 	if !exists {
-		c.SendError(ctx, network.NotFoundError("user not registered", nil))
+		c.Send(ctx).NotFoundError("user not registered", nil)
 		return
 	}
 
@@ -68,5 +68,5 @@ func (c *controller) signInBasicHandler(ctx *gin.Context) {
 }
 
 func (c *controller) signOutBasicHandler(ctx *gin.Context) {
-	c.SendResponse(ctx, network.SuccessMsgResponse("logout not working!"))
+	c.Send(ctx).SuccessMsgResponse("logout not working!")
 }

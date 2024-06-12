@@ -20,5 +20,5 @@ func (m *notFound) Attach(engine *gin.Engine) {
 }
 
 func (m *notFound) Handler(ctx *gin.Context) {
-	m.SendResponse(ctx, network.NotFoundResponse("resource not found"))
+	m.Send(ctx).NotFoundError("resource not found", nil)
 }

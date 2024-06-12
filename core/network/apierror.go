@@ -39,22 +39,22 @@ func newApiError(code int, message string, err error) ApiError {
 	return &apiError
 }
 
-func BadRequestError(message string, err error) ApiError {
+func NewBadRequestError(message string, err error) ApiError {
 	return newApiError(http.StatusBadRequest, message, err)
 }
 
-func ForbiddenError(message string, err error) ApiError {
+func NewForbiddenError(message string, err error) ApiError {
 	return newApiError(http.StatusForbidden, message, err)
 }
 
-func UnauthorizedError(message string, err error) ApiError {
+func NewUnauthorizedError(message string, err error) ApiError {
 	return newApiError(http.StatusUnauthorized, message, err)
 }
 
-func NotFoundError(message string, err error) ApiError {
+func NewNotFoundError(message string, err error) ApiError {
 	return newApiError(http.StatusNotFound, message, err)
 }
 
-func InternalServerError(message string, err error) ApiError {
+func NewInternalServerError(message string, err error) ApiError {
 	return newApiError(http.StatusInternalServerError, message, err)
 }
