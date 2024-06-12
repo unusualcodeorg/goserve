@@ -18,7 +18,6 @@ func ReqSetApiKey[T any](ctx *gin.Context, value *T) {
 	ctx.Set(reqPayloadApiKey, value)
 }
 
-
 func ReqMustGetApiKey[T any](ctx *gin.Context) *T {
 	apikey, ok := ctx.MustGet(reqPayloadApiKey).(*T)
 	if !ok {

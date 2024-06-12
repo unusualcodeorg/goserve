@@ -19,7 +19,8 @@ import (
 
 type AuthService interface {
 	IsEmailRegisted(email string) bool
-	SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
+	SignUpBasic(signUpDto *dto.SignUpBasic) (*dto.UserAuth, error)
+	SignInBasic(signInDto *dto.SignInBasic) (*dto.UserAuth, error)
 	GenerateToken(user *userModel.User) (string, string, error)
 	CreateKeystore(client *userModel.User, primaryKey string, secondaryKey string) (*model.Keystore, error)
 	FindKeystore(client *userModel.User, primaryKey string) (*model.Keystore, error)
@@ -91,7 +92,7 @@ func (s *service) IsEmailRegisted(email string) bool {
 	return user != nil
 }
 
-func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error) {
+func (s *service) SignUpBasic(signUpDto *dto.SignUpBasic) (*dto.UserAuth, error) {
 	role, err := s.userService.FindRoleByCode(userModel.RoleCodeLearner)
 	if err != nil {
 		return nil, err
@@ -99,12 +100,12 @@ func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
 	roles := make([]userModel.Role, 1)
 	roles[0] = *role
 
-	hashed, err := bcrypt.GenerateFromPassword([]byte(signupDto.Password), 5)
+	hashed, err := bcrypt.GenerateFromPassword([]byte(signUpDto.Password), 5)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := userModel.NewUser(signupDto.Email, string(hashed), &signupDto.Name, signupDto.ProfilePicUrl, roles)
+	user, err := userModel.NewUser(signUpDto.Email, string(hashed), &signUpDto.Name, signUpDto.ProfilePicUrl, roles)
 	if err != nil {
 		return nil, err
 	}
@@ -121,6 +122,10 @@ func (s *service) SignUpBasic(signupDto *dto.SignUpBasic) (*dto.UserAuth, error)
 
 	tokens := dto.NewUserToken(accessToken, refreshToken)
 	return dto.NewUserAuth(user, tokens), nil
+}
+
+func (s *service) SignInBasic(signInDto *dto.SignInBasic) (*dto.UserAuth, error) {
+	return nil, nil
 }
 
 func (s *service) GenerateToken(user *userModel.User) (string, string, error) {

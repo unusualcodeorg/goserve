@@ -10,53 +10,61 @@ import (
 )
 
 type authenticationProvider struct {
+	network.ApiResponseSender
 	authService auth.AuthService
 	userService user.UserService
 }
 
 func NewAuthenticationProvider(authService auth.AuthService, userService user.UserService) network.AuthenticationProvider {
-	m := authenticationProvider{
-		authService: authService,
-		userService: userService,
+	return &authenticationProvider{
+		ApiResponseSender: network.NewApiResponseSender(),
+		authService:       authService,
+		userService:       userService,
 	}
-	return &m
 }
 
 func (m *authenticationProvider) Middleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader(network.AuthorizationHeader)
 		if len(authHeader) == 0 {
-			panic(network.UnauthorizedError("permission denied: missing Authorization", nil))
+			m.SendError(ctx, network.UnauthorizedError("permission denied: missing Authorization", nil))
+			return
 		}
 
 		token := utils.ExtractBearerToken(authHeader)
 		if token == "" {
-			panic(network.UnauthorizedError("permission denied: invalid Authorization", nil))
+			m.SendError(ctx, network.UnauthorizedError("permission denied: invalid Authorization", nil))
+			return
 		}
 
 		claims, err := m.authService.VerifyToken(token)
 		if err != nil {
-			panic(network.UnauthorizedError(err.Error(), err))
+			m.SendError(ctx, network.UnauthorizedError(err.Error(), err))
+			return
 		}
 
 		valid := m.authService.ValidateClaims(claims)
 		if !valid {
-			panic(network.UnauthorizedError("permission denied: invalid claims", nil))
+			m.SendError(ctx, network.UnauthorizedError("permission denied: invalid claims", nil))
+			return
 		}
 
 		userId, err := mongo.NewObjectID(claims.Subject)
 		if err != nil {
-			panic(network.UnauthorizedError("permission denied: invalid claims subject", nil))
+			m.SendError(ctx, network.UnauthorizedError("permission denied: invalid claims subject", nil))
+			return
 		}
 
 		user, err := m.userService.FindUserById(userId)
 		if err != nil {
-			panic(network.UnauthorizedError("permission denied: claims subject does not exists", nil))
+			m.SendError(ctx, network.UnauthorizedError("permission denied: claims subject does not exists", err))
+			return
 		}
 
 		keystore, err := m.authService.FindKeystore(user, claims.ID)
 		if err != nil || keystore == nil {
-			panic(network.UnauthorizedError("permission denied: invalid access token", nil))
+			m.SendError(ctx, network.UnauthorizedError("permission denied: invalid access token", err))
+			return
 		}
 
 		network.ReqSetUser(ctx, user)

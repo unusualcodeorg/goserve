@@ -6,17 +6,19 @@ import (
 )
 
 type notFound struct {
+	network.BaseMiddleware
 }
 
 func NewNotFound() network.RootMiddleware {
-	m := notFound{}
-	return &m
+	return &notFound{
+		BaseMiddleware: network.NewBaseMiddleware(),
+	}
 }
 
 func (m *notFound) Attach(engine *gin.Engine) {
 	engine.NoRoute(m.Handler)
 }
 
-func (*notFound) Handler(ctx *gin.Context) {
-	network.NotFoundResponse(ctx, "resource not found")
+func (m *notFound) Handler(ctx *gin.Context) {
+	m.SendResponse(ctx, network.NotFoundResponse("resource not found"))
 }

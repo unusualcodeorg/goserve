@@ -5,18 +5,19 @@ import (
 )
 
 type baseController struct {
+	ApiResponseSender
 	basePath          string
 	authProvider      AuthenticationProvider
 	authorizeProvider AuthorizationProvider
 }
 
 func NewBaseController(basePath string, authProvider AuthenticationProvider, authorizeProvider AuthorizationProvider) BaseController {
-	c := baseController{
+	return &baseController{
+		ApiResponseSender: NewApiResponseSender(),
 		basePath:          basePath,
 		authProvider:      authProvider,
 		authorizeProvider: authorizeProvider,
 	}
-	return &c
 }
 
 func (c *baseController) Path() string {

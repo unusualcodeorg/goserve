@@ -17,11 +17,10 @@ func NewProfileController(
 	authorizeProvider network.AuthorizationProvider,
 	userService UserService,
 ) network.Controller {
-	c := controller{
+	return &controller{
 		BaseController: network.NewBaseController("/profile", authProvider, authorizeProvider),
 		userService:    userService,
 	}
-	return &c
 }
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
@@ -31,18 +30,21 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 func (c *controller) getUserHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, &coredto.MongoId{})
 	if err != nil {
-		panic(network.BadRequestError(err.Error(), err))
+		c.SendError(ctx, network.BadRequestError(err.Error(), err))
+		return
 	}
 
 	msg, err := c.userService.FindUserById(mongoId.ID)
 	if err != nil {
-		panic(network.NotFoundError("message not found", err))
+		c.SendError(ctx, network.NotFoundError("message not found", err))
+		return
 	}
 
 	data, err := network.MapToDto[dto.InfoPrivateUser](msg)
 	if err != nil {
-		panic(network.InternalServerError("something went wrong", err))
+		c.SendError(ctx, network.InternalServerError("something went wrong", err))
+		return
 	}
 
-	network.SuccessDataResponse(ctx, "success", data)
+	c.SendResponse(ctx, network.SuccessDataResponse("success", data))
 }

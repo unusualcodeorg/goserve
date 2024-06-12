@@ -36,56 +36,66 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 func (c *controller) createMessageHandler(ctx *gin.Context) {
 	body, err := network.ReqBody(ctx, &dto.CreateMessage{})
 	if err != nil {
-		panic(network.BadRequestError(err.Error(), err))
+		c.SendError(ctx, network.BadRequestError(err.Error(), err))
+		return
 	}
 
 	msg, err := c.contactService.SaveMessage(body)
 	if err != nil {
-		panic(network.InternalServerError("something went wrong", err))
+		c.SendError(ctx, network.InternalServerError("something went wrong", err))
+		return
 	}
 
 	data, err := network.MapToDto[dto.InfoMessage](msg)
 	if err != nil {
-		panic(network.InternalServerError("something went wrong", err))
+		c.SendError(ctx, network.InternalServerError("something went wrong", err))
+		return
 	}
 
-	network.SuccessDataResponse(ctx, "message received successfully!", data)
+	c.SendResponse(ctx, network.SuccessDataResponse("message received successfully!", data))
 }
 
 func (c *controller) getMessageHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, &coredto.MongoId{})
 	if err != nil {
-		panic(network.BadRequestError(err.Error(), err))
+		c.SendError(ctx, network.BadRequestError(err.Error(), err))
+		return
 	}
 
 	msg, err := c.contactService.FindMessage(mongoId.ID)
 	if err != nil {
-		panic(network.NotFoundError("message not found", err))
+		c.SendError(ctx, network.NotFoundError("message not found", err))
+		return
 	}
 
 	data, err := network.MapToDto[dto.InfoMessage](msg)
 	if err != nil {
-		panic(network.InternalServerError("something went wrong", err))
+		c.SendError(ctx, network.InternalServerError("something went wrong", err))
+		return
 	}
 
-	network.SuccessDataResponse(ctx, "success", data)
+	c.SendResponse(ctx, network.SuccessDataResponse("success", data))
 }
 
 func (c *controller) getMessagesPaginated(ctx *gin.Context) {
 	pagination, err := network.ReqQuery(ctx, &coredto.Pagination{})
 	if err != nil {
-		panic(network.BadRequestError(err.Error(), err))
+		c.SendError(ctx, network.BadRequestError(err.Error(), err))
+		return
 	}
 
 	msgs, err := c.contactService.FindPaginatedMessage(pagination)
 
 	if err != nil {
-		panic(network.NotFoundError("messages not found", err))
+		c.SendError(ctx, network.NotFoundError("messages not found", err))
+		return
 	}
 
 	data, err := network.MapToDto[[]dto.InfoMessage](&msgs)
 	if err != nil {
-		panic(network.InternalServerError("something went wrong", err))
+		c.SendError(ctx, network.InternalServerError("something went wrong", err))
+		return
 	}
-	network.SuccessDataResponse(ctx, "success", data)
+
+	c.SendResponse(ctx, network.SuccessDataResponse("success", data))
 }

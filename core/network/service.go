@@ -10,10 +10,9 @@ type baseService struct {
 }
 
 func NewBaseService(dbQueryTimeout time.Duration) BaseService {
-	s := baseService{
+	return &baseService{
 		dbQueryTimeout: dbQueryTimeout,
 	}
-	return &s
 }
 
 func (s *baseService) Context() (context.Context, context.CancelFunc) {

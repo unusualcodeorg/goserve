@@ -124,11 +124,10 @@ func New%sController(
 	authorizeMFunc network.AuthorizationProvider,
 	service %sService,
 ) network.Controller {
-	c := controller{
+	return &controller{
 		BaseController: network.NewBaseController("/%s", authMFunc, authorizeMFunc),
 		%sService:  service,
 	}
-	return &c
 }
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
@@ -138,20 +137,23 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 func (c *controller) get%sHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, &coredto.MongoId{})
 	if err != nil {
-		panic(network.BadRequestError(err.Error(), err))
+		c.SendError(ctx, network.BadRequestError(err.Error(), err))
+		return
 	}
 
 	%s, err := c.%sService.Find%s(mongoId.ID)
 	if err != nil {
-		panic(network.NotFoundError("%s not found", err))
+		c.SendError(ctx, network.NotFoundError("%s not found", err))
+		return
 	}
 
 	data, err := network.MapToDto[dto.Info%s](%s)
 	if err != nil {
-		panic(network.InternalServerError("something went wrong", err))
+		c.SendError(ctx, network.InternalServerError("something went wrong", err))
+		return
 	}
 
-	network.SuccessDataResponse(ctx, "success", data)
+	c.SendResponse(ctx, network.SuccessDataResponse("success", data))
 }
 `, featureLower, featureLower, featureLower, featureCaps, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureLower, featureCaps, featureLower)
 

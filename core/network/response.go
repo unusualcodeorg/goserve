@@ -2,8 +2,6 @@ package network
 
 import (
 	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
 type ResCode string
@@ -15,102 +13,70 @@ const (
 	invalid_access_token_code ResCode = "10003"
 )
 
-type messageResponse struct {
+type responseModel struct {
 	ResCode ResCode `json:"code" binding:"required"`
 	Status  int     `json:"status" binding:"required"`
 	Message string  `json:"message" binding:"required"`
+	Data    any     `json:"data,omitempty" binding:"required,omitempty"`
 }
 
-func (r *messageResponse) GetValue() *messageResponse {
+func (r *responseModel) GetValue() *responseModel {
 	return r
 }
 
-func (r *messageResponse) send(ctx *gin.Context) {
-	ctx.JSON(int(r.Status), r)
-}
-
-type dataResponse struct {
-	ResCode ResCode `json:"code" binding:"required"`
-	Status  int     `json:"status" binding:"required"`
-	Message string  `json:"message" binding:"required"`
-	Data    any     `json:"data" binding:"required"`
-}
-
-func (r *dataResponse) GetValue() *dataResponse {
-	return r
-}
-
-func (r *dataResponse) send(ctx *gin.Context) {
-	ctx.JSON(int(r.Status), r)
-}
-
-func SuccessDataResponse(ctx *gin.Context, message string, data any) Response[dataResponse] {
-	r := &dataResponse{
+func SuccessDataResponse(message string, data any) ApiResponse {
+	return &responseModel{
 		ResCode: success_code,
 		Status:  http.StatusOK,
 		Message: message,
 		Data:    data,
 	}
-	r.send(ctx)
-	return r
 }
 
-func SuccessMsgResponse(ctx *gin.Context, message string) Response[messageResponse] {
-	r := &messageResponse{
+func SuccessMsgResponse(message string) ApiResponse {
+	return &responseModel{
 		ResCode: success_code,
 		Status:  http.StatusOK,
 		Message: message,
 	}
-	r.send(ctx)
-	return r
 }
 
-func BadRequestResponse(ctx *gin.Context, message string) Response[messageResponse] {
-	r := &messageResponse{
+func BadRequestResponse(message string) ApiResponse {
+	return &responseModel{
 		ResCode: failue_code,
 		Status:  http.StatusBadRequest,
 		Message: message,
 	}
-	r.send(ctx)
-	return r
 }
 
-func ForbiddenResponse(ctx *gin.Context, message string) Response[messageResponse] {
-	r := &messageResponse{
+func ForbiddenResponse(message string) ApiResponse {
+	return &responseModel{
 		ResCode: failue_code,
 		Status:  http.StatusForbidden,
 		Message: message,
 	}
-	r.send(ctx)
-	return r
 }
 
-func UnauthorizedResponse(ctx *gin.Context, message string) Response[messageResponse] {
-	r := &messageResponse{
+func UnauthorizedResponse(message string) ApiResponse {
+	return &responseModel{
 		ResCode: failue_code,
 		Status:  http.StatusUnauthorized,
 		Message: message,
 	}
-	r.send(ctx)
-	return r
 }
 
-func NotFoundResponse(ctx *gin.Context, message string) Response[messageResponse] {
-	r := &messageResponse{
+func NotFoundResponse(message string) ApiResponse {
+	return &responseModel{
 		ResCode: failue_code,
 		Status:  http.StatusNotFound,
 		Message: message,
 	}
-	r.send(ctx)
-	return r
 }
 
-func InternalServerErrorResponse(ctx *gin.Context, message string) Response[messageResponse] {
-	r := &messageResponse{
+func InternalServerErrorResponse(message string) ApiResponse {
+	return &responseModel{
 		ResCode: failue_code,
 		Status:  http.StatusInternalServerError,
 		Message: message,
 	}
-	r.send(ctx)
-	return r
 }

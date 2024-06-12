@@ -1,26 +1,26 @@
 package middleware
 
 import (
-	"errors"
-
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 )
 
 type authorizationProvider struct {
+	network.ApiResponseSender
 }
 
 func NewAuthorizationProvider() network.AuthorizationProvider {
-	m := authorizationProvider{}
-	return &m
+	return &authorizationProvider{
+		ApiResponseSender: network.NewApiResponseSender(),
+	}
 }
 
 func (m *authorizationProvider) Middleware(roleNames ...string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if len(roleNames) == 0 {
-			e := errors.New("permission denied: role missing")
-			panic(network.ForbiddenError(e.Error(), e))
+			m.SendError(ctx, network.ForbiddenError("permission denied: role missing", nil))
+			return
 		}
 
 		user := network.ReqMustGetUser[model.User](ctx)
@@ -39,8 +39,8 @@ func (m *authorizationProvider) Middleware(roleNames ...string) gin.HandlerFunc 
 		}
 
 		if !hasRole {
-			e := errors.New("permission denied: does not have suffient role")
-			panic(network.ForbiddenError(e.Error(), e))
+			m.SendError(ctx, network.ForbiddenError("permission denied: does not have suffient role", nil))
+			return
 		}
 
 		ctx.Next()

@@ -35,7 +35,7 @@ func NewQuery[T any](db Database, collectionName string) Query[T] {
 }
 
 func (q *query[T]) CreateIndexes(ctx context.Context, indexes []mongo.IndexModel) error {
-	fmt.Println("database creating index for: " + q.collection.Name())
+	fmt.Println("database indexing for: " + q.collection.Name())
 	_, err := q.collection.Indexes().CreateMany(ctx, indexes)
 	return err
 }
