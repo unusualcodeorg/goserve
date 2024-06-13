@@ -2,19 +2,18 @@ package network
 
 import (
 	"context"
-	"time"
 )
 
 type baseService struct {
-	dbQueryTimeout time.Duration
+	context context.Context
 }
 
-func NewBaseService(dbQueryTimeout time.Duration) BaseService {
+func NewBaseService() BaseService {
 	return &baseService{
-		dbQueryTimeout: dbQueryTimeout,
+		context: context.Background(),
 	}
 }
 
-func (s *baseService) Context() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), s.dbQueryTimeout)
+func (s *baseService) Context() context.Context {
+	return s.context
 }

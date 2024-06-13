@@ -1,8 +1,6 @@
 package contact
 
 import (
-	"time"
-
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/model"
 	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
@@ -23,24 +21,21 @@ type service struct {
 	messageQueryBuilder mongo.QueryBuilder[model.Message]
 }
 
-func NewContactService(db mongo.Database, dbQueryTimeout time.Duration) ContactService {
+func NewContactService(db mongo.Database) ContactService {
 	s := service{
-		BaseService:  network.NewBaseService(dbQueryTimeout),
+		BaseService:         network.NewBaseService(),
 		messageQueryBuilder: mongo.NewQueryBuilder[model.Message](db, model.CollectionName),
 	}
 	return &s
 }
 
 func (s *service) SaveMessage(d *dto.CreateMessage) (*model.Message, error) {
-	ctx, cancel := s.Context()
-	defer cancel()
-
 	msg, err := model.NewMessage(d.Type, d.Msg)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := s.messageQueryBuilder.Query(ctx).InsertAndRetrieveOne(msg)
+	result, err := s.messageQueryBuilder.SingleQuery().InsertAndRetrieveOne(msg)
 	if err != nil {
 		return nil, err
 	}
@@ -49,12 +44,9 @@ func (s *service) SaveMessage(d *dto.CreateMessage) (*model.Message, error) {
 }
 
 func (s *service) FindMessage(id primitive.ObjectID) (*model.Message, error) {
-	ctx, cancel := s.Context()
-	defer cancel()
-
 	filter := bson.M{"_id": id}
 
-	msg, err := s.messageQueryBuilder.Query(ctx).FindOne(filter, nil)
+	msg, err := s.messageQueryBuilder.SingleQuery().FindOne(filter, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -63,12 +55,9 @@ func (s *service) FindMessage(id primitive.ObjectID) (*model.Message, error) {
 }
 
 func (s *service) FindPaginatedMessage(p *coredto.Pagination) ([]model.Message, error) {
-	ctx, cancel := s.Context()
-	defer cancel()
-
 	filter := bson.M{"status": true}
 
-	msgs, err := s.messageQueryBuilder.Query(ctx).FindPaginated(filter, p.Page, p.Limit, nil)
+	msgs, err := s.messageQueryBuilder.SingleQuery().FindPaginated(filter, p.Page, p.Limit, nil)
 	if err != nil {
 		return nil, err
 	}

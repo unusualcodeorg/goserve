@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,6 +12,7 @@ import (
 )
 
 type Query[T any] interface {
+	Close()
 	CreateIndexes(indexes []mongo.IndexModel) error
 	FindOne(filter bson.M, opts *options.FindOneOptions) (*T, error)
 	FindAll(filter bson.M, opts *options.FindOptions) ([]T, error)
@@ -27,6 +29,16 @@ type Query[T any] interface {
 type query[T any] struct {
 	collection *mongo.Collection
 	context    context.Context
+	cancel     context.CancelFunc
+}
+
+func newSingleQuery[T any](collection *mongo.Collection, timeout time.Duration) Query[T] {
+	context, cancel := context.WithTimeout(context.Background(), timeout)
+	return &query[T]{
+		context:    context,
+		cancel:     cancel,
+		collection: collection,
+	}
 }
 
 func newQuery[T any](context context.Context, collection *mongo.Collection) Query[T] {
@@ -36,13 +48,21 @@ func newQuery[T any](context context.Context, collection *mongo.Collection) Quer
 	}
 }
 
+func (q *query[T]) Close() {
+	if q.cancel != nil {
+		q.cancel()
+	}
+}
+
 func (q *query[T]) CreateIndexes(indexes []mongo.IndexModel) error {
+	defer q.Close()
 	fmt.Println("database indexing for: " + q.collection.Name())
 	_, err := q.collection.Indexes().CreateMany(q.context, indexes)
 	return err
 }
 
 func (q *query[T]) FindOne(filter bson.M, opts *options.FindOneOptions) (*T, error) {
+	defer q.Close()
 	var doc T
 	err := q.collection.FindOne(q.context, filter, opts).Decode(&doc)
 	if err != nil {
@@ -53,6 +73,7 @@ func (q *query[T]) FindOne(filter bson.M, opts *options.FindOneOptions) (*T, err
 }
 
 func (q *query[T]) FindAll(filter bson.M, opts *options.FindOptions) ([]T, error) {
+	defer q.Close()
 	cursor, err := q.collection.Find(q.context, filter, opts)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %w", err)
@@ -78,6 +99,7 @@ func (q *query[T]) FindAll(filter bson.M, opts *options.FindOptions) ([]T, error
 }
 
 func (q *query[T]) FindPaginated(filter bson.M, page int64, limit int64, opts *options.FindOptions) ([]T, error) {
+	defer q.Close()
 	skip := (page - 1) * limit
 
 	findOptions := options.Find()
@@ -109,6 +131,7 @@ func (q *query[T]) FindPaginated(filter bson.M, page int64, limit int64, opts *o
 }
 
 func (q *query[T]) InsertOne(doc *T) (*primitive.ObjectID, error) {
+	defer q.Close()
 	result, err := q.collection.InsertOne(q.context, doc)
 	if err != nil {
 		return nil, err
@@ -123,6 +146,7 @@ func (q *query[T]) InsertOne(doc *T) (*primitive.ObjectID, error) {
 }
 
 func (q *query[T]) InsertAndRetrieveOne(doc *T) (*T, error) {
+	defer q.Close()
 	result, err := q.collection.InsertOne(q.context, doc)
 	if err != nil {
 		return nil, err
@@ -138,6 +162,7 @@ func (q *query[T]) InsertAndRetrieveOne(doc *T) (*T, error) {
 }
 
 func (q *query[T]) InsertMany(docs []T) ([]primitive.ObjectID, error) {
+	defer q.Close()
 	var iDocs []interface{}
 	for _, doc := range docs {
 		iDocs = append(iDocs, doc)
@@ -162,6 +187,7 @@ func (q *query[T]) InsertMany(docs []T) ([]primitive.ObjectID, error) {
 }
 
 func (q *query[T]) InsertAndRetrieveMany(docs []T) ([]T, error) {
+	defer q.Close()
 	var iDocs []interface{}
 	for _, doc := range docs {
 		iDocs = append(iDocs, doc)
@@ -186,6 +212,7 @@ func (q *query[T]) InsertAndRetrieveMany(docs []T) ([]T, error) {
  * Example -> update := bson.M{"$set": bson.M{"field": "newValue"}}
  */
 func (q *query[T]) UpdateOne(filter bson.M, update bson.M) (int64, error) {
+	defer q.Close()
 	result, err := q.collection.UpdateOne(q.context, filter, update)
 	if err != nil {
 		return 0, err
@@ -197,6 +224,7 @@ func (q *query[T]) UpdateOne(filter bson.M, update bson.M) (int64, error) {
  * Example -> update := bson.M{"$set": bson.M{"field": "newValue"}}
  */
 func (q *query[T]) UpdateMany(filter bson.M, update bson.M) (int64, error) {
+	defer q.Close()
 	result, err := q.collection.UpdateMany(q.context, filter, update)
 	if err != nil {
 		return 0, err
@@ -205,6 +233,7 @@ func (q *query[T]) UpdateMany(filter bson.M, update bson.M) (int64, error) {
 }
 
 func (q *query[T]) DeleteOne(filter bson.M) (int64, error) {
+	defer q.Close()
 	result, err := q.collection.DeleteOne(q.context, filter)
 	if err != nil {
 		return 0, err

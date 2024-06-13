@@ -50,7 +50,7 @@ type Controller interface {
 }
 
 type BaseService interface {
-	Context() (context.Context, context.CancelFunc)
+	Context() context.Context
 }
 
 type Dto[T any] interface {

@@ -26,6 +26,7 @@ func Server() {
 		Name:        env.DBName,
 		MinPoolSize: env.DBMinPoolSize,
 		MaxPoolSize: env.DBMaxPoolSize,
+		Timeout: time.Duration(env.DBQueryTimeout) * time.Second,
 	}
 
 	db := mongo.NewDatabase(ctx, dbConfig)
@@ -36,11 +37,10 @@ func Server() {
 
 	router := network.NewRouter(env.GoMode)
 	router.RegisterValidationParsers(network.CustomTagNameFunc())
-	dbQueryTimeout := time.Duration(env.DBQueryTimeout) * time.Second
 
-	userService := user.NewUserService(db, dbQueryTimeout)
-	authService := auth.NewAuthService(db, dbQueryTimeout, env, userService)
-	contactService := contact.NewContactService(db, dbQueryTimeout)
+	userService := user.NewUserService(db)
+	authService := auth.NewAuthService(db, env, userService)
+	contactService := contact.NewContactService(db)
 
 	router.LoadRootMiddlewares(
 		coreMW.NewErrorProcessor(), // NOTE: this should be the first handler to be mounted

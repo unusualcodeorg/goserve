@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,6 +20,7 @@ type DbConfig struct {
 	Name        string
 	MinPoolSize uint16
 	MaxPoolSize uint16
+	Timeout     time.Duration
 }
 
 type Document[T any] interface {
