@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/jinzhu/copier"
 )
 
 const (
@@ -114,15 +113,6 @@ func ReqHeaders[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
 	}
 
 	return dto.GetValue(), nil
-}
-
-func MapToDto[T any, V any](modelObj *V) (*T, error) {
-	var dtoObj T
-	err := copier.Copy(&dtoObj, modelObj)
-	if err != nil {
-		return nil, err
-	}
-	return &dtoObj, nil
 }
 
 func processErrors[T any](dto Dto[T], err error) error {

@@ -6,6 +6,7 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type controller struct {
@@ -46,7 +47,7 @@ func (c *controller) createMessageHandler(ctx *gin.Context) {
 		return
 	}
 
-	data, err := network.MapToDto[dto.InfoMessage](msg)
+	data, err := utils.MapTo[dto.InfoMessage](msg)
 	if err != nil {
 		c.Send(ctx).InternalServerError("something went wrong", err)
 		return
@@ -68,7 +69,7 @@ func (c *controller) getMessageHandler(ctx *gin.Context) {
 		return
 	}
 
-	data, err := network.MapToDto[dto.InfoMessage](msg)
+	data, err := utils.MapTo[dto.InfoMessage](msg)
 	if err != nil {
 		c.Send(ctx).InternalServerError("something went wrong", err)
 		return
@@ -91,7 +92,7 @@ func (c *controller) getMessagesPaginated(ctx *gin.Context) {
 		return
 	}
 
-	data, err := network.MapToDto[[]dto.InfoMessage](&msgs)
+	data, err := utils.MapTo[[]dto.InfoMessage](&msgs)
 	if err != nil {
 		c.Send(ctx).InternalServerError("something went wrong", err)
 		return

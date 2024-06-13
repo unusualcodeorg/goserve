@@ -18,7 +18,17 @@ func Server() {
 	ctx := context.Background()
 	env := config.NewEnv(".env")
 
-	db := mongo.NewDatabase(ctx, env)
+	dbConfig := mongo.DbConfig{
+		User:        env.DBUser,
+		Pwd:         env.DBUserPwd,
+		Host:        env.DBHost,
+		Port:        env.DBPort,
+		Name:        env.DBName,
+		MinPoolSize: env.DBMinPoolSize,
+		MaxPoolSize: env.DBMaxPoolSize,
+	}
+
+	db := mongo.NewDatabase(ctx, dbConfig)
 	defer db.Disconnect()
 	db.Connect()
 
