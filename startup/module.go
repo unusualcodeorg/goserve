@@ -14,7 +14,6 @@ import (
 )
 
 type module struct {
-	// setup
 	context     context.Context
 	env         *config.Env
 	db          mongo.Database
