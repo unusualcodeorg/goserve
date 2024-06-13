@@ -25,13 +25,13 @@ func (r *router) GetEngine() *gin.Engine {
 	return r.engine
 }
 
-func (r *router) LoadRootMiddlewares(middlewares ...RootMiddleware) {
+func (r *router) LoadRootMiddlewares(middlewares []RootMiddleware) {
 	for _, m := range middlewares {
 		m.Attach(r.engine)
 	}
 }
 
-func (r *router) LoadControllers(controllers ...Controller) {
+func (r *router) LoadControllers(controllers []Controller) {
 	for _, c := range controllers {
 		g := r.engine.Group(c.Path())
 		c.MountRoutes(g)
