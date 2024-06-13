@@ -36,9 +36,9 @@ type AuthService interface {
 
 type service struct {
 	network.BaseService
-	keystoreQuery mongo.Query[model.Keystore]
-	apikeyQuery   mongo.Query[model.ApiKey]
-	userService   user.UserService
+	keystoreQueryBuilder mongo.QueryBuilder[model.Keystore]
+	apikeyQueryBuilder   mongo.QueryBuilder[model.ApiKey]
+	userService          user.UserService
 	// token
 	rsaPrivateKey        *rsa.PrivateKey
 	rsaPublicKey         *rsa.PublicKey
@@ -76,8 +76,8 @@ func NewAuthService(
 	s := service{
 		BaseService:   network.NewBaseService(dbQueryTimeout),
 		userService:   userService,
-		keystoreQuery: mongo.NewQuery[model.Keystore](db, model.KeystoreCollectionName),
-		apikeyQuery:   mongo.NewQuery[model.ApiKey](db, model.CollectionName),
+		keystoreQueryBuilder: mongo.NewQueryBuilder[model.Keystore](db, model.KeystoreCollectionName),
+		apikeyQueryBuilder:   mongo.NewQueryBuilder[model.ApiKey](db, model.ApiKeyCollectionName),
 		// token key
 		rsaPrivateKey: rsaPrivateKey,
 		rsaPublicKey:  rsaPublicKey,
@@ -151,7 +151,7 @@ func (s *service) SignOut(keystore *model.Keystore) error {
 	ctx, cancel := s.Context()
 	defer cancel()
 	filter := bson.M{"_id": keystore.ID}
-	_, err := s.keystoreQuery.DeleteOne(ctx, filter)
+	_, err := s.keystoreQueryBuilder.Query(ctx).DeleteOne(filter)
 	return err
 }
 
@@ -268,7 +268,7 @@ func (s *service) CreateKeystore(client *userModel.User, primaryKey string, seco
 		return nil, err
 	}
 
-	id, err := s.keystoreQuery.InsertOne(ctx, doc)
+	id, err := s.keystoreQueryBuilder.Query(ctx).InsertOne(doc)
 	if err != nil {
 		return nil, err
 	}
@@ -281,14 +281,14 @@ func (s *service) FindKeystore(client *userModel.User, primaryKey string) (*mode
 	ctx, cancel := s.Context()
 	defer cancel()
 	filter := bson.M{"client": client.ID, "pKey": primaryKey, "status": true}
-	return s.keystoreQuery.FindOne(ctx, filter, nil)
+	return s.keystoreQueryBuilder.Query(ctx).FindOne(filter, nil)
 }
 
 func (s *service) FindRefreshKeystore(client *userModel.User, primaryKey string, secondaryKey string) (*model.Keystore, error) {
 	ctx, cancel := s.Context()
 	defer cancel()
 	filter := bson.M{"client": client.ID, "pKey": primaryKey, "sKey": secondaryKey, "status": true}
-	return s.keystoreQuery.FindOne(ctx, filter, nil)
+	return s.keystoreQueryBuilder.Query(ctx).FindOne(filter, nil)
 }
 
 func (s *service) SignToken(claims jwt.RegisteredClaims) (string, error) {
@@ -354,7 +354,7 @@ func (s *service) FindApiKey(key string) (*model.ApiKey, error) {
 
 	filter := bson.M{"key": key, "status": true}
 
-	apikey, err := s.apikeyQuery.FindOne(ctx, filter, nil)
+	apikey, err := s.apikeyQueryBuilder.Query(ctx).FindOne(filter, nil)
 	if err != nil {
 		return nil, err
 	}

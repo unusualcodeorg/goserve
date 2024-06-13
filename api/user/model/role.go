@@ -90,6 +90,5 @@ func (*Role) EnsureIndexes(db mongo.Database) {
 			Options: options.Index().SetUnique(true),
 		},
 	}
-	q := mongo.NewQuery[Role](db, RolesCollectionName)
-	q.CreateIndexes(context.Background(), indexes)
+	mongo.NewQueryBuilder[Role](db, RolesCollectionName).Query(context.Background()).CreateIndexes(indexes)
 }

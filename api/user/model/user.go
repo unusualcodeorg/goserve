@@ -85,6 +85,5 @@ func (*User) EnsureIndexes(db mongo.Database) {
 			Options: options.Index().SetUnique(true),
 		},
 	}
-	q := mongo.NewQuery[User](db, UserCollectionName)
-	q.CreateIndexes(context.Background(), indexes)
+	mongo.NewQueryBuilder[User](db, UserCollectionName).Query(context.Background()).CreateIndexes(indexes)
 }

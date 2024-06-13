@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const CollectionName = "api_keys"
+const ApiKeyCollectionName = "api_keys"
 
 type Permission string
 
@@ -68,6 +68,6 @@ func (*ApiKey) EnsureIndexes(db mongo.Database) {
 			Options: options.Index().SetUnique(true),
 		},
 	}
-	q := mongo.NewQuery[ApiKey](db, CollectionName)
-	q.CreateIndexes(context.Background(), indexes)
+
+	mongo.NewQueryBuilder[ApiKey](db, ApiKeyCollectionName).Query(context.Background()).CreateIndexes(indexes)
 }
