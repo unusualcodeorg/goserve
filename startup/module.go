@@ -27,8 +27,8 @@ func (m *module) GetInstance() *module {
 
 func (m *module) Controllers() []network.Controller {
 	return []network.Controller{
-		auth.NewAuthController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.authService),
-		user.NewProfileController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.userService),
+		auth.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.authService),
+		user.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.userService),
 		contact.NewContactController(m.AuthenticationProvider(), m.AuthorizationProvider(), contact.NewContactService(m.db)),
 	}
 }
@@ -50,8 +50,8 @@ func (m *module) AuthorizationProvider() network.AuthorizationProvider {
 }
 
 func NewModule(context context.Context, env *config.Env, db mongo.Database) network.Module[module] {
-	userService := user.NewUserService(db)
-	authService := auth.NewAuthService(db, env, userService)
+	userService := user.NewService(db)
+	authService := auth.NewService(db, env, userService)
 
 	return &module{
 		context:     context,

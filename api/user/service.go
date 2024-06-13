@@ -27,7 +27,7 @@ type service struct {
 	roleQueryBuilder mongo.QueryBuilder[model.Role]
 }
 
-func NewUserService(db mongo.Database) UserService {
+func NewService(db mongo.Database) UserService {
 	s := service{
 		BaseService:      network.NewBaseService(),
 		userQueryBuilder: mongo.NewQueryBuilder[model.User](db, model.UserCollectionName),

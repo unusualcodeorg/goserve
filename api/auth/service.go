@@ -48,7 +48,7 @@ type service struct {
 	tokenAudience        string
 }
 
-func NewAuthService(
+func NewService(
 	db mongo.Database,
 	env *config.Env,
 	userService user.UserService,

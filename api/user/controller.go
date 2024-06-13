@@ -13,7 +13,7 @@ type controller struct {
 	userService UserService
 }
 
-func NewProfileController(
+func NewController(
 	authProvider network.AuthenticationProvider,
 	authorizeProvider network.AuthorizationProvider,
 	userService UserService,

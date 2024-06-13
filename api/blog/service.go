@@ -20,7 +20,7 @@ type service struct {
 	blogQueryBuilder mongo.QueryBuilder[model.Blog]
 }
 
-func NewBlogService(db mongo.Database) BlogService {
+func NewService(db mongo.Database) BlogService {
 	s := service{
 		BaseService:      network.NewBaseService(),
 		blogQueryBuilder: mongo.NewQueryBuilder[model.Blog](db, model.CollectionName),

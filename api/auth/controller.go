@@ -13,7 +13,7 @@ type controller struct {
 	authService AuthService
 }
 
-func NewAuthController(
+func NewController(
 	authProvider network.AuthenticationProvider,
 	authorizeProvider network.AuthorizationProvider,
 	service AuthService,
