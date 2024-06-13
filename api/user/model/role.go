@@ -39,13 +39,17 @@ func NewRole(code RoleCode) (*Role, error) {
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
-	if err := validateRole(r); err != nil {
+	if err := r.Validate(); err != nil {
 		return nil, err
 	}
 	return &r, nil
 }
 
-func validateRole(r Role) error {
+func (role *Role) GetValue() *Role {
+	return role
+}
+
+func (role *Role) Validate() error {
 	validate := validator.New()
 
 	_ = validate.RegisterValidation("rolecode", func(fl validator.FieldLevel) bool {
@@ -57,15 +61,6 @@ func validateRole(r Role) error {
 		return false
 	})
 
-	return validate.Struct(r)
-}
-
-func (role *Role) GetValue() *Role {
-	return role
-}
-
-func (role *Role) Validate() error {
-	validate := validator.New()
 	return validate.Struct(role)
 }
 
