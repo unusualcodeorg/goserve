@@ -14,7 +14,7 @@ type controller struct {
 	service Service
 }
 
-func NewContactController(
+func NewController(
 	authProvider network.AuthenticationProvider,
 	authorizeProvider network.AuthorizationProvider,
 	service Service,

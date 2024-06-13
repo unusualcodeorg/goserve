@@ -21,7 +21,7 @@ type service struct {
 	messageQueryBuilder mongo.QueryBuilder[model.Message]
 }
 
-func NewContactService(db mongo.Database) Service {
+func NewService(db mongo.Database) Service {
 	s := service{
 		BaseService:         network.NewBaseService(),
 		messageQueryBuilder: mongo.NewQueryBuilder[model.Message](db, model.CollectionName),

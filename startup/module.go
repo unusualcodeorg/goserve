@@ -5,6 +5,7 @@ import (
 
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth"
 	authMW "github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/middleware"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
@@ -29,7 +30,10 @@ func (m *module) Controllers() []network.Controller {
 	return []network.Controller{
 		auth.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.authService),
 		user.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.userService),
-		contact.NewContactController(m.AuthenticationProvider(), m.AuthorizationProvider(), contact.NewContactService(m.db)),
+		blog.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db)),
+		blog.NewWriterController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db)),
+		blog.NewWriterController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db)),
+		contact.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), contact.NewService(m.db)),
 	}
 }
 
