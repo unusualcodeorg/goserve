@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type UserService interface {
+type Service interface {
 	FindRoleByCode(code model.RoleCode) (*model.Role, error)
 	FindRoles(roleIds []primitive.ObjectID) ([]model.Role, error)
 	FindUserById(id primitive.ObjectID) (*model.User, error)
@@ -27,7 +27,7 @@ type service struct {
 	roleQueryBuilder mongo.QueryBuilder[model.Role]
 }
 
-func NewService(db mongo.Database) UserService {
+func NewService(db mongo.Database) Service {
 	s := service{
 		BaseService:      network.NewBaseService(),
 		userQueryBuilder: mongo.NewQueryBuilder[model.User](db, model.UserCollectionName),

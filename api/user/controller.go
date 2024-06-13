@@ -10,17 +10,17 @@ import (
 
 type controller struct {
 	network.BaseController
-	userService UserService
+	service Service
 }
 
 func NewController(
 	authProvider network.AuthenticationProvider,
 	authorizeProvider network.AuthorizationProvider,
-	userService UserService,
+	service Service,
 ) network.Controller {
 	return &controller{
 		BaseController: network.NewBaseController("/profile", authProvider, authorizeProvider),
-		userService:    userService,
+		service:    service,
 	}
 }
 
@@ -35,7 +35,7 @@ func (c *controller) getUserHandler(ctx *gin.Context) {
 		return
 	}
 
-	msg, err := c.userService.FindUserById(mongoId.ID)
+	msg, err := c.service.FindUserById(mongoId.ID)
 	if err != nil {
 		c.Send(ctx).NotFoundError("message not found", err)
 		return

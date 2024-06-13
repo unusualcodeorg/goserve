@@ -7,17 +7,17 @@ import (
 
 type controller struct {
 	network.BaseController
-	blogService BlogService
+	service Service
 }
 
 func NewController(
 	authMFunc network.AuthenticationProvider,
 	authorizeMFunc network.AuthorizationProvider,
-	service BlogService,
+	service Service,
 ) network.Controller {
 	return &controller{
 		BaseController: network.NewBaseController("/blog", authMFunc, authorizeMFunc),
-		blogService:    service,
+		service:        service,
 	}
 }
 

@@ -11,17 +11,17 @@ import (
 
 type controller struct {
 	network.BaseController
-	contactService ContactService
+	service Service
 }
 
 func NewContactController(
 	authProvider network.AuthenticationProvider,
 	authorizeProvider network.AuthorizationProvider,
-	service ContactService,
+	service Service,
 ) network.Controller {
 	c := controller{
 		BaseController: network.NewBaseController("/contact", authProvider, authorizeProvider),
-		contactService: service,
+		service: service,
 	}
 	return &c
 }
@@ -41,7 +41,7 @@ func (c *controller) createMessageHandler(ctx *gin.Context) {
 		return
 	}
 
-	msg, err := c.contactService.SaveMessage(body)
+	msg, err := c.service.SaveMessage(body)
 	if err != nil {
 		c.Send(ctx).InternalServerError("something went wrong", err)
 		return
@@ -63,7 +63,7 @@ func (c *controller) getMessageHandler(ctx *gin.Context) {
 		return
 	}
 
-	msg, err := c.contactService.FindMessage(mongoId.ID)
+	msg, err := c.service.FindMessage(mongoId.ID)
 	if err != nil {
 		c.Send(ctx).NotFoundError("message not found", err)
 		return
@@ -85,7 +85,7 @@ func (c *controller) getMessagesPaginated(ctx *gin.Context) {
 		return
 	}
 
-	msgs, err := c.contactService.FindPaginatedMessage(pagination)
+	msgs, err := c.service.FindPaginatedMessage(pagination)
 
 	if err != nil {
 		c.Send(ctx).NotFoundError("messages not found", err)

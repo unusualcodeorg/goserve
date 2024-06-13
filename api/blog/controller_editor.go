@@ -8,17 +8,17 @@ import (
 
 type editorController struct {
 	network.BaseController
-	blogService BlogService
+	service Service
 }
 
 func NewEditorController(
 	authMFunc network.AuthenticationProvider,
 	authorizeMFunc network.AuthorizationProvider,
-	service BlogService,
+	service Service,
 ) network.Controller {
 	return &editorController{
 		BaseController: network.NewBaseController("/blog/editor", authMFunc, authorizeMFunc),
-		blogService:    service,
+		service:        service,
 	}
 }
 

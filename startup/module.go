@@ -17,8 +17,8 @@ type module struct {
 	context     context.Context
 	env         *config.Env
 	db          mongo.Database
-	userService user.UserService
-	authService auth.AuthService
+	userService user.Service
+	authService auth.Service
 }
 
 func (m *module) GetInstance() *module {

@@ -11,11 +11,11 @@ import (
 
 type authenticationProvider struct {
 	network.ResponseSender
-	authService auth.AuthService
-	userService user.UserService
+	authService auth.Service
+	userService user.Service
 }
 
-func NewAuthenticationProvider(authService auth.AuthService, userService user.UserService) network.AuthenticationProvider {
+func NewAuthenticationProvider(authService auth.Service, userService user.Service) network.AuthenticationProvider {
 	return &authenticationProvider{
 		ResponseSender: network.NewResponseSender(),
 		authService:    authService,

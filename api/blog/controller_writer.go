@@ -9,17 +9,17 @@ import (
 
 type writerController struct {
 	network.BaseController
-	blogService BlogService
+	service Service
 }
 
 func NewWriterController(
 	authMFunc network.AuthenticationProvider,
 	authorizeMFunc network.AuthorizationProvider,
-	service BlogService,
+	service Service,
 ) network.Controller {
 	return &writerController{
 		BaseController: network.NewBaseController("/blog/writer", authMFunc, authorizeMFunc),
-		blogService:    service,
+		service:    service,
 	}
 }
 
@@ -37,7 +37,7 @@ func (c *writerController) postBlogHandler(ctx *gin.Context) {
 
 	user := network.ReqMustGetUser[userModel.User](ctx)
 
-	b, err := c.blogService.CreateBlog(body, user)
+	b, err := c.service.CreateBlog(body, user)
 	if err != nil {
 		c.Send(ctx).MixedError(err)
 		return

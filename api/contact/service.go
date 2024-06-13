@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type ContactService interface {
+type Service interface {
 	SaveMessage(d *dto.CreateMessage) (*model.Message, error)
 	FindMessage(id primitive.ObjectID) (*model.Message, error)
 	FindPaginatedMessage(p *coredto.Pagination) ([]model.Message, error)
@@ -21,7 +21,7 @@ type service struct {
 	messageQueryBuilder mongo.QueryBuilder[model.Message]
 }
 
-func NewContactService(db mongo.Database) ContactService {
+func NewContactService(db mongo.Database) Service {
 	s := service{
 		BaseService:         network.NewBaseService(),
 		messageQueryBuilder: mongo.NewQueryBuilder[model.Message](db, model.CollectionName),

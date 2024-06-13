@@ -17,7 +17,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthService interface {
+type Service interface {
 	SignUpBasic(signUpDto *dto.SignUpBasic) (*dto.UserAuth, error)
 	SignInBasic(signInDto *dto.SignInBasic) (*dto.UserAuth, error)
 	RenewToken(tokenRefreshDto *dto.TokenRefresh, accessToken string) (*dto.UserTokens, error)
@@ -38,7 +38,7 @@ type service struct {
 	network.BaseService
 	keystoreQueryBuilder mongo.QueryBuilder[model.Keystore]
 	apikeyQueryBuilder   mongo.QueryBuilder[model.ApiKey]
-	userService          user.UserService
+	userService          user.Service
 	// token
 	rsaPrivateKey        *rsa.PrivateKey
 	rsaPublicKey         *rsa.PublicKey
@@ -51,8 +51,8 @@ type service struct {
 func NewService(
 	db mongo.Database,
 	env *config.Env,
-	userService user.UserService,
-) AuthService {
+	userService user.Service,
+) Service {
 	privatePem, err := utils.LoadPEMFileInto(env.RSAPrivateKeyPath)
 	if err != nil {
 		panic(err)

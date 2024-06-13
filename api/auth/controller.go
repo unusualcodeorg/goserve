@@ -10,17 +10,17 @@ import (
 
 type controller struct {
 	network.BaseController
-	authService AuthService
+	service Service
 }
 
 func NewController(
 	authProvider network.AuthenticationProvider,
 	authorizeProvider network.AuthorizationProvider,
-	service AuthService,
+	service Service,
 ) network.Controller {
 	c := controller{
 		BaseController: network.NewBaseController("/auth", authProvider, authorizeProvider),
-		authService:    service,
+		service:        service,
 	}
 	return &c
 }
@@ -39,7 +39,7 @@ func (c *controller) signUpBasicHandler(ctx *gin.Context) {
 		return
 	}
 
-	data, err := c.authService.SignUpBasic(body)
+	data, err := c.service.SignUpBasic(body)
 	if err != nil {
 		c.Send(ctx).MixedError(err)
 		return
@@ -55,7 +55,7 @@ func (c *controller) signInBasicHandler(ctx *gin.Context) {
 		return
 	}
 
-	dto, err := c.authService.SignInBasic(body)
+	dto, err := c.service.SignInBasic(body)
 	if err != nil {
 		c.Send(ctx).MixedError(err)
 		return
@@ -67,7 +67,7 @@ func (c *controller) signInBasicHandler(ctx *gin.Context) {
 func (c *controller) signOutBasic(ctx *gin.Context) {
 	keystore := network.ReqMustGetKeystore[model.Keystore](ctx)
 
-	err := c.authService.SignOut(keystore)
+	err := c.service.SignOut(keystore)
 	if err != nil {
 		c.Send(ctx).InternalServerError("something went wrong", err)
 		return
@@ -86,7 +86,7 @@ func (c *controller) tokenRefreshHandler(ctx *gin.Context) {
 	authHeader := ctx.GetHeader(network.AuthorizationHeader)
 	accessToken := utils.ExtractBearerToken(authHeader)
 
-	dto, err := c.authService.RenewToken(body, accessToken)
+	dto, err := c.service.RenewToken(body, accessToken)
 	if err != nil {
 		c.Send(ctx).MixedError(err)
 		return

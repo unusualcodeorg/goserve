@@ -8,10 +8,10 @@ import (
 
 type keyProtection struct {
 	network.ResponseSender
-	authService auth.AuthService
+	authService auth.Service
 }
 
-func NewKeyProtection(authService auth.AuthService) network.RootMiddleware {
+func NewKeyProtection(authService auth.Service) network.RootMiddleware {
 	return &keyProtection{
 		ResponseSender: network.NewResponseSender(),
 		authService:    authService,

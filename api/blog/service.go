@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type BlogService interface {
+type Service interface {
 	// GetBlog(id primitive.ObjectID) (*dto.InfoBlog, error)
 	CreateBlog(createBlogDto *dto.CreateBlog, author *userModel.User) (*dto.PrivateBlog, error)
 }
@@ -20,7 +20,7 @@ type service struct {
 	blogQueryBuilder mongo.QueryBuilder[model.Blog]
 }
 
-func NewService(db mongo.Database) BlogService {
+func NewService(db mongo.Database) Service {
 	s := service{
 		BaseService:      network.NewBaseService(),
 		blogQueryBuilder: mongo.NewQueryBuilder[model.Blog](db, model.CollectionName),
