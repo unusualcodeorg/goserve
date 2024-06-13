@@ -1,8 +1,6 @@
 package blog
 
 import (
-	"time"
-
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
@@ -16,24 +14,21 @@ type BlogService interface {
 
 type service struct {
 	network.BaseService
-	blogQuery mongo.Query[model.Blog]
+	blogQueryBuilder mongo.QueryBuilder[model.Blog]
 }
 
-func NewBlogService(db mongo.Database, dbQueryTimeout time.Duration) BlogService {
+func NewBlogService(db mongo.Database) BlogService {
 	s := service{
-		BaseService:  network.NewBaseService(dbQueryTimeout),
-		blogQuery: mongo.NewQuery[model.Blog](db, model.CollectionName),
+		BaseService:  network.NewBaseService(),
+		blogQueryBuilder: mongo.NewQueryBuilder[model.Blog](db, model.CollectionName),
 	}
 	return &s
 }
 
 func (s *service) FindBlog(id primitive.ObjectID) (*model.Blog, error) {
-	ctx, cancel := s.Context()
-	defer cancel()
-
 	filter := bson.M{"_id": id}
 
-	msg, err := s.blogQuery.FindOne(ctx, filter, nil)
+	msg, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, nil)
 	if err != nil {
 		return nil, err
 	}

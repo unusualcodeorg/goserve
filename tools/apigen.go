@@ -56,8 +56,6 @@ func generateService(featureDir, featureName string) error {
 	template := fmt.Sprintf(`package %s
 
 import (
-	"time"
-
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/%s/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
@@ -71,24 +69,21 @@ type %sService interface {
 
 type service struct {
 	network.BaseService
-	%sQuery mongo.Query[model.%s]
+	%sQueryBuilder mongo.QueryBuilder[model.%s]
 }
 
-func New%sService(db mongo.Database, dbQueryTimeout time.Duration) %sService {
+func New%sService(db mongo.Database) %sService {
 	s := service{
-		BaseService:  network.NewBaseService(dbQueryTimeout),
-		%sQuery: mongo.NewQuery[model.%s](db, model.CollectionName),
+		BaseService:  network.NewBaseService(),
+		%sQueryBuilder: mongo.NewQueryBuilder[model.%s](db, model.CollectionName),
 	}
 	return &s
 }
 
 func (s *service) Find%s(id primitive.ObjectID) (*model.%s, error) {
-	ctx, cancel := s.Context()
-	defer cancel()
-
 	filter := bson.M{"_id": id}
 
-	msg, err := s.%sQuery.FindOne(ctx, filter, nil)
+	msg, err := s.%sQueryBuilder.SingleQuery().FindOne(filter, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -226,12 +221,11 @@ func (*%s) EnsureIndexes(db mongo.Database) {
 			},
 		},
 	}
-	q := mongo.NewQuery[%s](db, CollectionName)
-	q.CreateIndexes(context.Background(), indexes)
+	
+	mongo.NewQueryBuilder[%s](db, CollectionName).Query(context.Background()).CreateIndexes(indexes)
 }
 
 `
-
 	template := fmt.Sprintf(tStr, featureLower, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps)
 
 	return os.WriteFile(modelPath, []byte(template), os.ModePerm)
