@@ -3,9 +3,8 @@ package blog
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog/dto"
-	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
+	userModel "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type controller struct {
@@ -20,32 +19,31 @@ func NewBlogController(
 ) network.Controller {
 	return &controller{
 		BaseController: network.NewBaseController("/blog", authMFunc, authorizeMFunc),
-		blogService:  service,
+		blogService:    service,
 	}
 }
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
-	group.GET("/id/:id", c.getBlogHandler)
+	// group.GET("/id/:id", c.getBlogHandler)
+
+	writer := group.Group("/writer", c.Authentication(), c.Authorization(string(userModel.RoleCodeWriter)))
+	writer.POST("/", c.postBlogHandler)
 }
 
-func (c *controller) getBlogHandler(ctx *gin.Context) {
-	mongoId, err := network.ReqParams(ctx, &coredto.MongoId{})
+func (c *controller) postBlogHandler(ctx *gin.Context) {
+	body, err := network.ReqBody(ctx, dto.EmptyCreateBlog())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
 		return
 	}
 
-	blog, err := c.blogService.FindBlog(mongoId.ID)
+	user := network.ReqMustGetUser[userModel.User](ctx)
+
+	b, err := c.blogService.CreateBlog(body, user)
 	if err != nil {
-		c.Send(ctx).NotFoundError("blog not found", err)
+		c.Send(ctx).MixedError(err)
 		return
 	}
 
-	data, err := utils.MapTo[dto.InfoBlog](blog)
-	if err != nil {
-		c.Send(ctx).InternalServerError("something went wrong", err)
-		return
-	}
-
-	c.Send(ctx).SuccessDataResponse("success", data)
+	c.Send(ctx).SuccessDataResponse("blog creation success", b)
 }

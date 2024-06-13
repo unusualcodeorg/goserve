@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -36,22 +37,22 @@ type Blog struct {
 	UpdatedAt   time.Time          `bson:"updatedAt" validate:"required"`
 }
 
-func NewBlog(title, description, draftText, slug string, author, createdBy, updatedBy primitive.ObjectID, tags []string) (*Blog, error) {
+func NewBlog(slug, title, description, draftText string, tags []string, author *model.User) (*Blog, error) {
 	now := time.Now()
 	b := Blog{
 		Title:       title,
 		Description: description,
 		DraftText:   draftText,
 		Tags:        tags,
-		Author:      author,
+		Author:      author.ID,
 		Slug:        slug,
 		Score:       0.01,
 		IsSubmitted: false,
 		IsDraft:     true,
 		IsPublished: false,
 		Status:      true,
-		CreatedBy:   createdBy,
-		UpdatedBy:   updatedBy,
+		CreatedBy:   author.ID,
+		UpdatedBy:   author.ID,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
@@ -69,6 +70,12 @@ func (blog *Blog) Validate() error {
 func (*Blog) EnsureIndexes(db mongo.Database) {
 	indexes := []mongod.IndexModel{
 		{
+			Keys: bson.D{
+				{Key: "slug", Value: 1},
+			},
+			Options: options.Index().SetUnique(true),
+		},
+		{
 			Keys: bson.D{{Key: "title", Value: "text"}, {Key: "description", Value: "text"}},
 			Options: options.Index().SetWeights(bson.M{
 				"title":       3,
@@ -76,7 +83,7 @@ func (*Blog) EnsureIndexes(db mongo.Database) {
 			}),
 		},
 		{Keys: bson.D{{Key: "_id", Value: 1}, {Key: "status", Value: 1}}},
-		{Keys: bson.D{{Key: "slug", Value: 1}, {Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "slug", Value: 1}}},
 		{Keys: bson.D{{Key: "isPublished", Value: 1}, {Key: "status", Value: 1}}},
 		{Keys: bson.D{{Key: "_id", Value: 1}, {Key: "isPublished", Value: 1}, {Key: "status", Value: 1}}},
 		{Keys: bson.D{{Key: "tags", Value: 1}, {Key: "isPublished", Value: 1}, {Key: "status", Value: 1}}},

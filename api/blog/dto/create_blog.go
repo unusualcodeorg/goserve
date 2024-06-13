@@ -7,13 +7,13 @@ import (
 )
 
 type CreateBlog struct {
-	Title       string    `json:"title" validate:"required,min=3,max=500"`
-	Description string    `json:"description" validate:"required,min=3,max=2000"`
-	Text        string    `json:"text" validate:"required,max=50000"`
-	Slug        string    `json:"slug" validate:"required,min=3,max=200"`
-	ImgURL      *string   `json:"imgUrl,omitempty" validate:"omitempty,uri,max=200"`
-	Score       *float64  `json:"score,omitempty" validate:"omitempty,min=0,max=1"`
-	Tags        *[]string `json:"tags,omitempty" validate:"omitempty,dive,uppercase"`
+	Title       string   `json:"title" validate:"required,min=3,max=500"`
+	Description string   `json:"description" validate:"required,min=3,max=2000"`
+	DraftText   string   `bson:"draftText" validate:"required"`
+	Text        string   `json:"text" validate:"required,max=50000"`
+	Slug        string   `json:"slug" validate:"required,min=3,max=200"`
+	ImgURL      string   `json:"imgUrl" validate:"required,uri,max=200"`
+	Tags        []string `json:"tags" validate:"required,min=1,dive,uppercase"`
 }
 
 func EmptyCreateBlog() *CreateBlog {
@@ -24,7 +24,7 @@ func (d *CreateBlog) GetValue() *CreateBlog {
 	return d
 }
 
-func (b *CreateBlog) ValidateErrors(errs validator.ValidationErrors) []string {
+func (b *CreateBlog) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
 	var msgs []string
 	for _, err := range errs {
 		switch err.Tag() {
@@ -44,5 +44,5 @@ func (b *CreateBlog) ValidateErrors(errs validator.ValidationErrors) []string {
 			msgs = append(msgs, fmt.Sprintf("%s is invalid", err.Field()))
 		}
 	}
-	return msgs
+	return msgs, nil
 }
