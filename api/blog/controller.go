@@ -5,6 +5,7 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog/dto"
 	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type controller struct {
@@ -40,7 +41,7 @@ func (c *controller) getBlogHandler(ctx *gin.Context) {
 		return
 	}
 
-	data, err := network.MapToDto[dto.InfoBlog](blog)
+	data, err := utils.MapTo[dto.InfoBlog](blog)
 	if err != nil {
 		c.Send(ctx).InternalServerError("something went wrong", err)
 		return

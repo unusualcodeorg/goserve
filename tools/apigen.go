@@ -112,6 +112,7 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/%s/dto"
 	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type controller struct {
@@ -147,7 +148,7 @@ func (c *controller) get%sHandler(ctx *gin.Context) {
 		return
 	}
 
-	data, err := network.MapToDto[dto.Info%s](%s)
+	data, err := utils.MapTo[dto.Info%s](%s)
 	if err != nil {
 		c.Send(ctx).InternalServerError("something went wrong", err)
 		return
