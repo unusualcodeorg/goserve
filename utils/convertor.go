@@ -59,13 +59,13 @@ func IsValidObjectID(id string) bool {
 	return err == nil
 }
 
-func MapTo[T any, V any](v *V) (*T, error) {
-	var obj T
-	err := copier.Copy(&v, obj)
+func MapTo[T any, V any](from *V) (*T, error) {
+	var to T
+	err := copier.Copy(&to, from)
 	if err != nil {
 		return nil, err
 	}
-	return &obj, nil
+	return &to, nil
 }
 
 func ExtractBearerToken(authHeader string) string {
