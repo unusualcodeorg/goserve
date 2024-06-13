@@ -63,7 +63,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type %sService interface {
+type Service interface {
 	Find%s(id primitive.ObjectID) (*model.%s, error)
 }
 
@@ -72,7 +72,7 @@ type service struct {
 	%sQueryBuilder mongo.QueryBuilder[model.%s]
 }
 
-func New%sService(db mongo.Database) %sService {
+func NewService(db mongo.Database) Service {
 	s := service{
 		BaseService:  network.NewBaseService(),
 		%sQueryBuilder: mongo.NewQueryBuilder[model.%s](db, model.CollectionName),
@@ -90,7 +90,7 @@ func (s *service) Find%s(id primitive.ObjectID) (*model.%s, error) {
 
 	return msg, nil
 }
-`, featureLower, featureLower, featureCaps, featureCaps, featureCaps, featureLower, featureCaps, featureCaps, featureCaps, featureLower, featureCaps, featureCaps, featureCaps, featureLower)
+`, featureLower, featureLower, featureCaps, featureCaps, featureLower, featureCaps, featureLower, featureCaps, featureCaps, featureCaps, featureLower)
 
 	return os.WriteFile(servicePath, []byte(template), os.ModePerm)
 }
@@ -112,17 +112,17 @@ import (
 
 type controller struct {
 	network.BaseController
-	%sService %sService
+	service Service
 }
 
-func New%sController(
+func NewController(
 	authMFunc network.AuthenticationProvider,
 	authorizeMFunc network.AuthorizationProvider,
-	service %sService,
+	service Service,
 ) network.Controller {
 	return &controller{
 		BaseController: network.NewBaseController("/%s", authMFunc, authorizeMFunc),
-		%sService:  service,
+		service:  service,
 	}
 }
 
@@ -137,7 +137,7 @@ func (c *controller) get%sHandler(ctx *gin.Context) {
 		return
 	}
 
-	%s, err := c.%sService.Find%s(mongoId.ID)
+	%s, err := c.service.Find%s(mongoId.ID)
 	if err != nil {
 		c.Send(ctx).NotFoundError("%s not found", err)
 		return
@@ -151,7 +151,7 @@ func (c *controller) get%sHandler(ctx *gin.Context) {
 
 	c.Send(ctx).SuccessDataResponse("success", data)
 }
-`, featureLower, featureLower, featureLower, featureCaps, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureCaps, featureLower, featureLower, featureCaps, featureLower, featureCaps, featureLower)
+`, featureLower, featureLower, featureLower, featureCaps, featureCaps, featureLower, featureCaps, featureLower, featureCaps, featureLower)
 
 	return os.WriteFile(controllerPath, []byte(template), os.ModePerm)
 }
