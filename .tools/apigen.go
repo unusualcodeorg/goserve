@@ -105,6 +105,7 @@ func generateController(featureDir, featureName string) error {
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/%s/dto"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/common"
 	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/framework/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
@@ -112,6 +113,7 @@ import (
 
 type controller struct {
 	network.BaseController
+	common.ContextPayload
 	service Service
 }
 
@@ -122,6 +124,7 @@ func NewController(
 ) network.Controller {
 	return &controller{
 		BaseController: network.NewBaseController("/%s", authMFunc, authorizeMFunc),
+		ContextPayload: common.NewContextPayload(),
 		service:  service,
 	}
 }
