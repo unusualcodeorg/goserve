@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/common"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
@@ -11,7 +12,7 @@ import (
 
 type authenticationProvider struct {
 	network.ResponseSender
-	utils.GinContextUtil
+	common.ContextPayload
 	authService auth.Service
 	userService user.Service
 }
@@ -19,7 +20,7 @@ type authenticationProvider struct {
 func NewAuthenticationProvider(authService auth.Service, userService user.Service) network.AuthenticationProvider {
 	return &authenticationProvider{
 		ResponseSender: network.NewResponseSender(),
-		GinContextUtil: utils.NewGinContextUtil(),
+		ContextPayload: common.NewContextPayload(),
 		authService:    authService,
 		userService:    userService,
 	}

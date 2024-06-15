@@ -3,11 +3,13 @@ package blog
 import (
 	"github.com/gin-gonic/gin"
 	userModel "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/common"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 )
 
 type editorController struct {
 	network.BaseController
+	common.ContextPayload
 	service Service
 }
 
@@ -18,6 +20,7 @@ func NewEditorController(
 ) network.Controller {
 	return &editorController{
 		BaseController: network.NewBaseController("/blog/editor", authMFunc, authorizeMFunc),
+		ContextPayload: common.NewContextPayload(),
 		service:        service,
 	}
 }

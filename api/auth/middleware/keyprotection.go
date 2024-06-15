@@ -3,20 +3,20 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/common"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type keyProtection struct {
 	network.ResponseSender
-	utils.GinContextUtil
+	common.ContextPayload
 	authService auth.Service
 }
 
 func NewKeyProtection(authService auth.Service) network.RootMiddleware {
 	return &keyProtection{
 		ResponseSender: network.NewResponseSender(),
-		GinContextUtil: utils.NewGinContextUtil(),
+		ContextPayload: common.NewContextPayload(),
 		authService:    authService,
 	}
 }

@@ -3,13 +3,14 @@ package auth
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/dto"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/common"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type controller struct {
 	network.BaseController
-	utils.GinContextUtil
+	common.ContextPayload
 	service Service
 }
 
@@ -20,7 +21,7 @@ func NewController(
 ) network.Controller {
 	c := controller{
 		BaseController: network.NewBaseController("/auth", authProvider, authorizeProvider),
-		GinContextUtil: utils.NewGinContextUtil(),
+		ContextPayload: common.NewContextPayload(),
 		service:        service,
 	}
 	return &c

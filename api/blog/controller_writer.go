@@ -4,13 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog/dto"
 	userModel "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/common"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type writerController struct {
 	network.BaseController
-	utils.GinContextUtil
+	common.ContextPayload
 	service Service
 }
 
@@ -21,7 +21,7 @@ func NewWriterController(
 ) network.Controller {
 	return &writerController{
 		BaseController: network.NewBaseController("/blog/writer", authMFunc, authorizeMFunc),
-		GinContextUtil: utils.NewGinContextUtil(),
+		ContextPayload: common.NewContextPayload(),
 		service:        service,
 	}
 }

@@ -3,19 +3,19 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/common"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type authorizationProvider struct {
 	network.ResponseSender
-	utils.GinContextUtil
+	common.ContextPayload
 }
 
 func NewAuthorizationProvider() network.AuthorizationProvider {
 	return &authorizationProvider{
 		ResponseSender: network.NewResponseSender(),
-		GinContextUtil: utils.NewGinContextUtil(),
+		ContextPayload: common.NewContextPayload(),
 	}
 }
 
