@@ -57,8 +57,8 @@ func generateService(featureDir, featureName string) error {
 
 import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/%s/model"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/mongo"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -105,8 +105,8 @@ func generateController(featureDir, featureName string) error {
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/%s/dto"
-	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/framework/dto"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
@@ -173,7 +173,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	mongod "go.mongodb.org/mongo-driver/mongo"

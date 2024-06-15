@@ -9,9 +9,9 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
-	coreMW "github.com/unusualcodeorg/go-lang-backend-architecture/core/middleware"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	coreMW "github.com/unusualcodeorg/go-lang-backend-architecture/framework/middleware"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/mongo"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 )
 
 type module struct {
@@ -32,7 +32,7 @@ func (m *module) Controllers() []network.Controller {
 		user.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.userService),
 		blog.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db)),
 		blog.NewWriterController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db)),
-		blog.NewWriterController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db)),
+		blog.NewEditorController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db)),
 		contact.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), contact.NewService(m.db)),
 	}
 }

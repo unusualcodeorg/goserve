@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
-	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/core/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/framework/dto"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
@@ -21,7 +21,7 @@ func NewController(
 ) network.Controller {
 	c := controller{
 		BaseController: network.NewBaseController("/contact", authProvider, authorizeProvider),
-		service: service,
+		service:        service,
 	}
 	return &c
 }

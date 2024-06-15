@@ -3,7 +3,7 @@ package blog
 import (
 	"github.com/gin-gonic/gin"
 	userModel "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 )
 
 type editorController struct {

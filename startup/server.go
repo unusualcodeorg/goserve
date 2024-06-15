@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/mongo"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 )
 
 func Server() {
