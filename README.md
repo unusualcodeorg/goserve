@@ -2,4 +2,4 @@
 go-lang- backend-architecture
 
 # Generate API
-`go run tools/apigen.go dummy`
+`go run .tools/apigen.go dummy`

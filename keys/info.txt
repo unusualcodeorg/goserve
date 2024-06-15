@@ -3,7 +3,7 @@
 # Create RSA Key Pair using cammand
 make keygen
 # OR
-go run tools/rsa/keygen.go
+go run .tools/rsa/keygen.go
 
 1. private.pem
 2. public.pem
