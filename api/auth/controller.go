@@ -3,13 +3,13 @@ package auth
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type controller struct {
 	network.BaseController
+	utils.GinContextUtil
 	service Service
 }
 
@@ -20,6 +20,7 @@ func NewController(
 ) network.Controller {
 	c := controller{
 		BaseController: network.NewBaseController("/auth", authProvider, authorizeProvider),
+		GinContextUtil: utils.NewGinContextUtil(),
 		service:        service,
 	}
 	return &c
@@ -65,7 +66,7 @@ func (c *controller) signInBasicHandler(ctx *gin.Context) {
 }
 
 func (c *controller) signOutBasic(ctx *gin.Context) {
-	keystore := network.ReqMustGetKeystore[model.Keystore](ctx)
+	keystore := c.MustGetKeystore(ctx)
 
 	err := c.service.SignOut(keystore)
 	if err != nil {

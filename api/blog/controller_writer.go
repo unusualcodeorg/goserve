@@ -5,10 +5,12 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog/dto"
 	userModel "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type writerController struct {
 	network.BaseController
+	utils.GinContextUtil
 	service Service
 }
 
@@ -19,6 +21,7 @@ func NewWriterController(
 ) network.Controller {
 	return &writerController{
 		BaseController: network.NewBaseController("/blog/writer", authMFunc, authorizeMFunc),
+		GinContextUtil: utils.NewGinContextUtil(),
 		service:    service,
 	}
 }
@@ -35,7 +38,7 @@ func (c *writerController) postBlogHandler(ctx *gin.Context) {
 		return
 	}
 
-	user := network.ReqMustGetUser[userModel.User](ctx)
+	user := c.MustGetUser(ctx)
 
 	b, err := c.service.CreateBlog(body, user)
 	if err != nil {

@@ -9,7 +9,7 @@ type errorCatcher struct {
 	network.BaseMiddleware
 }
 
-func NewErrorProcessor() network.RootMiddleware {
+func NewErrorCatcher() network.RootMiddleware {
 	return &errorCatcher{
 		BaseMiddleware: network.NewBaseMiddleware(),
 	}

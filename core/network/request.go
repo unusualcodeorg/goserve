@@ -8,48 +8,6 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-const (
-	reqPayloadApiKey   string = "apikey"
-	reqPayloadUser     string = "user"
-	reqPayloadKeystore string = "keystore"
-)
-
-func ReqSetApiKey[T any](ctx *gin.Context, value *T) {
-	ctx.Set(reqPayloadApiKey, value)
-}
-
-func ReqMustGetApiKey[T any](ctx *gin.Context) *T {
-	apikey, ok := ctx.MustGet(reqPayloadApiKey).(*T)
-	if !ok {
-		panic(errors.New("apikey missing for request"))
-	}
-	return apikey
-}
-
-func ReqSetUser[T any](ctx *gin.Context, value *T) {
-	ctx.Set(reqPayloadUser, value)
-}
-
-func ReqMustGetUser[T any](ctx *gin.Context) *T {
-	user, ok := ctx.MustGet(reqPayloadUser).(*T)
-	if !ok {
-		panic(errors.New("user missing for request"))
-	}
-	return user
-}
-
-func ReqSetKeystore[T any](ctx *gin.Context, value *T) {
-	ctx.Set(reqPayloadKeystore, value)
-}
-
-func ReqMustGetKeystore[T any](ctx *gin.Context) *T {
-	user, ok := ctx.MustGet(reqPayloadKeystore).(*T)
-	if !ok {
-		panic(errors.New("keystore missing for request"))
-	}
-	return user
-}
-
 // ShouldBindJSON in gin internally used go-playground/validator i.e. why we have error with validaiton info
 func ReqBody[T any](ctx *gin.Context, dto Dto[T]) (*T, error) {
 	if err := ctx.ShouldBindJSON(dto); err != nil {

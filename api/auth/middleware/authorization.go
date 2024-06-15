@@ -4,15 +4,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type authorizationProvider struct {
 	network.ResponseSender
+	utils.GinContextUtil
 }
 
 func NewAuthorizationProvider() network.AuthorizationProvider {
 	return &authorizationProvider{
 		ResponseSender: network.NewResponseSender(),
+		GinContextUtil: utils.NewGinContextUtil(),
 	}
 }
 
@@ -23,7 +26,7 @@ func (m *authorizationProvider) Middleware(roleNames ...string) gin.HandlerFunc 
 			return
 		}
 
-		user := network.ReqMustGetUser[model.User](ctx)
+		user := m.MustGetUser(ctx)
 
 		hasRole := false
 		for _, code := range roleNames {

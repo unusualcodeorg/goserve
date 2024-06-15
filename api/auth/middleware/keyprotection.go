@@ -4,16 +4,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/core/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
 
 type keyProtection struct {
 	network.ResponseSender
+	utils.GinContextUtil
 	authService auth.Service
 }
 
 func NewKeyProtection(authService auth.Service) network.RootMiddleware {
 	return &keyProtection{
 		ResponseSender: network.NewResponseSender(),
+		GinContextUtil: utils.NewGinContextUtil(),
 		authService:    authService,
 	}
 }
@@ -35,7 +38,7 @@ func (m *keyProtection) Handler(ctx *gin.Context) {
 		return
 	}
 
-	network.ReqSetApiKey(ctx, apikey)
+	m.SetApiKey(ctx, apikey)
 
 	ctx.Next()
 }

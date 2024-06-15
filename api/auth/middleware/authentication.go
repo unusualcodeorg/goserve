@@ -11,6 +11,7 @@ import (
 
 type authenticationProvider struct {
 	network.ResponseSender
+	utils.GinContextUtil
 	authService auth.Service
 	userService user.Service
 }
@@ -18,6 +19,7 @@ type authenticationProvider struct {
 func NewAuthenticationProvider(authService auth.Service, userService user.Service) network.AuthenticationProvider {
 	return &authenticationProvider{
 		ResponseSender: network.NewResponseSender(),
+		GinContextUtil: utils.NewGinContextUtil(),
 		authService:    authService,
 		userService:    userService,
 	}
@@ -67,8 +69,8 @@ func (m *authenticationProvider) Middleware() gin.HandlerFunc {
 			return
 		}
 
-		network.ReqSetUser(ctx, user)
-		network.ReqSetKeystore(ctx, keystore)
+		m.SetUser(ctx, user)
+		m.SetKeystore(ctx, keystore)
 
 		ctx.Next()
 	}
