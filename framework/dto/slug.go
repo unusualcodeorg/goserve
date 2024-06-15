@@ -7,7 +7,7 @@ import (
 )
 
 type Slug struct {
-	Slug string `bson:"slug" validate:"required,min=3,max=200"`
+	Slug string `uri:"slug" validate:"required,min=3,max=200"`
 }
 
 func (d *Slug) GetValue() *Slug {
