@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog/model"
+	userModel "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -27,8 +28,17 @@ func EmptyInfoPublicBlog() *PublicBlog {
 	return &PublicBlog{}
 }
 
-func NewPublicBlog(blog *model.Blog) (*PublicBlog, error) {
+func NewPublicBlog(blog *model.Blog, author *userModel.User) (*PublicBlog, error) {
 	b, err := utils.MapTo[PublicBlog](blog)
+	if err != nil {
+		return nil, err
+	}
+
+	b.Author, err = utils.MapTo[InfoAuthor](author)
+	if err != nil {
+		return nil, err
+	}
+
 	return b, err
 }
 

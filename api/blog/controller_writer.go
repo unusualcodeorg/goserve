@@ -5,6 +5,7 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog/dto"
 	userModel "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/common"
+	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/framework/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 )
 
@@ -29,6 +30,7 @@ func NewWriterController(
 func (c *writerController) MountRoutes(group *gin.RouterGroup) {
 	group.Use(c.Authentication(), c.Authorization(string(userModel.RoleCodeWriter)))
 	group.POST("/", c.postBlogHandler)
+	group.GET("/id/:id", c.getBlogHandler)
 }
 
 func (c *writerController) postBlogHandler(ctx *gin.Context) {
@@ -47,4 +49,22 @@ func (c *writerController) postBlogHandler(ctx *gin.Context) {
 	}
 
 	c.Send(ctx).SuccessDataResponse("blog creation success", b)
+}
+
+func (c *writerController) getBlogHandler(ctx *gin.Context) {
+	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
+	if err != nil {
+		c.Send(ctx).BadRequestError(err.Error(), err)
+		return
+	}
+
+	user := c.MustGetUser(ctx)
+
+	blog, err := c.service.GetPrivateBlogById(mongoId.ID, user)
+	if err != nil {
+		c.Send(ctx).NotFoundError(mongoId.Id+" not found", err)
+		return
+	}
+
+	c.Send(ctx).SuccessDataResponse("success", blog)
 }

@@ -16,7 +16,7 @@ type Service interface {
 	FindUserByEmail(email string) (*model.User, error)
 	CreateUser(user *model.User) (*model.User, error)
 	FindUserPrivateProfile(user *model.User) (*model.User, error)
-	FindUserPubicProfile(user *model.User) (*model.User, error)
+	FindUserPublicProfile(userId primitive.ObjectID) (*model.User, error)
 	// UpdateUserInfo(user *model.User) (*model.User, error)
 	// DeactivateUser(user *model.User) (*model.User, error)
 }
@@ -97,8 +97,8 @@ func (s *service) FindUserPrivateProfile(user *model.User) (*model.User, error) 
 	return s.userQueryBuilder.SingleQuery().FindOne(filter, opts)
 }
 
-func (s *service) FindUserPubicProfile(user *model.User) (*model.User, error) {
-	filter := bson.M{"_id": user.ID, "status": true}
+func (s *service) FindUserPublicProfile(userId primitive.ObjectID) (*model.User, error) {
+	filter := bson.M{"_id": userId, "status": true}
 	projection := bson.D{{Key: "name", Value: 1}, {Key: "profilePicUrl", Value: 1}}
 	opts := options.FindOne().SetProjection(projection)
 	return s.userQueryBuilder.SingleQuery().FindOne(filter, opts)
