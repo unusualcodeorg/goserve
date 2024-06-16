@@ -5,6 +5,7 @@ import (
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user"
 	userModel "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
+	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/framework/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 	"go.mongodb.org/mongo-driver/bson"
@@ -17,9 +18,9 @@ type Service interface {
 	GetPrivateBlogById(id primitive.ObjectID, author *userModel.User) (*dto.PrivateBlog, error)
 	GetPublisedBlogById(id primitive.ObjectID) (*dto.PublicBlog, error)
 	GetPublishedBlogBySlug(slug string) (*dto.PublicBlog, error)
-	GetAllDraftsForAuthor(blogId primitive.ObjectID, author *userModel.User) ([]*dto.PrivateBlog, error)
-	GetAllPublishedForAuthor(blogId primitive.ObjectID, author *userModel.User) ([]*dto.PrivateBlog, error)
-	GetAllSubmittedForAuthor(blogId primitive.ObjectID, author *userModel.User) ([]*dto.PrivateBlog, error)
+	GetPaginatedDraftsForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
+	GetPaginatedPublishedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
+	GetPaginatedSubmittedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 }
 
 type service struct {
@@ -93,31 +94,31 @@ func (s *service) getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
 	return dto.NewPublicBlog(blog, author)
 }
 
-func (s *service) GetAllDraftsForAuthor(blogId primitive.ObjectID, author *userModel.User) ([]*dto.PrivateBlog, error) {
-	filter := bson.M{"_id": blogId, "author": author.ID, "status": true, "isDraft": true}
-	return s.getAllPrivateForAuthor(filter, author)
+func (s *service) GetPaginatedDraftsForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
+	filter := bson.M{"author": author.ID, "status": true, "isDraft": true}
+	return s.getPaginated(filter, p)
 }
 
-func (s *service) GetAllPublishedForAuthor(blogId primitive.ObjectID, author *userModel.User) ([]*dto.PrivateBlog, error) {
-	filter := bson.M{"_id": blogId, "author": author.ID, "status": true, "isPublished": true}
-	return s.getAllPrivateForAuthor(filter, author)
+func (s *service) GetPaginatedPublishedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
+	filter := bson.M{"author": author.ID, "status": true, "isPublished": true}
+	return s.getPaginated(filter, p)
 }
 
-func (s *service) GetAllSubmittedForAuthor(blogId primitive.ObjectID, author *userModel.User) ([]*dto.PrivateBlog, error) {
-	filter := bson.M{"_id": blogId, "author": author.ID, "status": true, "isSubmitted": true}
-	return s.getAllPrivateForAuthor(filter, author)
+func (s *service) GetPaginatedSubmittedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
+	filter := bson.M{"author": author.ID, "status": true, "isSubmitted": true}
+	return s.getPaginated(filter, p)
 }
 
-func (s *service) getAllPrivateForAuthor(filter bson.M, author *userModel.User) ([]*dto.PrivateBlog, error) {
-	blogs, err := s.blogQueryBuilder.SingleQuery().FindAll(filter, nil)
+func (s *service) getPaginated(filter bson.M, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
+	blogs, err := s.blogQueryBuilder.SingleQuery().FindPaginated(filter, p.Page, p.Limit, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	dtos := make([]*dto.PrivateBlog, len(blogs))
+	dtos := make([]*dto.InfoBlog, len(blogs))
 
 	for i, b := range blogs {
-		d, err := dto.NewPrivateBlog(b, author)
+		d, err := dto.NewInfoBlog(b)
 		if err != nil {
 			return nil, err
 		}
