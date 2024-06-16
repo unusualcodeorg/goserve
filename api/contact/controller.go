@@ -3,8 +3,6 @@ package contact
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
-	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/framework/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 )
@@ -27,11 +25,7 @@ func NewController(
 }
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
-	group.Use(c.Authentication())
-	group.Use(c.Authorization(string(model.RoleCodeLearner)))
 	group.POST("/", c.createMessageHandler)
-	group.GET("/id/:id", c.getMessageHandler)
-	group.GET("/paginated", c.getMessagesPaginated)
 }
 
 func (c *controller) createMessageHandler(ctx *gin.Context) {
@@ -56,47 +50,25 @@ func (c *controller) createMessageHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessDataResponse("message received successfully!", data)
 }
 
-func (c *controller) getMessageHandler(ctx *gin.Context) {
-	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
-	if err != nil {
-		c.Send(ctx).BadRequestError(err.Error(), err)
-		return
-	}
+// func (c *controller) getMessagesPaginated(ctx *gin.Context) {
+// 	pagination, err := network.ReqQuery(ctx, coredto.EmptyPagination())
+// 	if err != nil {
+// 		c.Send(ctx).BadRequestError(err.Error(), err)
+// 		return
+// 	}
 
-	msg, err := c.service.FindMessage(mongoId.ID)
-	if err != nil {
-		c.Send(ctx).NotFoundError("message not found", err)
-		return
-	}
+// 	msgs, err := c.service.FindPaginatedMessage(pagination)
 
-	data, err := utils.MapTo[dto.InfoMessage](msg)
-	if err != nil {
-		c.Send(ctx).InternalServerError("something went wrong", err)
-		return
-	}
+// 	if err != nil {
+// 		c.Send(ctx).NotFoundError("messages not found", err)
+// 		return
+// 	}
 
-	c.Send(ctx).SuccessDataResponse("success", data)
-}
+// 	data, err := utils.MapTo[[]dto.InfoMessage](&msgs)
+// 	if err != nil {
+// 		c.Send(ctx).InternalServerError("something went wrong", err)
+// 		return
+// 	}
 
-func (c *controller) getMessagesPaginated(ctx *gin.Context) {
-	pagination, err := network.ReqQuery(ctx, coredto.EmptyPagination())
-	if err != nil {
-		c.Send(ctx).BadRequestError(err.Error(), err)
-		return
-	}
-
-	msgs, err := c.service.FindPaginatedMessage(pagination)
-
-	if err != nil {
-		c.Send(ctx).NotFoundError("messages not found", err)
-		return
-	}
-
-	data, err := utils.MapTo[[]dto.InfoMessage](&msgs)
-	if err != nil {
-		c.Send(ctx).InternalServerError("something went wrong", err)
-		return
-	}
-
-	c.Send(ctx).SuccessDataResponse("success", data)
-}
+// 	c.Send(ctx).SuccessDataResponse("success", data)
+// }
