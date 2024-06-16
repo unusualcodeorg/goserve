@@ -16,7 +16,7 @@ const UserCollectionName = "users"
 
 type User struct {
 	ID            primitive.ObjectID   `bson:"_id,omitempty"`
-	Name          *string              `bson:"name,omitempty" validate:"omitempty,max=200"`
+	Name          string               `bson:"name" validate:"required,max=200"`
 	Email         string               `bson:"email" validate:"required,email"`
 	Password      *string              `bson:"password" validate:"required,min=6,max=100"`
 	ProfilePicURL *string              `bson:"profilePicUrl,omitempty" validate:"omitempty,max=500"`
@@ -30,7 +30,7 @@ type User struct {
 	RoleDocs []Role `bson:"-" validate:"-"`
 }
 
-func NewUser(email string, pwdHash string, name *string, profilePicUrl *string, roles []Role) (*User, error) {
+func NewUser(email string, pwdHash string, name string, profilePicUrl *string, roles []Role) (*User, error) {
 	roleIds := make([]primitive.ObjectID, len(roles))
 	for i, role := range roles {
 		roleIds[i] = role.ID

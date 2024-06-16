@@ -134,7 +134,7 @@ func (c *controller) MountRoutes(group *gin.RouterGroup) {
 }
 
 func (c *controller) get%sHandler(ctx *gin.Context) {
-	mongoId, err := network.ReqParams(ctx, &coredto.MongoId{})
+	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
 		return

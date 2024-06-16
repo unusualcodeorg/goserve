@@ -86,6 +86,7 @@ func (*Blog) EnsureIndexes(db mongo.Database) {
 		{Keys: bson.D{{Key: "slug", Value: 1}}},
 		{Keys: bson.D{{Key: "isPublished", Value: 1}, {Key: "status", Value: 1}}},
 		{Keys: bson.D{{Key: "_id", Value: 1}, {Key: "isPublished", Value: 1}, {Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "slug", Value: 1}, {Key: "isPublished", Value: 1}, {Key: "status", Value: 1}}},
 		{Keys: bson.D{{Key: "tags", Value: 1}, {Key: "isPublished", Value: 1}, {Key: "status", Value: 1}}},
 	}
 

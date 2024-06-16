@@ -6,6 +6,10 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+func EmptyPagination() *Pagination {
+	return &Pagination{}
+}
+
 type Pagination struct {
 	Page  int64 `form:"page" binding:"required" validate:"required,min=1,max=1000"`
 	Limit int64 `form:"limit" binding:"required" validate:"required,min=1,max=1000"`

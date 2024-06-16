@@ -57,7 +57,7 @@ func (c *controller) createMessageHandler(ctx *gin.Context) {
 }
 
 func (c *controller) getMessageHandler(ctx *gin.Context) {
-	mongoId, err := network.ReqParams(ctx, &coredto.MongoId{})
+	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
 		return
@@ -79,7 +79,7 @@ func (c *controller) getMessageHandler(ctx *gin.Context) {
 }
 
 func (c *controller) getMessagesPaginated(ctx *gin.Context) {
-	pagination, err := network.ReqQuery(ctx, &coredto.Pagination{})
+	pagination, err := network.ReqQuery(ctx, coredto.EmptyPagination())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
 		return

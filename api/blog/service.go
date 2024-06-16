@@ -6,12 +6,14 @@ import (
 	userModel "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Service interface {
-	// GetBlog(id primitive.ObjectID) (*dto.InfoBlog, error)
+	GetPublisedBlogById(id primitive.ObjectID) (*dto.PublicBlog, error)
+	GetPublishedBlogBySlug(slug string) (*dto.PublicBlog, error)
 	CreateBlog(createBlogDto *dto.CreateBlog, author *userModel.User) (*dto.PrivateBlog, error)
 }
 
@@ -28,15 +30,26 @@ func NewService(db mongo.Database) Service {
 	return &s
 }
 
-func (s *service) FindBlog(id primitive.ObjectID) (*model.Blog, error) {
-	filter := bson.M{"_id": id}
+func (s *service) GetPublisedBlogById(id primitive.ObjectID) (*dto.PublicBlog, error) {
+	filter := bson.M{"_id": id, "isPublished": true, "status": true}
 
-	msg, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, nil)
+	blog, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return msg, nil
+	return utils.MapTo[dto.PublicBlog](blog)
+}
+
+func (s *service) GetPublishedBlogBySlug(slug string) (*dto.PublicBlog, error) {
+	filter := bson.M{"slug": slug, "isPublished": true, "status": true}
+
+	blog, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return utils.MapTo[dto.PublicBlog](blog)
 }
 
 func (s *service) CreateBlog(b *dto.CreateBlog, author *userModel.User) (*dto.PrivateBlog, error) {
@@ -56,5 +69,5 @@ func (s *service) CreateBlog(b *dto.CreateBlog, author *userModel.User) (*dto.Pr
 		return nil, err
 	}
 
-	return dto.NewPrivateBlog(created)
+	return dto.NewPrivateBlog(created, author)
 }

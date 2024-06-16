@@ -23,7 +23,7 @@ func (d *InfoBlog) GetValue() *InfoBlog {
 	return d
 }
 
-func (b *InfoBlog) ValidateErrors(errs validator.ValidationErrors) []string {
+func (b *InfoBlog) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
 	var msgs []string
 	for _, err := range errs {
 		switch err.Tag() {
@@ -43,5 +43,5 @@ func (b *InfoBlog) ValidateErrors(errs validator.ValidationErrors) []string {
 			msgs = append(msgs, fmt.Sprintf("%s is invalid", err.Field()))
 		}
 	}
-	return msgs
+	return msgs, nil
 }

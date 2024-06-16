@@ -8,6 +8,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+func EmptyMongoId() *MongoId {
+	return &MongoId{}
+}
+
 type MongoId struct {
 	Id string             `uri:"id" binding:"required" validate:"required,len=24"`
 	ID primitive.ObjectID `uri:"-" validate:"-"`

@@ -6,53 +6,37 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog/model"
-	userModel "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type PrivateBlog struct {
+type PublicBlog struct {
 	ID          primitive.ObjectID `json:"_id" binding:"required" validate:"required"`
 	Title       string             `json:"title" validate:"required,min=3,max=500"`
 	Description string             `json:"description" validate:"required,min=3,max=2000"`
 	Text        string             `json:"text" validate:"required,max=50000"`
-	DraftText   string             `json:"draftText" validate:"required"`
 	Slug        string             `json:"slug" validate:"required,min=3,max=200"`
 	Author      *InfoAuthor        `json:"author,omitempty" validate:"required,omitempty"`
 	ImgURL      *string            `json:"imgUrl,omitempty" validate:"omitempty,uri,max=200"`
 	Score       *float64           `json:"score,omitempty" validate:"omitempty,min=0,max=1"`
 	Tags        *[]string          `json:"tags,omitempty" validate:"omitempty,dive,uppercase"`
-	IsSubmitted bool               `json:"isSubmitted" validate:"required"`
-	IsDraft     bool               `json:"isDraft" validate:"required"`
-	IsPublished bool               `json:"isPublished" validate:"required"`
 	PublishedAt *time.Time         `json:"publishedAt,omitempty"`
-	CreatedAt   time.Time          `json:"createdAt" validate:"required"`
-	UpdatedAt   time.Time          `json:"updatedAt" validate:"required"`
 }
 
-func EmptyInfoPrivateBlog() *PrivateBlog {
-	return &PrivateBlog{}
+func EmptyInfoPublicBlog() *PublicBlog {
+	return &PublicBlog{}
 }
 
-func NewPrivateBlog(blog *model.Blog, author *userModel.User) (*PrivateBlog, error) {
-	b, err := utils.MapTo[PrivateBlog](blog)
-	if err != nil {
-		return nil, err
-	}
-
-	b.Author, err = utils.MapTo[InfoAuthor](author)
-	if err != nil {
-		return nil, err
-	}
-
+func NewPublicBlog(blog *model.Blog) (*PublicBlog, error) {
+	b, err := utils.MapTo[PublicBlog](blog)
 	return b, err
 }
 
-func (d *PrivateBlog) GetValue() *PrivateBlog {
+func (d *PublicBlog) GetValue() *PublicBlog {
 	return d
 }
 
-func (b *PrivateBlog) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
+func (b *PublicBlog) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
 	var msgs []string
 	for _, err := range errs {
 		switch err.Tag() {
