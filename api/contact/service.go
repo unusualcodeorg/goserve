@@ -13,7 +13,7 @@ import (
 type Service interface {
 	SaveMessage(d *dto.CreateMessage) (*model.Message, error)
 	FindMessage(id primitive.ObjectID) (*model.Message, error)
-	FindPaginatedMessage(p *coredto.Pagination) ([]model.Message, error)
+	FindPaginatedMessage(p *coredto.Pagination) ([]*model.Message, error)
 }
 
 type service struct {
@@ -54,7 +54,7 @@ func (s *service) FindMessage(id primitive.ObjectID) (*model.Message, error) {
 	return msg, nil
 }
 
-func (s *service) FindPaginatedMessage(p *coredto.Pagination) ([]model.Message, error) {
+func (s *service) FindPaginatedMessage(p *coredto.Pagination) ([]*model.Message, error) {
 	filter := bson.M{"status": true}
 
 	msgs, err := s.messageQueryBuilder.SingleQuery().FindPaginated(filter, p.Page, p.Limit, nil)

@@ -13,7 +13,7 @@ type InfoRole struct {
 	Code model.RoleCode     `json:"code" binding:"required" validate:"required,rolecode"`
 }
 
-func NewInfoRole(role model.Role) *InfoRole {
+func NewInfoRole(role *model.Role) *InfoRole {
 	return &InfoRole{
 		ID:   role.ID,
 		Code: role.Code,

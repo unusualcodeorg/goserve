@@ -15,12 +15,12 @@ type Query[T any] interface {
 	Close()
 	CreateIndexes(indexes []mongo.IndexModel) error
 	FindOne(filter bson.M, opts *options.FindOneOptions) (*T, error)
-	FindAll(filter bson.M, opts *options.FindOptions) ([]T, error)
-	FindPaginated(filter bson.M, page int64, limit int64, opts *options.FindOptions) ([]T, error)
+	FindAll(filter bson.M, opts *options.FindOptions) ([]*T, error)
+	FindPaginated(filter bson.M, page int64, limit int64, opts *options.FindOptions) ([]*T, error)
 	InsertOne(doc *T) (*primitive.ObjectID, error)
 	InsertAndRetrieveOne(doc *T) (*T, error)
-	InsertMany(doc []T) ([]primitive.ObjectID, error)
-	InsertAndRetrieveMany(doc []T) ([]T, error)
+	InsertMany(doc []*T) ([]primitive.ObjectID, error)
+	InsertAndRetrieveMany(doc []*T) ([]*T, error)
 	UpdateOne(filter bson.M, update bson.M) (int64, error)
 	UpdateMany(filter bson.M, update bson.M) (int64, error)
 	DeleteOne(filter bson.M) (int64, error)
@@ -72,7 +72,7 @@ func (q *query[T]) FindOne(filter bson.M, opts *options.FindOneOptions) (*T, err
 	return &doc, nil
 }
 
-func (q *query[T]) FindAll(filter bson.M, opts *options.FindOptions) ([]T, error) {
+func (q *query[T]) FindAll(filter bson.M, opts *options.FindOptions) ([]*T, error) {
 	defer q.Close()
 	cursor, err := q.collection.Find(q.context, filter, opts)
 	if err != nil {
@@ -80,7 +80,7 @@ func (q *query[T]) FindAll(filter bson.M, opts *options.FindOptions) ([]T, error
 	}
 	defer cursor.Close(q.context)
 
-	var docs []T
+	var docs []*T
 
 	for cursor.Next(q.context) {
 		var result T
@@ -88,7 +88,7 @@ func (q *query[T]) FindAll(filter bson.M, opts *options.FindOptions) ([]T, error
 		if err != nil {
 			return nil, fmt.Errorf("error decoding result: %w", err)
 		}
-		docs = append(docs, result)
+		docs = append(docs, &result)
 	}
 
 	if err := cursor.Err(); err != nil {
@@ -98,7 +98,7 @@ func (q *query[T]) FindAll(filter bson.M, opts *options.FindOptions) ([]T, error
 	return docs, nil
 }
 
-func (q *query[T]) FindPaginated(filter bson.M, page int64, limit int64, opts *options.FindOptions) ([]T, error) {
+func (q *query[T]) FindPaginated(filter bson.M, page int64, limit int64, opts *options.FindOptions) ([]*T, error) {
 	defer q.Close()
 	skip := (page - 1) * limit
 
@@ -112,7 +112,7 @@ func (q *query[T]) FindPaginated(filter bson.M, page int64, limit int64, opts *o
 	}
 	defer cursor.Close(q.context)
 
-	var docs []T
+	var docs []*T
 
 	for cursor.Next(q.context) {
 		var result T
@@ -120,7 +120,7 @@ func (q *query[T]) FindPaginated(filter bson.M, page int64, limit int64, opts *o
 		if err != nil {
 			return nil, fmt.Errorf("error decoding result: %w", err)
 		}
-		docs = append(docs, result)
+		docs = append(docs, &result)
 	}
 
 	if err := cursor.Err(); err != nil {
@@ -161,9 +161,9 @@ func (q *query[T]) InsertAndRetrieveOne(doc *T) (*T, error) {
 	return retrived, nil
 }
 
-func (q *query[T]) InsertMany(docs []T) ([]primitive.ObjectID, error) {
+func (q *query[T]) InsertMany(docs []*T) ([]primitive.ObjectID, error) {
 	defer q.Close()
-	var iDocs []interface{}
+	var iDocs []any
 	for _, doc := range docs {
 		iDocs = append(iDocs, doc)
 	}
@@ -186,9 +186,9 @@ func (q *query[T]) InsertMany(docs []T) ([]primitive.ObjectID, error) {
 	return insertedIDs, nil
 }
 
-func (q *query[T]) InsertAndRetrieveMany(docs []T) ([]T, error) {
+func (q *query[T]) InsertAndRetrieveMany(docs []*T) ([]*T, error) {
 	defer q.Close()
-	var iDocs []interface{}
+	var iDocs []any
 	for _, doc := range docs {
 		iDocs = append(iDocs, doc)
 	}

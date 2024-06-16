@@ -27,10 +27,10 @@ type User struct {
 	UpdatedAt     time.Time            `bson:"updatedAt" validate:"required"`
 
 	// docs
-	RoleDocs []Role `bson:"-" validate:"-"`
+	RoleDocs []*Role `bson:"-" validate:"-"`
 }
 
-func NewUser(email string, pwdHash string, name string, profilePicUrl *string, roles []Role) (*User, error) {
+func NewUser(email string, pwdHash string, name string, profilePicUrl *string, roles []*Role) (*User, error) {
 	roleIds := make([]primitive.ObjectID, len(roles))
 	for i, role := range roles {
 		roleIds[i] = role.ID

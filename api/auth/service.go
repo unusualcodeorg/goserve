@@ -99,8 +99,8 @@ func (s *service) SignUpBasic(signUpDto *dto.SignUpBasic) (*dto.UserAuth, error)
 	if err != nil {
 		return nil, err
 	}
-	roles := make([]userModel.Role, 1)
-	roles[0] = *role
+	roles := make([]*userModel.Role, 1)
+	roles[0] = role
 
 	hashed, err := bcrypt.GenerateFromPassword([]byte(signUpDto.Password), 5)
 	if err != nil {

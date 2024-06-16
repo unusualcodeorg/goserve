@@ -17,6 +17,9 @@ type Service interface {
 	GetPrivateBlogById(id primitive.ObjectID, author *userModel.User) (*dto.PrivateBlog, error)
 	GetPublisedBlogById(id primitive.ObjectID) (*dto.PublicBlog, error)
 	GetPublishedBlogBySlug(slug string) (*dto.PublicBlog, error)
+	GetAllDraftsForAuthor(blogId primitive.ObjectID, author *userModel.User) ([]*dto.PrivateBlog, error)
+	GetAllPublishedForAuthor(blogId primitive.ObjectID, author *userModel.User) ([]*dto.PrivateBlog, error)
+	GetAllSubmittedForAuthor(blogId primitive.ObjectID, author *userModel.User) ([]*dto.PrivateBlog, error)
 }
 
 type service struct {
@@ -88,4 +91,38 @@ func (s *service) getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
 	}
 
 	return dto.NewPublicBlog(blog, author)
+}
+
+func (s *service) GetAllDraftsForAuthor(blogId primitive.ObjectID, author *userModel.User) ([]*dto.PrivateBlog, error) {
+	filter := bson.M{"_id": blogId, "author": author.ID, "status": true, "isDraft": true}
+	return s.getAllPrivateForAuthor(filter, author)
+}
+
+func (s *service) GetAllPublishedForAuthor(blogId primitive.ObjectID, author *userModel.User) ([]*dto.PrivateBlog, error) {
+	filter := bson.M{"_id": blogId, "author": author.ID, "status": true, "isPublished": true}
+	return s.getAllPrivateForAuthor(filter, author)
+}
+
+func (s *service) GetAllSubmittedForAuthor(blogId primitive.ObjectID, author *userModel.User) ([]*dto.PrivateBlog, error) {
+	filter := bson.M{"_id": blogId, "author": author.ID, "status": true, "isSubmitted": true}
+	return s.getAllPrivateForAuthor(filter, author)
+}
+
+func (s *service) getAllPrivateForAuthor(filter bson.M, author *userModel.User) ([]*dto.PrivateBlog, error) {
+	blogs, err := s.blogQueryBuilder.SingleQuery().FindAll(filter, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	dtos := make([]*dto.PrivateBlog, len(blogs))
+
+	for i, b := range blogs {
+		d, err := dto.NewPrivateBlog(b, author)
+		if err != nil {
+			return nil, err
+		}
+		dtos[i] = d
+	}
+
+	return dtos, nil
 }

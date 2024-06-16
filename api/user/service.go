@@ -11,7 +11,7 @@ import (
 
 type Service interface {
 	FindRoleByCode(code model.RoleCode) (*model.Role, error)
-	FindRoles(roleIds []primitive.ObjectID) ([]model.Role, error)
+	FindRoles(roleIds []primitive.ObjectID) ([]*model.Role, error)
 	FindUserById(id primitive.ObjectID) (*model.User, error)
 	FindUserByEmail(email string) (*model.User, error)
 	CreateUser(user *model.User) (*model.User, error)
@@ -41,7 +41,7 @@ func (s *service) FindRoleByCode(code model.RoleCode) (*model.Role, error) {
 	return s.roleQueryBuilder.SingleQuery().FindOne(filter, nil)
 }
 
-func (s *service) FindRoles(roleIds []primitive.ObjectID) ([]model.Role, error) {
+func (s *service) FindRoles(roleIds []primitive.ObjectID) ([]*model.Role, error) {
 	filter := bson.M{"_id": bson.M{"$in": roleIds}}
 	return s.roleQueryBuilder.SingleQuery().FindAll(filter, nil)
 }
