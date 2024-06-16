@@ -21,14 +21,14 @@ type Blog struct {
 	Description string             `bson:"description" validate:"required,max=2000"`
 	Text        *string            `bson:"text,omitempty"`
 	DraftText   string             `bson:"draftText" validate:"required"`
-	Tags        []string           `bson:"tags"`
+	Tags        []string           `bson:"tags" validate:"required"`
 	Author      primitive.ObjectID `bson:"author" validate:"required"`
 	ImgURL      *string            `bson:"imgUrl,omitempty"`
-	Slug        string             `bson:"slug" validate:"required,unique,min=3,max=200"`
+	Slug        string             `bson:"slug" validate:"required,min=3,max=200"`
 	Score       float64            `bson:"score" validate:"min=0,max=1"`
-	IsSubmitted bool               `bson:"isSubmitted" validate:"required"`
-	IsDraft     bool               `bson:"isDraft" validate:"required"`
-	IsPublished bool               `bson:"isPublished" validate:"required"`
+	IsSubmitted bool               `bson:"isSubmitted"`
+	IsDraft     bool               `bson:"isDraft"`
+	IsPublished bool               `bson:"isPublished"`
 	Status      bool               `bson:"status"`
 	PublishedAt *time.Time         `bson:"publishedAt,omitempty"`
 	CreatedBy   primitive.ObjectID `bson:"createdBy" validate:"required"`

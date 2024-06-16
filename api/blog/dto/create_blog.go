@@ -9,7 +9,7 @@ import (
 type CreateBlog struct {
 	Title       string   `json:"title" validate:"required,min=3,max=500"`
 	Description string   `json:"description" validate:"required,min=3,max=2000"`
-	DraftText   string   `bson:"draftText" validate:"required"`
+	DraftText   string   `json:"draftText" validate:"required"`
 	Text        string   `json:"text" validate:"required,max=50000"`
 	Slug        string   `json:"slug" validate:"required,min=3,max=200"`
 	ImgURL      string   `json:"imgUrl" validate:"required,uri,max=200"`
@@ -31,9 +31,9 @@ func (b *CreateBlog) ValidateErrors(errs validator.ValidationErrors) ([]string, 
 		case "required":
 			msgs = append(msgs, fmt.Sprintf("%s is required", err.Field()))
 		case "min":
-			msgs = append(msgs, fmt.Sprintf("%s must be at least %s characters", err.Field(), err.Param()))
+			msgs = append(msgs, fmt.Sprintf("%s must be at least %s size", err.Field(), err.Param()))
 		case "max":
-			msgs = append(msgs, fmt.Sprintf("%s must be at most %s characters", err.Field(), err.Param()))
+			msgs = append(msgs, fmt.Sprintf("%s must be at most %s size", err.Field(), err.Param()))
 		case "url":
 			msgs = append(msgs, fmt.Sprintf("%s must be a valid URL", err.Field()))
 		case "uri":
