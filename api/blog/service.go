@@ -165,7 +165,7 @@ func (s *service) BlogPublicationForEditor(blogId primitive.ObjectID, editor *us
 	filter := bson.M{"_id": blogId, "status": true}
 	blog, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, nil)
 	if err != nil {
-		return err
+		return network.NewNotFoundError("blog for _id "+blogId.Hex()+" not found", err)
 	}
 
 	var update bson.M
@@ -218,7 +218,7 @@ func (s *service) GetPublishedBlogBySlug(slug string) (*dto.PublicBlog, error) {
 }
 
 func (s *service) getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error) {
-	projection := bson.D{{Key: "text", Value: 0}, {Key: "draftText", Value: 0}}
+	projection := bson.D{{Key: "draftText", Value: 0}}
 	opts := options.FindOne().SetProjection(projection)
 	blog, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, opts)
 	if err != nil {
