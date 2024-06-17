@@ -57,8 +57,8 @@ func generateService(featureDir, featureName string) error {
 
 import (
 	"github.com/unusualcodeorg/goserve/api/%s/model"
-	"github.com/unusualcodeorg/goserve/framework/mongo"
-	"github.com/unusualcodeorg/goserve/framework/network"
+	"github.com/unusualcodeorg/goserve/arch/mongo"
+	"github.com/unusualcodeorg/goserve/arch/network"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -106,8 +106,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/goserve/api/%s/dto"
 	"github.com/unusualcodeorg/goserve/common"
-	coredto "github.com/unusualcodeorg/goserve/framework/dto"
-	"github.com/unusualcodeorg/goserve/framework/network"
+	coredto "github.com/unusualcodeorg/goserve/arch/dto"
+	"github.com/unusualcodeorg/goserve/arch/network"
 	"github.com/unusualcodeorg/goserve/utils"
 )
 
@@ -176,7 +176,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/unusualcodeorg/goserve/framework/mongo"
+	"github.com/unusualcodeorg/goserve/arch/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	mongod "go.mongodb.org/mongo-driver/mongo"

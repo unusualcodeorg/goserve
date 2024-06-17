@@ -4,7 +4,7 @@ import (
 	auth "github.com/unusualcodeorg/goserve/api/auth/model"
 	contact "github.com/unusualcodeorg/goserve/api/contact/model"
 	user "github.com/unusualcodeorg/goserve/api/user/model"
-	"github.com/unusualcodeorg/goserve/framework/mongo"
+	"github.com/unusualcodeorg/goserve/arch/mongo"
 )
 
 func EnsureDbIndexes(db mongo.Database) {

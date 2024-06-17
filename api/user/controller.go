@@ -3,8 +3,8 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/goserve/api/user/dto"
-	coredto "github.com/unusualcodeorg/goserve/framework/dto"
-	"github.com/unusualcodeorg/goserve/framework/network"
+	coredto "github.com/unusualcodeorg/goserve/arch/dto"
+	"github.com/unusualcodeorg/goserve/arch/network"
 	"github.com/unusualcodeorg/goserve/utils"
 )
 

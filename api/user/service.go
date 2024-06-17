@@ -2,8 +2,8 @@ package user
 
 import (
 	"github.com/unusualcodeorg/goserve/api/user/model"
-	"github.com/unusualcodeorg/goserve/framework/mongo"
-	"github.com/unusualcodeorg/goserve/framework/network"
+	"github.com/unusualcodeorg/goserve/arch/mongo"
+	"github.com/unusualcodeorg/goserve/arch/network"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"

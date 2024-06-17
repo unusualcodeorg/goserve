@@ -3,9 +3,9 @@ package blog
 import (
 	"github.com/gin-gonic/gin"
 	userModel "github.com/unusualcodeorg/goserve/api/user/model"
+	coredto "github.com/unusualcodeorg/goserve/arch/dto"
+	"github.com/unusualcodeorg/goserve/arch/network"
 	"github.com/unusualcodeorg/goserve/common"
-	coredto "github.com/unusualcodeorg/goserve/framework/dto"
-	"github.com/unusualcodeorg/goserve/framework/network"
 )
 
 type editorController struct {

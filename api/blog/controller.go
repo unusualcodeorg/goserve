@@ -2,8 +2,8 @@ package blog
 
 import (
 	"github.com/gin-gonic/gin"
-	coredto "github.com/unusualcodeorg/goserve/framework/dto"
-	"github.com/unusualcodeorg/goserve/framework/network"
+	coredto "github.com/unusualcodeorg/goserve/arch/dto"
+	"github.com/unusualcodeorg/goserve/arch/network"
 )
 
 type controller struct {

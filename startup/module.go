@@ -8,10 +8,10 @@ import (
 	"github.com/unusualcodeorg/goserve/api/blog"
 	"github.com/unusualcodeorg/goserve/api/contact"
 	"github.com/unusualcodeorg/goserve/api/user"
+	coreMW "github.com/unusualcodeorg/goserve/arch/middleware"
+	"github.com/unusualcodeorg/goserve/arch/mongo"
+	"github.com/unusualcodeorg/goserve/arch/network"
 	"github.com/unusualcodeorg/goserve/config"
-	coreMW "github.com/unusualcodeorg/goserve/framework/middleware"
-	"github.com/unusualcodeorg/goserve/framework/mongo"
-	"github.com/unusualcodeorg/goserve/framework/network"
 )
 
 type module struct {

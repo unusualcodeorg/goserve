@@ -3,9 +3,9 @@ package contact
 import (
 	"github.com/unusualcodeorg/goserve/api/contact/dto"
 	"github.com/unusualcodeorg/goserve/api/contact/model"
-	coredto "github.com/unusualcodeorg/goserve/framework/dto"
-	"github.com/unusualcodeorg/goserve/framework/mongo"
-	"github.com/unusualcodeorg/goserve/framework/network"
+	coredto "github.com/unusualcodeorg/goserve/arch/dto"
+	"github.com/unusualcodeorg/goserve/arch/mongo"
+	"github.com/unusualcodeorg/goserve/arch/network"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

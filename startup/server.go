@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/unusualcodeorg/goserve/arch/mongo"
+	"github.com/unusualcodeorg/goserve/arch/network"
 	"github.com/unusualcodeorg/goserve/config"
-	"github.com/unusualcodeorg/goserve/framework/mongo"
-	"github.com/unusualcodeorg/goserve/framework/network"
 )
 
 func Server() {
