@@ -31,8 +31,9 @@ func (c *writerController) MountRoutes(group *gin.RouterGroup) {
 	group.Use(c.Authentication(), c.Authorization(string(userModel.RoleCodeWriter)))
 	group.POST("/", c.postBlogHandler)
 	group.GET("/id/:id", c.getBlogHandler)
-	group.PUT("/submit/:id", c.submitBlogHandler)
-	group.PUT("/withdraw/:id", c.withdrawBlogHandler)
+	group.PUT("/submit/id/:id", c.submitBlogHandler)
+	group.PUT("/withdraw/id/:id", c.withdrawBlogHandler)
+	group.DELETE("/id/:id", c.deleteBlogHandler)
 	group.GET("/drafts", c.getDraftsBlogsHandler)
 	group.GET("/submitted", c.getSubmittedBlogsHandler)
 	group.GET("/published", c.getPublishedBlogsHandler)
@@ -108,6 +109,24 @@ func (c *writerController) withdrawBlogHandler(ctx *gin.Context) {
 	}
 
 	c.Send(ctx).SuccessMsgResponse("blog withdrawn successfully")
+}
+
+func (c *writerController) deleteBlogHandler(ctx *gin.Context) {
+	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
+	if err != nil {
+		c.Send(ctx).BadRequestError(err.Error(), err)
+		return
+	}
+
+	user := c.MustGetUser(ctx)
+
+	err = c.service.DeactivateBlog(mongoId.ID, user)
+	if err != nil {
+		c.Send(ctx).MixedError(err)
+		return
+	}
+
+	c.Send(ctx).SuccessMsgResponse("blog deleted successfully")
 }
 
 func (c *writerController) getDraftsBlogsHandler(ctx *gin.Context) {
