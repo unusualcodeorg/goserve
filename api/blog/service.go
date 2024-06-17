@@ -1,6 +1,8 @@
 package blog
 
 import (
+	"time"
+
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog/model"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user"
@@ -20,12 +22,15 @@ type Service interface {
 	UpdateBlog(updateBlogDto *dto.UpdateBlog, author *userModel.User) (*dto.PrivateBlog, error)
 	DeactivateBlog(blogId primitive.ObjectID, author *userModel.User) error
 	BlogSubmission(blogId primitive.ObjectID, author *userModel.User, submit bool) error
+	BlogPublicationForEditor(blogId primitive.ObjectID, editor *userModel.User, publish bool) error
 	GetPrivateBlogById(id primitive.ObjectID, author *userModel.User) (*dto.PrivateBlog, error)
 	GetPublisedBlogById(id primitive.ObjectID) (*dto.PublicBlog, error)
 	GetPublishedBlogBySlug(slug string) (*dto.PublicBlog, error)
 	GetPaginatedDraftsForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedPublishedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedSubmittedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
+	GetPaginatedPublishedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
+	GetPaginatedSubmittedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
 	getPaginated(filter bson.M, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 }
@@ -113,6 +118,9 @@ func (s *service) UpdateBlog(b *dto.UpdateBlog, author *userModel.User) (*dto.Pr
 		updates["imgUrl"] = *b.ImgURL
 	}
 
+	updates["updatedBy"] = author.ID
+	updates["updatedAt"] = time.Now()
+
 	set := bson.M{"$set": updates}
 	_, err = s.blogQueryBuilder.SingleQuery().UpdateOne(filter, set)
 	if err != nil {
@@ -124,7 +132,7 @@ func (s *service) UpdateBlog(b *dto.UpdateBlog, author *userModel.User) (*dto.Pr
 
 func (s *service) DeactivateBlog(blogId primitive.ObjectID, author *userModel.User) error {
 	filter := bson.M{"_id": blogId, "author": author.ID, "status": true}
-	update := bson.M{"$set": bson.M{"status": false}}
+	update := bson.M{"$set": bson.M{"status": false, "updatedBy": author.ID, "updatedAt": time.Now()}}
 	result, err := s.blogQueryBuilder.SingleQuery().UpdateOne(filter, update)
 	if err != nil {
 		return err
@@ -139,7 +147,22 @@ func (s *service) DeactivateBlog(blogId primitive.ObjectID, author *userModel.Us
 
 func (s *service) BlogSubmission(blogId primitive.ObjectID, author *userModel.User, submit bool) error {
 	filter := bson.M{"_id": blogId, "author": author.ID, "status": true}
-	update := bson.M{"$set": bson.M{"isSubmitted": submit}}
+	update := bson.M{"$set": bson.M{"isSubmitted": submit, "updatedBy": author.ID, "updatedAt": time.Now()}}
+	result, err := s.blogQueryBuilder.SingleQuery().UpdateOne(filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return network.NewNotFoundError("blog not found", nil)
+	}
+
+	return nil
+}
+
+func (s *service) BlogPublicationForEditor(blogId primitive.ObjectID, editor *userModel.User, publish bool) error {
+	filter := bson.M{"_id": blogId, "status": true}
+	update := bson.M{"$set": bson.M{"isPublished": publish, "updatedBy": editor.ID, "updatedAt": time.Now()}}
 	result, err := s.blogQueryBuilder.SingleQuery().UpdateOne(filter, update)
 	if err != nil {
 		return err
@@ -201,6 +224,16 @@ func (s *service) GetPaginatedPublishedForAuthor(author *userModel.User, p *core
 
 func (s *service) GetPaginatedSubmittedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
 	filter := bson.M{"author": author.ID, "status": true, "isSubmitted": true}
+	return s.getPaginated(filter, p)
+}
+
+func (s *service) GetPaginatedPublishedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error) {
+	filter := bson.M{"status": true, "isPublished": true}
+	return s.getPaginated(filter, p)
+}
+
+func (s *service) GetPaginatedSubmittedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error) {
+	filter := bson.M{"status": true, "isSubmitted": true}
 	return s.getPaginated(filter, p)
 }
 
