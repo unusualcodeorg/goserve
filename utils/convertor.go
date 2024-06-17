@@ -76,3 +76,10 @@ func ExtractBearerToken(authHeader string) string {
 	}
 	return authHeader[tokenIndex+len(prefix):]
 }
+
+func FormatEndpoint(endpoint string) string {
+	endpoint = strings.ReplaceAll(endpoint, " ", "")
+	endpoint = strings.ReplaceAll(endpoint, "/", "-")
+	endpoint = strings.ReplaceAll(endpoint, "?", "")
+	return endpoint
+}

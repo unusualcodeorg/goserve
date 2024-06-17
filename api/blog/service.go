@@ -8,13 +8,16 @@ import (
 	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/framework/dto"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/mongo"
 	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
+	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Service interface {
+	BlogSlugExists(slug string) bool
 	CreateBlog(createBlogDto *dto.CreateBlog, author *userModel.User) (*dto.PrivateBlog, error)
+	UpdateBlog(updateBlogDto *dto.UpdateBlog, author *userModel.User) (*dto.PrivateBlog, error)
 	DeactivateBlog(blogId primitive.ObjectID, author *userModel.User) error
 	BlogSubmission(blogId primitive.ObjectID, author *userModel.User, submit bool) error
 	GetPrivateBlogById(id primitive.ObjectID, author *userModel.User) (*dto.PrivateBlog, error)
@@ -23,6 +26,8 @@ type Service interface {
 	GetPaginatedDraftsForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedPublishedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedSubmittedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
+	getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
+	getPaginated(filter bson.M, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 }
 
 type service struct {
@@ -39,10 +44,19 @@ func NewService(db mongo.Database) Service {
 	return &s
 }
 
+func (s *service) BlogSlugExists(slug string) bool {
+	filter := bson.M{"slug": slug}
+	projection := bson.D{{Key: "status", Value: 1}}
+	opts := options.FindOne().SetProjection(projection)
+	_, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, opts)
+	return err == nil
+}
+
 func (s *service) CreateBlog(b *dto.CreateBlog, author *userModel.User) (*dto.PrivateBlog, error) {
-	filter := bson.M{"slug": b.Slug}
-	_, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, nil)
-	if err == nil {
+	b.Slug = utils.FormatEndpoint(b.Slug)
+
+	exists := s.BlogSlugExists(b.Slug)
+	if exists {
 		return nil, network.NewBadRequestError("Blog with slug: "+b.Slug+" already exists", nil)
 	}
 
@@ -57,6 +71,55 @@ func (s *service) CreateBlog(b *dto.CreateBlog, author *userModel.User) (*dto.Pr
 	}
 
 	return dto.NewPrivateBlog(created, author)
+}
+
+func (s *service) UpdateBlog(b *dto.UpdateBlog, author *userModel.User) (*dto.PrivateBlog, error) {
+	filter := bson.M{"_id": b.ID, "author": author.ID, "status": true}
+	blog, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, nil)
+	if err != nil {
+		return nil, network.NewNotFoundError("Blog with id: "+b.ID.Hex()+" does not exists", nil)
+	}
+
+	updates := bson.M{}
+
+	if b.Slug != nil {
+		slug := utils.FormatEndpoint(*b.Slug)
+		if slug != blog.Slug {
+			exists := s.BlogSlugExists(slug)
+			if exists {
+				return nil, network.NewBadRequestError("Blog with slug: "+slug+" already exists", nil)
+			}
+			updates["slug"] = slug
+		}
+	}
+
+	if b.Title != nil {
+		updates["title"] = *b.Title
+	}
+
+	if b.Description != nil {
+		updates["description"] = *b.Description
+	}
+
+	if b.DraftText != nil {
+		updates["draftText"] = *b.DraftText
+	}
+
+	if b.Tags != nil {
+		updates["tags"] = *b.Tags
+	}
+
+	if b.ImgURL != nil {
+		updates["imgUrl"] = *b.ImgURL
+	}
+
+	set := bson.M{"$set": updates}
+	_, err = s.blogQueryBuilder.SingleQuery().UpdateOne(filter, set)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.GetPrivateBlogById(blog.ID, author)
 }
 
 func (s *service) DeactivateBlog(blogId primitive.ObjectID, author *userModel.User) error {

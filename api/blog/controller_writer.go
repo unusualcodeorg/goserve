@@ -30,10 +30,11 @@ func NewWriterController(
 func (c *writerController) MountRoutes(group *gin.RouterGroup) {
 	group.Use(c.Authentication(), c.Authorization(string(userModel.RoleCodeWriter)))
 	group.POST("/", c.postBlogHandler)
+	group.PUT("/", c.updateBlogHandler)
 	group.GET("/id/:id", c.getBlogHandler)
+	group.DELETE("/id/:id", c.deleteBlogHandler)
 	group.PUT("/submit/id/:id", c.submitBlogHandler)
 	group.PUT("/withdraw/id/:id", c.withdrawBlogHandler)
-	group.DELETE("/id/:id", c.deleteBlogHandler)
 	group.GET("/drafts", c.getDraftsBlogsHandler)
 	group.GET("/submitted", c.getSubmittedBlogsHandler)
 	group.GET("/published", c.getPublishedBlogsHandler)
@@ -54,7 +55,25 @@ func (c *writerController) postBlogHandler(ctx *gin.Context) {
 		return
 	}
 
-	c.Send(ctx).SuccessDataResponse("blog creation success", b)
+	c.Send(ctx).SuccessDataResponse("blog created successfully", b)
+}
+
+func (c *writerController) updateBlogHandler(ctx *gin.Context) {
+	body, err := network.ReqBody(ctx, dto.EmptyUpdateBlog())
+	if err != nil {
+		c.Send(ctx).BadRequestError(err.Error(), err)
+		return
+	}
+
+	user := c.MustGetUser(ctx)
+
+	b, err := c.service.UpdateBlog(body, user)
+	if err != nil {
+		c.Send(ctx).MixedError(err)
+		return
+	}
+
+	c.Send(ctx).SuccessDataResponse("blog updated successfully", b)
 }
 
 func (c *writerController) getBlogHandler(ctx *gin.Context) {
