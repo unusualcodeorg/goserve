@@ -1,11 +1,11 @@
 package contact
 
 import (
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/model"
-	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/framework/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
+	"github.com/unusualcodeorg/goserve/api/contact/dto"
+	"github.com/unusualcodeorg/goserve/api/contact/model"
+	coredto "github.com/unusualcodeorg/goserve/framework/dto"
+	"github.com/unusualcodeorg/goserve/framework/mongo"
+	"github.com/unusualcodeorg/goserve/framework/network"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

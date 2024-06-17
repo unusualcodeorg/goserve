@@ -3,15 +3,15 @@ package startup
 import (
 	"context"
 
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth"
-	authMW "github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/middleware"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/contact"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/config"
-	coreMW "github.com/unusualcodeorg/go-lang-backend-architecture/framework/middleware"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/mongo"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
+	"github.com/unusualcodeorg/goserve/api/auth"
+	authMW "github.com/unusualcodeorg/goserve/api/auth/middleware"
+	"github.com/unusualcodeorg/goserve/api/blog"
+	"github.com/unusualcodeorg/goserve/api/contact"
+	"github.com/unusualcodeorg/goserve/api/user"
+	"github.com/unusualcodeorg/goserve/config"
+	coreMW "github.com/unusualcodeorg/goserve/framework/middleware"
+	"github.com/unusualcodeorg/goserve/framework/mongo"
+	"github.com/unusualcodeorg/goserve/framework/network"
 )
 
 type module struct {

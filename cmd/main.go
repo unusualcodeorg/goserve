@@ -1,6 +1,6 @@
 package main
 
-import "github.com/unusualcodeorg/go-lang-backend-architecture/startup"
+import "github.com/unusualcodeorg/goserve/startup"
 
 func main() {
 	startup.Server()

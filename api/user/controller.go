@@ -2,10 +2,10 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/user/dto"
-	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/framework/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/utils"
+	"github.com/unusualcodeorg/goserve/api/user/dto"
+	coredto "github.com/unusualcodeorg/goserve/framework/dto"
+	"github.com/unusualcodeorg/goserve/framework/network"
+	"github.com/unusualcodeorg/goserve/utils"
 )
 
 type controller struct {

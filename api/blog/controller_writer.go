@@ -2,11 +2,11 @@ package blog
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/blog/dto"
-	userModel "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/common"
-	coredto "github.com/unusualcodeorg/go-lang-backend-architecture/framework/dto"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
+	"github.com/unusualcodeorg/goserve/api/blog/dto"
+	userModel "github.com/unusualcodeorg/goserve/api/user/model"
+	"github.com/unusualcodeorg/goserve/common"
+	coredto "github.com/unusualcodeorg/goserve/framework/dto"
+	"github.com/unusualcodeorg/goserve/framework/network"
 )
 
 type writerController struct {

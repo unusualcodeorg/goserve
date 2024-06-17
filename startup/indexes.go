@@ -1,10 +1,10 @@
 package startup
 
 import (
-	auth "github.com/unusualcodeorg/go-lang-backend-architecture/api/auth/model"
-	contact "github.com/unusualcodeorg/go-lang-backend-architecture/api/contact/model"
-	user "github.com/unusualcodeorg/go-lang-backend-architecture/api/user/model"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/mongo"
+	auth "github.com/unusualcodeorg/goserve/api/auth/model"
+	contact "github.com/unusualcodeorg/goserve/api/contact/model"
+	user "github.com/unusualcodeorg/goserve/api/user/model"
+	"github.com/unusualcodeorg/goserve/framework/mongo"
 )
 
 func EnsureDbIndexes(db mongo.Database) {

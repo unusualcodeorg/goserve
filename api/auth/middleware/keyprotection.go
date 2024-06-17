@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/api/auth"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/common"
-	"github.com/unusualcodeorg/go-lang-backend-architecture/framework/network"
+	"github.com/unusualcodeorg/goserve/api/auth"
+	"github.com/unusualcodeorg/goserve/common"
+	"github.com/unusualcodeorg/goserve/framework/network"
 )
 
 type keyProtection struct {

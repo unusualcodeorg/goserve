@@ -1,4 +1,4 @@
-module github.com/unusualcodeorg/go-lang-backend-architecture
+module github.com/unusualcodeorg/goserve
 
 go 1.22.4
 
