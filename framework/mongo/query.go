@@ -21,9 +21,9 @@ type Query[T any] interface {
 	InsertAndRetrieveOne(doc *T) (*T, error)
 	InsertMany(doc []*T) ([]primitive.ObjectID, error)
 	InsertAndRetrieveMany(doc []*T) ([]*T, error)
-	UpdateOne(filter bson.M, update bson.M) (int64, error)
-	UpdateMany(filter bson.M, update bson.M) (int64, error)
-	DeleteOne(filter bson.M) (int64, error)
+	UpdateOne(filter bson.M, update bson.M) (*mongo.UpdateResult, error)
+	UpdateMany(filter bson.M, update bson.M) (*mongo.UpdateResult, error)
+	DeleteOne(filter bson.M) (*mongo.DeleteResult, error)
 }
 
 type query[T any] struct {
@@ -211,33 +211,33 @@ func (q *query[T]) InsertAndRetrieveMany(docs []*T) ([]*T, error) {
 /*
  * Example -> update := bson.M{"$set": bson.M{"field": "newValue"}}
  */
-func (q *query[T]) UpdateOne(filter bson.M, update bson.M) (int64, error) {
+func (q *query[T]) UpdateOne(filter bson.M, update bson.M) (*mongo.UpdateResult, error) {
 	defer q.Close()
 	result, err := q.collection.UpdateOne(q.context, filter, update)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return result.MatchedCount, nil
+	return result, nil
 }
 
 /*
  * Example -> update := bson.M{"$set": bson.M{"field": "newValue"}}
  */
-func (q *query[T]) UpdateMany(filter bson.M, update bson.M) (int64, error) {
+func (q *query[T]) UpdateMany(filter bson.M, update bson.M) (*mongo.UpdateResult, error) {
 	defer q.Close()
 	result, err := q.collection.UpdateMany(q.context, filter, update)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return result.MatchedCount, nil
+	return result, nil
 }
 
-func (q *query[T]) DeleteOne(filter bson.M) (int64, error) {
+func (q *query[T]) DeleteOne(filter bson.M) (*mongo.DeleteResult, error) {
 	defer q.Close()
 	result, err := q.collection.DeleteOne(q.context, filter)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return result.DeletedCount, nil
+	return result, nil
 }
