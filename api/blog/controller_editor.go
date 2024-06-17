@@ -28,9 +28,25 @@ func NewEditorController(
 
 func (c *editorController) MountRoutes(group *gin.RouterGroup) {
 	group.Use(c.Authentication(), c.Authorization(string(userModel.RoleCodeEditor)))
+	group.GET("/id/:id", c.getBlogHandler)
 	group.PUT("/publish/id/:id", c.publishBlogHandler)
 	group.PUT("/unpublish/id/:id", c.unpublishBlogHandler)
+}
 
+func (c *editorController) getBlogHandler(ctx *gin.Context) {
+	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
+	if err != nil {
+		c.Send(ctx).BadRequestError(err.Error(), err)
+		return
+	}
+
+	blog, err := c.service.GetBlogByIdForEditor(mongoId.ID)
+	if err != nil {
+		c.Send(ctx).NotFoundError(mongoId.Id+" not found", err)
+		return
+	}
+
+	c.Send(ctx).SuccessDataResponse("success", blog)
 }
 
 func (c *editorController) publishBlogHandler(ctx *gin.Context) {

@@ -29,6 +29,7 @@ type Service interface {
 	GetPaginatedDraftsForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedPublishedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedSubmittedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
+	GetBlogByIdForEditor(id primitive.ObjectID) (*dto.PrivateBlog, error)
 	GetPaginatedPublishedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedSubmittedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
@@ -231,6 +232,21 @@ func (s *service) getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
 	}
 
 	return dto.NewPublicBlog(blog, author)
+}
+
+func (s *service) GetBlogByIdForEditor(id primitive.ObjectID) (*dto.PrivateBlog, error) {
+	filter := bson.M{"_id": id, "status": true}
+	blog, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	author, err := s.userService.FindUserPublicProfile(blog.Author)
+	if err != nil {
+		return nil, err
+	}
+
+	return dto.NewPrivateBlog(blog, author)
 }
 
 func (s *service) GetPaginatedDraftsForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
