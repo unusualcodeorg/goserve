@@ -26,9 +26,9 @@ type Blog struct {
 	ImgURL      *string            `bson:"imgUrl,omitempty"`
 	Slug        string             `bson:"slug" validate:"required,min=3,max=200"`
 	Score       float64            `bson:"score" validate:"min=0,max=1"`
-	IsSubmitted bool               `bson:"isSubmitted"`
-	IsDraft     bool               `bson:"isDraft"`
-	IsPublished bool               `bson:"isPublished"`
+	Submitted   bool               `bson:"submitted"`
+	Drafted     bool               `bson:"drafted"`
+	Published   bool               `bson:"published"`
 	Status      bool               `bson:"status"`
 	PublishedAt *time.Time         `bson:"publishedAt,omitempty"`
 	CreatedBy   primitive.ObjectID `bson:"createdBy" validate:"required"`
@@ -47,9 +47,9 @@ func NewBlog(slug, title, description, draftText string, tags []string, author *
 		Author:      author.ID,
 		Slug:        slug,
 		Score:       0.01,
-		IsSubmitted: false,
-		IsDraft:     true,
-		IsPublished: false,
+		Submitted:   false,
+		Drafted:     true,
+		Published:   false,
 		Status:      true,
 		CreatedBy:   author.ID,
 		UpdatedBy:   author.ID,
@@ -84,10 +84,10 @@ func (*Blog) EnsureIndexes(db mongo.Database) {
 		},
 		{Keys: bson.D{{Key: "_id", Value: 1}, {Key: "status", Value: 1}}},
 		{Keys: bson.D{{Key: "slug", Value: 1}}},
-		{Keys: bson.D{{Key: "isPublished", Value: 1}, {Key: "status", Value: 1}}},
-		{Keys: bson.D{{Key: "_id", Value: 1}, {Key: "isPublished", Value: 1}, {Key: "status", Value: 1}}},
-		{Keys: bson.D{{Key: "slug", Value: 1}, {Key: "isPublished", Value: 1}, {Key: "status", Value: 1}}},
-		{Keys: bson.D{{Key: "tags", Value: 1}, {Key: "isPublished", Value: 1}, {Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "published", Value: 1}, {Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "_id", Value: 1}, {Key: "published", Value: 1}, {Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "slug", Value: 1}, {Key: "published", Value: 1}, {Key: "status", Value: 1}}},
+		{Keys: bson.D{{Key: "tags", Value: 1}, {Key: "published", Value: 1}, {Key: "status", Value: 1}}},
 	}
 
 	mongo.NewQueryBuilder[Blog](db, CollectionName).Query(context.Background()).CreateIndexes(indexes)

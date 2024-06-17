@@ -15,16 +15,16 @@ type PrivateBlog struct {
 	ID          primitive.ObjectID `json:"_id" binding:"required" validate:"required"`
 	Title       string             `json:"title" validate:"required,min=3,max=500"`
 	Description string             `json:"description" validate:"required,min=3,max=2000"`
-	Text        *string             `json:"text,omitempty" validate:"omitempty,max=50000"`
+	Text        *string            `json:"text,omitempty" validate:"omitempty,max=50000"`
 	DraftText   string             `json:"draftText" validate:"required"`
 	Slug        string             `json:"slug" validate:"required,min=3,max=200"`
 	Author      *InfoAuthor        `json:"author,omitempty" validate:"required,omitempty"`
 	ImgURL      *string            `json:"imgUrl,omitempty" validate:"omitempty,uri,max=200"`
 	Score       *float64           `json:"score,omitempty" validate:"omitempty,min=0,max=1"`
 	Tags        *[]string          `json:"tags,omitempty" validate:"omitempty,dive,uppercase"`
-	IsSubmitted bool               `json:"isSubmitted" validate:"required"`
-	IsDraft     bool               `json:"isDraft" validate:"required"`
-	IsPublished bool               `json:"isPublished" validate:"required"`
+	Submitted   bool               `json:"submitted" validate:"required"`
+	Drafted     bool               `json:"drafted" validate:"required"`
+	Published   bool               `json:"published" validate:"required"`
 	PublishedAt *time.Time         `json:"publishedAt,omitempty"`
 	CreatedAt   time.Time          `json:"createdAt" validate:"required"`
 	UpdatedAt   time.Time          `json:"updatedAt" validate:"required"`

@@ -147,7 +147,7 @@ func (s *service) DeactivateBlog(blogId primitive.ObjectID, author *userModel.Us
 
 func (s *service) BlogSubmission(blogId primitive.ObjectID, author *userModel.User, submit bool) error {
 	filter := bson.M{"_id": blogId, "author": author.ID, "status": true}
-	update := bson.M{"$set": bson.M{"isSubmitted": submit, "updatedBy": author.ID, "updatedAt": time.Now()}}
+	update := bson.M{"$set": bson.M{"submitted": submit, "updatedBy": author.ID, "updatedAt": time.Now()}}
 	result, err := s.blogQueryBuilder.SingleQuery().UpdateOne(filter, update)
 	if err != nil {
 		return err
@@ -162,7 +162,7 @@ func (s *service) BlogSubmission(blogId primitive.ObjectID, author *userModel.Us
 
 func (s *service) BlogPublicationForEditor(blogId primitive.ObjectID, editor *userModel.User, publish bool) error {
 	filter := bson.M{"_id": blogId, "status": true}
-	update := bson.M{"$set": bson.M{"isPublished": publish, "updatedBy": editor.ID, "updatedAt": time.Now()}}
+	update := bson.M{"$set": bson.M{"published": publish, "updatedBy": editor.ID, "updatedAt": time.Now()}}
 	result, err := s.blogQueryBuilder.SingleQuery().UpdateOne(filter, update)
 	if err != nil {
 		return err
@@ -187,12 +187,12 @@ func (s *service) GetPrivateBlogById(id primitive.ObjectID, author *userModel.Us
 }
 
 func (s *service) GetPublisedBlogById(id primitive.ObjectID) (*dto.PublicBlog, error) {
-	filter := bson.M{"_id": id, "isPublished": true, "status": true}
+	filter := bson.M{"_id": id, "published": true, "status": true}
 	return s.getPublicPublishedBlog(filter)
 }
 
 func (s *service) GetPublishedBlogBySlug(slug string) (*dto.PublicBlog, error) {
-	filter := bson.M{"slug": slug, "isPublished": true, "status": true}
+	filter := bson.M{"slug": slug, "published": true, "status": true}
 	return s.getPublicPublishedBlog(filter)
 }
 
@@ -213,27 +213,27 @@ func (s *service) getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
 }
 
 func (s *service) GetPaginatedDraftsForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
-	filter := bson.M{"author": author.ID, "status": true, "isDraft": true}
+	filter := bson.M{"author": author.ID, "status": true, "drafted": true}
 	return s.getPaginated(filter, p)
 }
 
 func (s *service) GetPaginatedPublishedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
-	filter := bson.M{"author": author.ID, "status": true, "isPublished": true}
+	filter := bson.M{"author": author.ID, "status": true, "published": true}
 	return s.getPaginated(filter, p)
 }
 
 func (s *service) GetPaginatedSubmittedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
-	filter := bson.M{"author": author.ID, "status": true, "isSubmitted": true}
+	filter := bson.M{"author": author.ID, "status": true, "submitted": true}
 	return s.getPaginated(filter, p)
 }
 
 func (s *service) GetPaginatedPublishedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error) {
-	filter := bson.M{"status": true, "isPublished": true}
+	filter := bson.M{"status": true, "published": true}
 	return s.getPaginated(filter, p)
 }
 
 func (s *service) GetPaginatedSubmittedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error) {
-	filter := bson.M{"status": true, "isSubmitted": true}
+	filter := bson.M{"status": true, "submitted": true}
 	return s.getPaginated(filter, p)
 }
 
