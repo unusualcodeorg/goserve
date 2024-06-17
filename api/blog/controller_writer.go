@@ -85,7 +85,7 @@ func (c *writerController) getBlogHandler(ctx *gin.Context) {
 
 	user := c.MustGetUser(ctx)
 
-	blog, err := c.service.GetPrivateBlogById(mongoId.ID, user)
+	blog, err := c.service.GetBlogByIdForAuthor(mongoId.ID, user)
 	if err != nil {
 		c.Send(ctx).NotFoundError(mongoId.Id+" not found", err)
 		return

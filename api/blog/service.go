@@ -22,14 +22,14 @@ type Service interface {
 	UpdateBlog(updateBlogDto *dto.UpdateBlog, author *userModel.User) (*dto.PrivateBlog, error)
 	DeactivateBlog(blogId primitive.ObjectID, author *userModel.User) error
 	BlogSubmission(blogId primitive.ObjectID, author *userModel.User, submit bool) error
-	BlogPublicationForEditor(blogId primitive.ObjectID, editor *userModel.User, publish bool) error
-	GetPrivateBlogById(id primitive.ObjectID, author *userModel.User) (*dto.PrivateBlog, error)
 	GetPublisedBlogById(id primitive.ObjectID) (*dto.PublicBlog, error)
 	GetPublishedBlogBySlug(slug string) (*dto.PublicBlog, error)
+	GetBlogByIdForAuthor(id primitive.ObjectID, author *userModel.User) (*dto.PrivateBlog, error)
 	GetPaginatedDraftsForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedPublishedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedSubmittedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetBlogByIdForEditor(id primitive.ObjectID) (*dto.PrivateBlog, error)
+	BlogPublicationForEditor(blogId primitive.ObjectID, editor *userModel.User, publish bool) error
 	GetPaginatedPublishedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedSubmittedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
@@ -129,7 +129,7 @@ func (s *service) UpdateBlog(b *dto.UpdateBlog, author *userModel.User) (*dto.Pr
 		return nil, err
 	}
 
-	return s.GetPrivateBlogById(blog.ID, author)
+	return s.GetBlogByIdForAuthor(blog.ID, author)
 }
 
 func (s *service) DeactivateBlog(blogId primitive.ObjectID, author *userModel.User) error {
@@ -197,7 +197,7 @@ func (s *service) BlogPublicationForEditor(blogId primitive.ObjectID, editor *us
 	return nil
 }
 
-func (s *service) GetPrivateBlogById(id primitive.ObjectID, author *userModel.User) (*dto.PrivateBlog, error) {
+func (s *service) GetBlogByIdForAuthor(id primitive.ObjectID, author *userModel.User) (*dto.PrivateBlog, error) {
 	filter := bson.M{"_id": id, "author": author.ID, "status": true}
 
 	blog, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, nil)
