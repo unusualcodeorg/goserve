@@ -30,9 +30,9 @@ func (m *module) Controllers() []network.Controller {
 	return []network.Controller{
 		auth.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.authService),
 		user.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.userService),
-		blog.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db)),
-		blog.NewWriterController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db)),
-		blog.NewEditorController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db)),
+		blog.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.userService)),
+		blog.NewWriterController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.userService)),
+		blog.NewEditorController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.userService)),
 		contact.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), contact.NewService(m.db)),
 	}
 }

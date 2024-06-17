@@ -41,10 +41,11 @@ type service struct {
 	userService      user.Service
 }
 
-func NewService(db mongo.Database) Service {
+func NewService(db mongo.Database, userService user.Service) Service {
 	s := service{
 		BaseService:      network.NewBaseService(),
 		blogQueryBuilder: mongo.NewQueryBuilder[model.Blog](db, model.CollectionName),
+		userService:      userService,
 	}
 	return &s
 }
@@ -162,8 +163,28 @@ func (s *service) BlogSubmission(blogId primitive.ObjectID, author *userModel.Us
 
 func (s *service) BlogPublicationForEditor(blogId primitive.ObjectID, editor *userModel.User, publish bool) error {
 	filter := bson.M{"_id": blogId, "status": true}
-	update := bson.M{"$set": bson.M{"published": publish, "updatedBy": editor.ID, "updatedAt": time.Now()}}
-	result, err := s.blogQueryBuilder.SingleQuery().UpdateOne(filter, update)
+	blog, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, nil)
+	if err != nil {
+		return err
+	}
+
+	var update bson.M
+
+	if publish {
+		if blog.PublishedAt == nil {
+			now := time.Now()
+			blog.PublishedAt = &now
+		}
+		update = bson.M{"drafted": false, "submitted": false, "published": true, "text": blog.DraftText, "publishedAt": blog.PublishedAt}
+	} else {
+		update = bson.M{"drafted": true, "submitted": false, "published": false}
+	}
+
+	update["updatedBy"] = editor.ID
+	update["updatedAt"] = time.Now()
+
+	updated := bson.M{"$set": update}
+	result, err := s.blogQueryBuilder.SingleQuery().UpdateOne(filter, updated)
 	if err != nil {
 		return err
 	}
@@ -197,7 +218,7 @@ func (s *service) GetPublishedBlogBySlug(slug string) (*dto.PublicBlog, error) {
 }
 
 func (s *service) getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error) {
-	projection := bson.D{{Key: "text", Value: 0}, {Key: "draftText", Value: 0}, {Key: "text", Value: 0}}
+	projection := bson.D{{Key: "text", Value: 0}, {Key: "draftText", Value: 0}}
 	opts := options.FindOne().SetProjection(projection)
 	blog, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, opts)
 	if err != nil {
