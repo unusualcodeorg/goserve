@@ -31,6 +31,8 @@ func (c *editorController) MountRoutes(group *gin.RouterGroup) {
 	group.GET("/id/:id", c.getBlogHandler)
 	group.PUT("/publish/id/:id", c.publishBlogHandler)
 	group.PUT("/unpublish/id/:id", c.unpublishBlogHandler)
+	group.GET("/submitted", c.getSubmittedBlogsHandler)
+	group.GET("/published", c.getPublishedBlogsHandler)
 }
 
 func (c *editorController) getBlogHandler(ctx *gin.Context) {
@@ -50,7 +52,7 @@ func (c *editorController) getBlogHandler(ctx *gin.Context) {
 }
 
 func (c *editorController) publishBlogHandler(ctx *gin.Context) {
- mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
+	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
 		return
@@ -68,7 +70,7 @@ func (c *editorController) publishBlogHandler(ctx *gin.Context) {
 }
 
 func (c *editorController) unpublishBlogHandler(ctx *gin.Context) {
- mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
+	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
 		return
@@ -83,4 +85,36 @@ func (c *editorController) unpublishBlogHandler(ctx *gin.Context) {
 	}
 
 	c.Send(ctx).SuccessMsgResponse("blog unpublished successfully")
+}
+
+func (c *editorController) getSubmittedBlogsHandler(ctx *gin.Context) {
+	pagination, err := network.ReqQuery(ctx, coredto.EmptyPagination())
+	if err != nil {
+		c.Send(ctx).BadRequestError(err.Error(), err)
+		return
+	}
+
+	blog, err := c.service.GetPaginatedSubmittedForEditor(pagination)
+	if err != nil {
+		c.Send(ctx).NotFoundError("blogs not found", err)
+		return
+	}
+
+	c.Send(ctx).SuccessDataResponse("success", blog)
+}
+
+func (c *editorController) getPublishedBlogsHandler(ctx *gin.Context) {
+	pagination, err := network.ReqQuery(ctx, coredto.EmptyPagination())
+	if err != nil {
+		c.Send(ctx).BadRequestError(err.Error(), err)
+		return
+	}
+
+	blog, err := c.service.GetPaginatedPublishedForEditor(pagination)
+	if err != nil {
+		c.Send(ctx).NotFoundError("blogs not found", err)
+		return
+	}
+
+	c.Send(ctx).SuccessDataResponse("success", blog)
 }
