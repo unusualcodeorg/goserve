@@ -15,6 +15,7 @@ import (
 
 type Service interface {
 	CreateBlog(createBlogDto *dto.CreateBlog, author *userModel.User) (*dto.PrivateBlog, error)
+	BlogSubmission(blogId primitive.ObjectID, author *userModel.User, submit bool) error
 	GetPrivateBlogById(id primitive.ObjectID, author *userModel.User) (*dto.PrivateBlog, error)
 	GetPublisedBlogById(id primitive.ObjectID) (*dto.PublicBlog, error)
 	GetPublishedBlogBySlug(slug string) (*dto.PublicBlog, error)
@@ -55,6 +56,22 @@ func (s *service) CreateBlog(b *dto.CreateBlog, author *userModel.User) (*dto.Pr
 	}
 
 	return dto.NewPrivateBlog(created, author)
+}
+
+func (s *service) BlogSubmission(blogId primitive.ObjectID, author *userModel.User, submit bool) error {
+	filter := bson.M{"_id": blogId, "author": author.ID, "status": true}
+	update := bson.M{"$set": bson.M{"isSubmitted": submit}}
+	result, err := s.blogQueryBuilder.SingleQuery().UpdateOne(filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		network.NewNotFoundError("blog not found", nil)
+		return nil
+	}
+
+	return nil
 }
 
 func (s *service) GetPrivateBlogById(id primitive.ObjectID, author *userModel.User) (*dto.PrivateBlog, error) {

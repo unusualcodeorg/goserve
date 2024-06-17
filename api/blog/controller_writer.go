@@ -31,6 +31,8 @@ func (c *writerController) MountRoutes(group *gin.RouterGroup) {
 	group.Use(c.Authentication(), c.Authorization(string(userModel.RoleCodeWriter)))
 	group.POST("/", c.postBlogHandler)
 	group.GET("/id/:id", c.getBlogHandler)
+	group.PUT("/submit/:id", c.submitBlogHandler)
+	group.PUT("/withdraw/:id", c.withdrawBlogHandler)
 	group.GET("/drafts", c.getDraftsBlogsHandler)
 	group.GET("/submitted", c.getSubmittedBlogsHandler)
 	group.GET("/published", c.getPublishedBlogsHandler)
@@ -70,6 +72,42 @@ func (c *writerController) getBlogHandler(ctx *gin.Context) {
 	}
 
 	c.Send(ctx).SuccessDataResponse("success", blog)
+}
+
+func (c *writerController) submitBlogHandler(ctx *gin.Context) {
+	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
+	if err != nil {
+		c.Send(ctx).BadRequestError(err.Error(), err)
+		return
+	}
+
+	user := c.MustGetUser(ctx)
+
+	err = c.service.BlogSubmission(mongoId.ID, user, true)
+	if err != nil {
+		c.Send(ctx).MixedError(err)
+		return
+	}
+
+	c.Send(ctx).SuccessMsgResponse("blog submitted successfully")
+}
+
+func (c *writerController) withdrawBlogHandler(ctx *gin.Context) {
+	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
+	if err != nil {
+		c.Send(ctx).BadRequestError(err.Error(), err)
+		return
+	}
+
+	user := c.MustGetUser(ctx)
+
+	err = c.service.BlogSubmission(mongoId.ID, user, false)
+	if err != nil {
+		c.Send(ctx).MixedError(err)
+		return
+	}
+
+	c.Send(ctx).SuccessMsgResponse("blog withdrawn successfully")
 }
 
 func (c *writerController) getDraftsBlogsHandler(ctx *gin.Context) {
