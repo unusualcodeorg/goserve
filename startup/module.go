@@ -6,6 +6,7 @@ import (
 	"github.com/unusualcodeorg/goserve/api/auth"
 	authMW "github.com/unusualcodeorg/goserve/api/auth/middleware"
 	"github.com/unusualcodeorg/goserve/api/blog"
+	"github.com/unusualcodeorg/goserve/api/blogs"
 	"github.com/unusualcodeorg/goserve/api/contact"
 	"github.com/unusualcodeorg/goserve/api/user"
 	coreMW "github.com/unusualcodeorg/goserve/arch/middleware"
@@ -35,7 +36,7 @@ func (m *module) Controllers() []network.Controller {
 		blog.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.store, m.userService)),
 		blog.NewWriterController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.store, m.userService)),
 		blog.NewEditorController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.store, m.userService)),
-		blog.NewBlogsController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.store, m.userService)),
+		blogs.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), blogs.NewService(m.db, m.store)),
 		contact.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), contact.NewService(m.db)),
 	}
 }

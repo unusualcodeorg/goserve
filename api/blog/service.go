@@ -22,8 +22,6 @@ type Service interface {
 	GetBlogDtoCacheById(id primitive.ObjectID) (*dto.PublicBlog, error)
 	SetBlogDtoCacheBySlug(blog *dto.PublicBlog) error
 	GetBlogDtoCacheBySlug(slug string) (*dto.PublicBlog, error)
-	SetSimilarBlogsDtoCache(blogId primitive.ObjectID, blogs []*dto.InfoBlog) error
-	GetSimilarBlogsDtoCache(blogId primitive.ObjectID) ([]*dto.InfoBlog, error)
 	BlogSlugExists(slug string) bool
 	CreateBlog(createBlogDto *dto.CreateBlog, author *userModel.User) (*dto.PrivateBlog, error)
 	UpdateBlog(updateBlogDto *dto.UpdateBlog, author *userModel.User) (*dto.PrivateBlog, error)
@@ -39,11 +37,7 @@ type Service interface {
 	BlogPublicationForEditor(blogId primitive.ObjectID, editor *userModel.User, publish bool) error
 	GetPaginatedPublishedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedSubmittedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
-	GetPaginatedLatestBlogs(p *coredto.Pagination) ([]*dto.InfoBlog, error)
-	GetPaginatedTaggedBlogs(tag string, p *coredto.Pagination) ([]*dto.InfoBlog, error)
-	GetSimilarBlogs(blogId primitive.ObjectID) ([]*dto.InfoBlog, error)
 	getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
-	getPublicPaginated(filter bson.M, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	getPaginated(filter bson.M, p *coredto.Pagination, opts *options.FindOptions) ([]*dto.InfoBlog, error)
 }
 
@@ -51,7 +45,6 @@ type service struct {
 	network.BaseService
 	blogQueryBuilder mongo.QueryBuilder[model.Blog]
 	publicBlogCache  redis.Cache[dto.PublicBlog]
-	infoBlogCache    redis.Cache[dto.InfoBlog]
 	userService      user.Service
 }
 
@@ -60,7 +53,6 @@ func NewService(db mongo.Database, store redis.Store, userService user.Service) 
 		BaseService:      network.NewBaseService(),
 		blogQueryBuilder: mongo.NewQueryBuilder[model.Blog](db, model.CollectionName),
 		publicBlogCache:  redis.NewCache[dto.PublicBlog](store),
-		infoBlogCache:    redis.NewCache[dto.InfoBlog](store),
 		userService:      userService,
 	}
 }
@@ -83,16 +75,6 @@ func (s *service) SetBlogDtoCacheBySlug(blog *dto.PublicBlog) error {
 func (s *service) GetBlogDtoCacheBySlug(slug string) (*dto.PublicBlog, error) {
 	key := "blog_" + slug
 	return s.publicBlogCache.GetJSON(key)
-}
-
-func (s *service) SetSimilarBlogsDtoCache(blogId primitive.ObjectID, blogs []*dto.InfoBlog) error {
-	key := "similar_blogs_" + blogId.Hex()
-	return s.infoBlogCache.SetJSONList(key, blogs, 6*time.Hour)
-}
-
-func (s *service) GetSimilarBlogsDtoCache(blogId primitive.ObjectID) ([]*dto.InfoBlog, error) {
-	key := "similar_blogs_" + blogId.Hex()
-	return s.infoBlogCache.GetJSONList(key)
 }
 
 func (s *service) BlogSlugExists(slug string) bool {
@@ -329,53 +311,6 @@ func (s *service) GetPaginatedPublishedForEditor(p *coredto.Pagination) ([]*dto.
 func (s *service) GetPaginatedSubmittedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error) {
 	filter := bson.M{"status": true, "submitted": true}
 	return s.getPaginated(filter, p, nil)
-}
-
-func (s *service) GetPaginatedLatestBlogs(p *coredto.Pagination) ([]*dto.InfoBlog, error) {
-	filter := bson.M{"status": true, "published": true}
-	return s.getPublicPaginated(filter, p)
-}
-
-func (s *service) GetPaginatedTaggedBlogs(tag string, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
-	filter := bson.M{"status": true, "published": true, "tags": tag}
-	return s.getPublicPaginated(filter, p)
-}
-
-func (s *service) GetSimilarBlogs(blogId primitive.ObjectID) ([]*dto.InfoBlog, error) {
-	ftr := bson.M{"_id": blogId, "published": true, "status": true}
-	dto, err := s.getPublicPublishedBlog(ftr)
-	if err != nil {
-		return nil, network.NewNotFoundError("blog not found", err)
-	}
-
-	filter := bson.M{
-		"$text":     bson.M{"$search": dto.Title, "$caseSensitive": false},
-		"status":    true,
-		"published": true,
-		"_id":       bson.M{"$ne": dto.ID},
-	}
-
-	opts := options.Find()
-	opts.SetProjection(bson.M{"similarity": bson.M{"$meta": "textScore"}})
-	opts.SetSort(bson.D{
-		{Key: "similarity", Value: bson.M{"$meta": "textScore"}},
-		{Key: "updatedAt", Value: -1},
-		{Key: "score", Value: -1},
-	})
-
-	pagination := &coredto.Pagination{
-		Page:  1,
-		Limit: 6,
-	}
-
-	return s.getPaginated(filter, pagination, opts)
-}
-
-func (s *service) getPublicPaginated(filter bson.M, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
-	projection := bson.D{{Key: "draftText", Value: 0}}
-	opts := options.Find().SetProjection(projection)
-	opts.SetSort(bson.D{{Key: "updatedAt", Value: -1}, {Key: "score", Value: -1}})
-	return s.getPaginated(filter, p, opts)
 }
 
 func (s *service) getPaginated(filter bson.M, p *coredto.Pagination, opts *options.FindOptions) ([]*dto.InfoBlog, error) {

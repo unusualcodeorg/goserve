@@ -1,8 +1,8 @@
-package blog
+package blogs
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/unusualcodeorg/goserve/api/blog/dto"
+	"github.com/unusualcodeorg/goserve/api/blogs/dto"
 	coredto "github.com/unusualcodeorg/goserve/arch/dto"
 	"github.com/unusualcodeorg/goserve/arch/network"
 )
@@ -12,7 +12,7 @@ type blogsController struct {
 	service Service
 }
 
-func NewBlogsController(
+func NewController(
 	authMFunc network.AuthenticationProvider,
 	authorizeMFunc network.AuthorizationProvider,
 	service Service,
