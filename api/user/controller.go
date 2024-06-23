@@ -2,14 +2,14 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/unusualcodeorg/goserve/api/user/dto"
 	coredto "github.com/unusualcodeorg/goserve/arch/dto"
 	"github.com/unusualcodeorg/goserve/arch/network"
-	"github.com/unusualcodeorg/goserve/utils"
+	"github.com/unusualcodeorg/goserve/common"
 )
 
 type controller struct {
 	network.BaseController
+	common.ContextPayload
 	service Service
 }
 
@@ -20,30 +20,39 @@ func NewController(
 ) network.Controller {
 	return &controller{
 		BaseController: network.NewBaseController("/profile", authProvider, authorizeProvider),
+		ContextPayload: common.NewContextPayload(),
 		service:        service,
 	}
 }
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
-	group.GET("/id/:id", c.getUserHandler)
+	group.GET("/id/:id", c.getPublicProfileHandler)
+	private := group.Use(c.Authentication())
+	private.GET("/mine", c.getPrivateProfileHandler)
 }
 
-func (c *controller) getUserHandler(ctx *gin.Context) {
+func (c *controller) getPublicProfileHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
 		return
 	}
 
-	msg, err := c.service.FindUserById(mongoId.ID)
+	data, err := c.service.GetUserPublicProfile(mongoId.ID)
 	if err != nil {
-		c.Send(ctx).NotFoundError("message not found", err)
+		c.Send(ctx).MixedError(err)
 		return
 	}
 
-	data, err := utils.MapTo[dto.InfoPrivateUser](msg)
+	c.Send(ctx).SuccessDataResponse("success", data)
+}
+
+func (c *controller) getPrivateProfileHandler(ctx *gin.Context) {
+	user := c.MustGetUser(ctx)
+
+	data, err := c.service.GetUserPrivateProfile(user)
 	if err != nil {
-		c.Send(ctx).InternalServerError("something went wrong", err)
+		c.Send(ctx).MixedError(err)
 		return
 	}
 

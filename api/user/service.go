@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/unusualcodeorg/goserve/api/user/dto"
 	"github.com/unusualcodeorg/goserve/api/user/model"
 	"github.com/unusualcodeorg/goserve/arch/mongo"
 	"github.com/unusualcodeorg/goserve/arch/network"
@@ -10,6 +11,8 @@ import (
 )
 
 type Service interface {
+	GetUserPrivateProfile(user *model.User) (*dto.InfoPrivateUser, error)
+	GetUserPublicProfile(userId primitive.ObjectID) (*dto.InfoPublicUser, error)
 	FindRoleByCode(code model.RoleCode) (*model.Role, error)
 	FindRoles(roleIds []primitive.ObjectID) ([]*model.Role, error)
 	FindUserById(id primitive.ObjectID) (*model.User, error)
@@ -33,6 +36,18 @@ func NewService(db mongo.Database) Service {
 		userQueryBuilder: mongo.NewQueryBuilder[model.User](db, model.UserCollectionName),
 		roleQueryBuilder: mongo.NewQueryBuilder[model.Role](db, model.RolesCollectionName),
 	}
+}
+
+func (s *service) GetUserPrivateProfile(user *model.User) (*dto.InfoPrivateUser, error) {
+	return dto.NewInfoPrivateUser(user), nil
+}
+
+func (s *service) GetUserPublicProfile(userId primitive.ObjectID) (*dto.InfoPublicUser, error) {
+	user, err := s.FindUserPublicProfile(userId)
+	if err != nil {
+		return nil, network.NewNotFoundError("user does not exists", err)
+	}
+	return dto.NewInfoPublicUser(user), nil
 }
 
 func (s *service) FindRoleByCode(code model.RoleCode) (*model.Role, error) {
