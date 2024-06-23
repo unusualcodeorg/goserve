@@ -10,6 +10,7 @@ import (
 	coredto "github.com/unusualcodeorg/goserve/arch/dto"
 	"github.com/unusualcodeorg/goserve/arch/mongo"
 	"github.com/unusualcodeorg/goserve/arch/network"
+	"github.com/unusualcodeorg/goserve/arch/redis"
 	"github.com/unusualcodeorg/goserve/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,6 +18,10 @@ import (
 )
 
 type Service interface {
+	SetBlogDtoCacheById(blog *dto.PublicBlog) error
+	GetBlogDtoCacheById(id primitive.ObjectID) (*dto.PublicBlog, error)
+	SetBlogDtoCacheBySlug(blog *dto.PublicBlog) error
+	GetBlogDtoCacheBySlug(slug string) (*dto.PublicBlog, error)
 	BlogSlugExists(slug string) bool
 	CreateBlog(createBlogDto *dto.CreateBlog, author *userModel.User) (*dto.PrivateBlog, error)
 	UpdateBlog(updateBlogDto *dto.UpdateBlog, author *userModel.User) (*dto.PrivateBlog, error)
@@ -39,16 +44,37 @@ type Service interface {
 type service struct {
 	network.BaseService
 	blogQueryBuilder mongo.QueryBuilder[model.Blog]
+	blogCache        redis.Cache[dto.PublicBlog]
 	userService      user.Service
 }
 
-func NewService(db mongo.Database, userService user.Service) Service {
-	s := service{
+func NewService(db mongo.Database, store redis.Store, userService user.Service) Service {
+	return &service{
 		BaseService:      network.NewBaseService(),
 		blogQueryBuilder: mongo.NewQueryBuilder[model.Blog](db, model.CollectionName),
+		blogCache:        redis.NewCache[dto.PublicBlog](store),
 		userService:      userService,
 	}
-	return &s
+}
+
+func (s *service) SetBlogDtoCacheById(blog *dto.PublicBlog) error {
+	key := "blog_" + blog.ID.Hex()
+	return s.blogCache.SetJSON(key, blog, time.Duration(10*time.Minute))
+}
+
+func (s *service) GetBlogDtoCacheById(id primitive.ObjectID) (*dto.PublicBlog, error) {
+	key := "blog_" + id.Hex()
+	return s.blogCache.GetJSON(key)
+}
+
+func (s *service) SetBlogDtoCacheBySlug(blog *dto.PublicBlog) error {
+	key := "blog_" + blog.Slug
+	return s.blogCache.SetJSON(key, blog, time.Duration(10*time.Minute))
+}
+
+func (s *service) GetBlogDtoCacheBySlug(slug string) (*dto.PublicBlog, error) {
+	key := "blog_" + slug
+	return s.blogCache.GetJSON(key)
 }
 
 func (s *service) BlogSlugExists(slug string) bool {

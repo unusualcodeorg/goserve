@@ -35,13 +35,21 @@ func (c *controller) getBlogByIdHandler(ctx *gin.Context) {
 		return
 	}
 
-	blog, err := c.service.GetPublisedBlogById(mongoId.ID)
+	blog, err := c.service.GetBlogDtoCacheById(mongoId.ID)
+	if err == nil {
+		c.Send(ctx).SuccessDataResponse("success", blog)
+		return
+	}
+
+	blog, err = c.service.GetPublisedBlogById(mongoId.ID)
 	if err != nil {
 		c.Send(ctx).NotFoundError(mongoId.Id+" not found", err)
 		return
 	}
 
 	c.Send(ctx).SuccessDataResponse("success", blog)
+
+	c.service.SetBlogDtoCacheById(blog)
 }
 
 func (c *controller) getBlogBySlugHandler(ctx *gin.Context) {
@@ -51,11 +59,18 @@ func (c *controller) getBlogBySlugHandler(ctx *gin.Context) {
 		return
 	}
 
-	blog, err := c.service.GetPublishedBlogBySlug(slug.Slug)
+	blog, err := c.service.GetBlogDtoCacheBySlug(slug.Slug)
+	if err == nil {
+		c.Send(ctx).SuccessDataResponse("success", blog)
+		return
+	}
+
+	blog, err = c.service.GetPublishedBlogBySlug(slug.Slug)
 	if err != nil {
 		c.Send(ctx).NotFoundError(slug.Slug+" not found", err)
 		return
 	}
 
 	c.Send(ctx).SuccessDataResponse("success", blog)
+	c.service.SetBlogDtoCacheBySlug(blog)
 }

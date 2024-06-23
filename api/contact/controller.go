@@ -49,26 +49,3 @@ func (c *controller) createMessageHandler(ctx *gin.Context) {
 
 	c.Send(ctx).SuccessDataResponse("message received successfully!", data)
 }
-
-// func (c *controller) getMessagesPaginated(ctx *gin.Context) {
-// 	pagination, err := network.ReqQuery(ctx, coredto.EmptyPagination())
-// 	if err != nil {
-// 		c.Send(ctx).BadRequestError(err.Error(), err)
-// 		return
-// 	}
-
-// 	msgs, err := c.service.FindPaginatedMessage(pagination)
-
-// 	if err != nil {
-// 		c.Send(ctx).NotFoundError("messages not found", err)
-// 		return
-// 	}
-
-// 	data, err := utils.MapTo[[]dto.InfoMessage](&msgs)
-// 	if err != nil {
-// 		c.Send(ctx).InternalServerError("something went wrong", err)
-// 		return
-// 	}
-
-// 	c.Send(ctx).SuccessDataResponse("success", data)
-// }
