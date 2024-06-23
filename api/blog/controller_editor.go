@@ -110,11 +110,11 @@ func (c *editorController) getPublishedBlogsHandler(ctx *gin.Context) {
 		return
 	}
 
-	blog, err := c.service.GetPaginatedPublishedForEditor(pagination)
+	blogs, err := c.service.GetPaginatedPublishedForEditor(pagination)
 	if err != nil {
 		c.Send(ctx).NotFoundError("blogs not found", err)
 		return
 	}
 
-	c.Send(ctx).SuccessDataResponse("success", blog)
+	c.Send(ctx).SuccessDataResponse("success", blogs)
 }

@@ -102,11 +102,13 @@ func (q *query[T]) FindPaginated(filter bson.M, page int64, limit int64, opts *o
 	defer q.Close()
 	skip := (page - 1) * limit
 
-	findOptions := options.Find()
-	findOptions.SetSkip(skip)
-	findOptions.SetLimit(int64(limit))
+	if opts == nil {
+		opts = options.Find()
+	}
+	opts.SetSkip(skip)
+	opts.SetLimit(int64(limit))
 
-	cursor, err := q.collection.Find(q.context, filter, findOptions)
+	cursor, err := q.collection.Find(q.context, filter, opts)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %w", err)
 	}

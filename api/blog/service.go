@@ -37,8 +37,9 @@ type Service interface {
 	BlogPublicationForEditor(blogId primitive.ObjectID, editor *userModel.User, publish bool) error
 	GetPaginatedPublishedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedSubmittedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
+	GetPaginatedLatestBlogs(p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
-	getPaginated(filter bson.M, p *coredto.Pagination) ([]*dto.InfoBlog, error)
+	getPaginated(filter bson.M, p *coredto.Pagination, opts *options.FindOptions) ([]*dto.InfoBlog, error)
 }
 
 type service struct {
@@ -195,6 +196,10 @@ func (s *service) BlogPublicationForEditor(blogId primitive.ObjectID, editor *us
 		return network.NewNotFoundError("blog for _id "+blogId.Hex()+" not found", err)
 	}
 
+	if !blog.Submitted {
+		return network.NewBadRequestError("blog for _id "+blogId.Hex()+" is not submitted", err)
+	}
+
 	var update bson.M
 
 	if publish {
@@ -277,31 +282,39 @@ func (s *service) GetBlogByIdForEditor(id primitive.ObjectID) (*dto.PrivateBlog,
 
 func (s *service) GetPaginatedDraftsForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
 	filter := bson.M{"author": author.ID, "status": true, "drafted": true}
-	return s.getPaginated(filter, p)
+	return s.getPaginated(filter, p, nil)
 }
 
 func (s *service) GetPaginatedPublishedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
 	filter := bson.M{"author": author.ID, "status": true, "published": true}
-	return s.getPaginated(filter, p)
+	return s.getPaginated(filter, p, nil)
 }
 
 func (s *service) GetPaginatedSubmittedForAuthor(author *userModel.User, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
 	filter := bson.M{"author": author.ID, "status": true, "submitted": true}
-	return s.getPaginated(filter, p)
+	return s.getPaginated(filter, p, nil)
 }
 
 func (s *service) GetPaginatedPublishedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error) {
 	filter := bson.M{"status": true, "published": true}
-	return s.getPaginated(filter, p)
+	return s.getPaginated(filter, p, nil)
 }
 
 func (s *service) GetPaginatedSubmittedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error) {
 	filter := bson.M{"status": true, "submitted": true}
-	return s.getPaginated(filter, p)
+	return s.getPaginated(filter, p, nil)
 }
 
-func (s *service) getPaginated(filter bson.M, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
-	blogs, err := s.blogQueryBuilder.SingleQuery().FindPaginated(filter, p.Page, p.Limit, nil)
+func (s *service) GetPaginatedLatestBlogs(p *coredto.Pagination) ([]*dto.InfoBlog, error) {
+	filter := bson.M{"status": true, "published": true}
+	projection := bson.D{{Key: "draftText", Value: 0}}
+	opts := options.Find().SetProjection(projection)
+	opts.SetSort(bson.D{{Key: "updatedAt", Value: -1}, {Key: "score", Value: -1}})
+	return s.getPaginated(filter, p, opts)
+}
+
+func (s *service) getPaginated(filter bson.M, p *coredto.Pagination, opts *options.FindOptions) ([]*dto.InfoBlog, error) {
+	blogs, err := s.blogQueryBuilder.SingleQuery().FindPaginated(filter, p.Page, p.Limit, opts)
 	if err != nil {
 		return nil, err
 	}
