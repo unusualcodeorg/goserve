@@ -22,11 +22,10 @@ type service struct {
 }
 
 func NewService(db mongo.Database) Service {
-	s := service{
+	return &service{
 		BaseService:         network.NewBaseService(),
 		messageQueryBuilder: mongo.NewQueryBuilder[model.Message](db, model.CollectionName),
 	}
-	return &s
 }
 
 func (s *service) SaveMessage(d *dto.CreateMessage) (*model.Message, error) {

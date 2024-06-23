@@ -72,7 +72,7 @@ func NewService(
 		panic(err)
 	}
 
-	s := service{
+	return &service{
 		BaseService:          network.NewBaseService(),
 		userService:          userService,
 		keystoreQueryBuilder: mongo.NewQueryBuilder[model.Keystore](db, model.KeystoreCollectionName),
@@ -86,7 +86,6 @@ func NewService(
 		tokenIssuer:          env.TokenIssuer,
 		tokenAudience:        env.TokenAudience,
 	}
-	return &s
 }
 
 func (s *service) SignUpBasic(signUpDto *dto.SignUpBasic) (*dto.UserAuth, error) {

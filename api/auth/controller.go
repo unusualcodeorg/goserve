@@ -19,12 +19,11 @@ func NewController(
 	authorizeProvider network.AuthorizationProvider,
 	service Service,
 ) network.Controller {
-	c := controller{
+	return &controller{
 		BaseController: network.NewBaseController("/auth", authProvider, authorizeProvider),
 		ContextPayload: common.NewContextPayload(),
 		service:        service,
 	}
-	return &c
 }
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {

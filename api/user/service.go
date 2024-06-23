@@ -28,12 +28,11 @@ type service struct {
 }
 
 func NewService(db mongo.Database) Service {
-	s := service{
+	return &service{
 		BaseService:      network.NewBaseService(),
 		userQueryBuilder: mongo.NewQueryBuilder[model.User](db, model.UserCollectionName),
 		roleQueryBuilder: mongo.NewQueryBuilder[model.Role](db, model.RolesCollectionName),
 	}
-	return &s
 }
 
 func (s *service) FindRoleByCode(code model.RoleCode) (*model.Role, error) {

@@ -17,11 +17,10 @@ func NewController(
 	authorizeProvider network.AuthorizationProvider,
 	service Service,
 ) network.Controller {
-	c := controller{
+	return &controller{
 		BaseController: network.NewBaseController("/contact", authProvider, authorizeProvider),
 		service:        service,
 	}
-	return &c
 }
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
