@@ -39,6 +39,7 @@ type Service interface {
 	GetPaginatedSubmittedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedLatestBlogs(p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedTaggedBlogs(tag string, p *coredto.Pagination) ([]*dto.InfoBlog, error)
+	GetSimilarBlogs(blogId primitive.ObjectID) ([]*dto.InfoBlog, error)
 	getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
 	getPublicPaginated(filter bson.M, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	getPaginated(filter bson.M, p *coredto.Pagination, opts *options.FindOptions) ([]*dto.InfoBlog, error)
@@ -256,12 +257,12 @@ func (s *service) getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
 	opts := options.FindOne().SetProjection(projection)
 	blog, err := s.blogQueryBuilder.SingleQuery().FindOne(filter, opts)
 	if err != nil {
-		return nil, err
+		return nil, network.NewNotFoundError("blog not found", err)
 	}
 
 	author, err := s.userService.FindUserPublicProfile(blog.Author)
 	if err != nil {
-		return nil, err
+		return nil, network.NewNotFoundError("author not found", err)
 	}
 
 	return dto.NewPublicBlog(blog, author)
@@ -315,6 +316,36 @@ func (s *service) GetPaginatedLatestBlogs(p *coredto.Pagination) ([]*dto.InfoBlo
 func (s *service) GetPaginatedTaggedBlogs(tag string, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
 	filter := bson.M{"status": true, "published": true, "tags": tag}
 	return s.getPublicPaginated(filter, p)
+}
+
+func (s *service) GetSimilarBlogs(blogId primitive.ObjectID) ([]*dto.InfoBlog, error) {
+	ftr := bson.M{"_id": blogId, "published": true, "status": true}
+	dto, err := s.getPublicPublishedBlog(ftr)
+	if err != nil {
+		return nil, network.NewNotFoundError("blog not found", err)
+	}
+
+	filter := bson.M{
+		"$text":       bson.M{"$search": dto.Title, "$caseSensitive": false},
+		"status":      true,
+		"published": true,
+		"_id":         bson.M{"$ne": dto.ID},
+	}
+
+	opts := options.Find()
+	opts.SetProjection(bson.M{"similarity": bson.M{"$meta": "textScore"}})
+	opts.SetSort(bson.D{
+		{Key: "similarity", Value: bson.M{"$meta": "textScore"}},
+		{Key: "updatedAt", Value: -1},
+		{Key: "score", Value: -1},
+	})
+
+	pagination := &coredto.Pagination{
+		Page:  1,
+		Limit: 6,
+	}
+
+	return s.getPaginated(filter, pagination, opts)
 }
 
 func (s *service) getPublicPaginated(filter bson.M, p *coredto.Pagination) ([]*dto.InfoBlog, error) {

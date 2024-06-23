@@ -57,7 +57,8 @@ func (q *query[T]) Close() {
 func (q *query[T]) CreateIndexes(indexes []mongo.IndexModel) error {
 	defer q.Close()
 	fmt.Println("database indexing for: " + q.collection.Name())
-	_, err := q.collection.Indexes().CreateMany(q.context, indexes)
+	result, err := q.collection.Indexes().CreateMany(q.context, indexes)
+	fmt.Println(q.collection.Name(), result)
 	return err
 }
 

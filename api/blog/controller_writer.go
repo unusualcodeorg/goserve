@@ -159,7 +159,7 @@ func (c *writerController) getDraftsBlogsHandler(ctx *gin.Context) {
 
 	blog, err := c.service.GetPaginatedDraftsForAuthor(user, pagination)
 	if err != nil {
-		c.Send(ctx).NotFoundError("blogs not found", err)
+		c.Send(ctx).MixedError(err)
 		return
 	}
 
@@ -177,7 +177,7 @@ func (c *writerController) getSubmittedBlogsHandler(ctx *gin.Context) {
 
 	blog, err := c.service.GetPaginatedSubmittedForAuthor(user, pagination)
 	if err != nil {
-		c.Send(ctx).NotFoundError("blogs not found", err)
+		c.Send(ctx).MixedError(err)
 		return
 	}
 
@@ -193,11 +193,11 @@ func (c *writerController) getPublishedBlogsHandler(ctx *gin.Context) {
 
 	user := c.MustGetUser(ctx)
 
-	blog, err := c.service.GetPaginatedPublishedForAuthor(user, pagination)
+	blogs, err := c.service.GetPaginatedPublishedForAuthor(user, pagination)
 	if err != nil {
-		c.Send(ctx).NotFoundError("blogs not found", err)
+		c.Send(ctx).MixedError(err)
 		return
 	}
 
-	c.Send(ctx).SuccessDataResponse("success", blog)
+	c.Send(ctx).SuccessDataResponse("success", blogs)
 }

@@ -26,6 +26,7 @@ func NewBlogsController(
 func (c *blogsController) MountRoutes(group *gin.RouterGroup) {
 	group.GET("/latest", c.getLatestBlogsHandler)
 	group.GET("/tag/:tag", c.getTaggedBlogsHandler)
+	group.GET("/similar/id/:id", c.getSimilarBlogsHandler)
 
 }
 
@@ -38,7 +39,7 @@ func (c *blogsController) getLatestBlogsHandler(ctx *gin.Context) {
 
 	blogs, err := c.service.GetPaginatedLatestBlogs(pagination)
 	if err != nil {
-		c.Send(ctx).NotFoundError("blogs not found", err)
+		c.Send(ctx).MixedError(err)
 		return
 	}
 
@@ -60,7 +61,23 @@ func (c *blogsController) getTaggedBlogsHandler(ctx *gin.Context) {
 
 	blogs, err := c.service.GetPaginatedTaggedBlogs(tag.Tag, pagination)
 	if err != nil {
-		c.Send(ctx).NotFoundError("blogs not found", err)
+		c.Send(ctx).MixedError(err)
+		return
+	}
+
+	c.Send(ctx).SuccessDataResponse("success", blogs)
+}
+
+func (c *blogsController) getSimilarBlogsHandler(ctx *gin.Context) {
+	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
+	if err != nil {
+		c.Send(ctx).BadRequestError(err.Error(), err)
+		return
+	}
+
+	blogs, err := c.service.GetSimilarBlogs(mongoId.ID)
+	if err != nil {
+		c.Send(ctx).MixedError(err)
 		return
 	}
 

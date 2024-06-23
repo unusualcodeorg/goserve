@@ -96,7 +96,7 @@ func (c *editorController) getSubmittedBlogsHandler(ctx *gin.Context) {
 
 	blog, err := c.service.GetPaginatedSubmittedForEditor(pagination)
 	if err != nil {
-		c.Send(ctx).NotFoundError("blogs not found", err)
+		c.Send(ctx).MixedError(err)
 		return
 	}
 
@@ -112,7 +112,7 @@ func (c *editorController) getPublishedBlogsHandler(ctx *gin.Context) {
 
 	blogs, err := c.service.GetPaginatedPublishedForEditor(pagination)
 	if err != nil {
-		c.Send(ctx).NotFoundError("blogs not found", err)
+		c.Send(ctx).MixedError(err)
 		return
 	}
 
