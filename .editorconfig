@@ -11,7 +11,7 @@ insert_final_newline = true
 # Go files
 [*.go]
 indent_style = tab
-indent_size = 4
+indent_size = 2
 
 # JavaScript files
 [*.js]
