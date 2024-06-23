@@ -25,7 +25,6 @@ func NewController(
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
 	group.GET("/id/:id", c.getBlogByIdHandler)
 	group.GET("/slug/:slug", c.getBlogBySlugHandler)
-
 }
 
 func (c *controller) getBlogByIdHandler(ctx *gin.Context) {
@@ -48,7 +47,6 @@ func (c *controller) getBlogByIdHandler(ctx *gin.Context) {
 	}
 
 	c.Send(ctx).SuccessDataResponse("success", blog)
-
 	c.service.SetBlogDtoCacheById(blog)
 }
 
