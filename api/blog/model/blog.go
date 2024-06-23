@@ -62,6 +62,10 @@ func NewBlog(slug, title, description, draftText string, tags []string, author *
 	return &b, nil
 }
 
+func (blog *Blog) GetValue() *Blog {
+	return blog
+}
+
 func (blog *Blog) Validate() error {
 	validate := validator.New()
 	return validate.Struct(blog)
@@ -83,7 +87,6 @@ func (*Blog) EnsureIndexes(db mongo.Database) {
 			}),
 		},
 		{Keys: bson.D{{Key: "_id", Value: 1}, {Key: "status", Value: 1}}},
-		{Keys: bson.D{{Key: "slug", Value: 1}}},
 		{Keys: bson.D{{Key: "published", Value: 1}, {Key: "status", Value: 1}}},
 		{Keys: bson.D{{Key: "_id", Value: 1}, {Key: "published", Value: 1}, {Key: "status", Value: 1}}},
 		{Keys: bson.D{{Key: "slug", Value: 1}, {Key: "published", Value: 1}, {Key: "status", Value: 1}}},

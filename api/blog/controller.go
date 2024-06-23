@@ -43,7 +43,7 @@ func (c *controller) getBlogByIdHandler(ctx *gin.Context) {
 
 	blog, err = c.service.GetPublisedBlogById(mongoId.ID)
 	if err != nil {
-		c.Send(ctx).NotFoundError(mongoId.Id+" not found", err)
+		c.Send(ctx).MixedError(err)
 		return
 	}
 
@@ -67,7 +67,7 @@ func (c *controller) getBlogBySlugHandler(ctx *gin.Context) {
 
 	blog, err = c.service.GetPublishedBlogBySlug(slug.Slug)
 	if err != nil {
-		c.Send(ctx).NotFoundError(slug.Slug+" not found", err)
+		c.Send(ctx).MixedError(err)
 		return
 	}
 
