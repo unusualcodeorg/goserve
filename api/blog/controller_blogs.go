@@ -75,6 +75,12 @@ func (c *blogsController) getSimilarBlogsHandler(ctx *gin.Context) {
 		return
 	}
 
+	similars, err := c.service.GetSimilarBlogsDtoCache(mongoId.ID)
+	if err == nil {
+		c.Send(ctx).SuccessDataResponse("success", similars)
+		return
+	}
+
 	blogs, err := c.service.GetSimilarBlogs(mongoId.ID)
 	if err != nil {
 		c.Send(ctx).MixedError(err)
@@ -82,4 +88,5 @@ func (c *blogsController) getSimilarBlogsHandler(ctx *gin.Context) {
 	}
 
 	c.Send(ctx).SuccessDataResponse("success", blogs)
+	c.service.SetSimilarBlogsDtoCache(mongoId.ID, blogs)
 }

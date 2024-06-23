@@ -9,8 +9,8 @@ import (
 type Cache[T any] interface {
 	SetJSON(key string, value *T, expiration time.Duration) error
 	GetJSON(key string) (*T, error)
-	SetJSONList(key string, values []T, expiration time.Duration) error
-	GetJSONList(key string) ([]T, error)
+	SetJSONList(key string, values []*T, expiration time.Duration) error
+	GetJSONList(key string) ([]*T, error)
 }
 
 type cache[T any] struct {
@@ -49,7 +49,7 @@ func (c *cache[T]) GetJSON(key string) (*T, error) {
 	return &dest, nil
 }
 
-func (c *cache[T]) SetJSONList(key string, values []T, expiration time.Duration) error {
+func (c *cache[T]) SetJSONList(key string, values []*T, expiration time.Duration) error {
 	var list []json.RawMessage
 	for _, value := range values {
 		data, err := json.Marshal(value)
@@ -67,7 +67,7 @@ func (c *cache[T]) SetJSONList(key string, values []T, expiration time.Duration)
 	return c.store.GetInstance().Set(c.context, key, str, expiration).Err()
 }
 
-func (c *cache[T]) GetJSONList(key string) ([]T, error) {
+func (c *cache[T]) GetJSONList(key string) ([]*T, error) {
 	str, err := c.store.GetInstance().Get(c.context, key).Result()
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (c *cache[T]) GetJSONList(key string) ([]T, error) {
 		return nil, err
 	}
 
-	dest := make([]T, len(list))
+	dest := make([]*T, len(list))
 	for i, data := range list {
 		if err := json.Unmarshal(data, &dest[i]); err != nil {
 			return nil, err

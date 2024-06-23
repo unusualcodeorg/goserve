@@ -22,6 +22,8 @@ type Service interface {
 	GetBlogDtoCacheById(id primitive.ObjectID) (*dto.PublicBlog, error)
 	SetBlogDtoCacheBySlug(blog *dto.PublicBlog) error
 	GetBlogDtoCacheBySlug(slug string) (*dto.PublicBlog, error)
+	SetSimilarBlogsDtoCache(blogId primitive.ObjectID, blogs []*dto.InfoBlog) error
+	GetSimilarBlogsDtoCache(blogId primitive.ObjectID) ([]*dto.InfoBlog, error)
 	BlogSlugExists(slug string) bool
 	CreateBlog(createBlogDto *dto.CreateBlog, author *userModel.User) (*dto.PrivateBlog, error)
 	UpdateBlog(updateBlogDto *dto.UpdateBlog, author *userModel.User) (*dto.PrivateBlog, error)
@@ -48,7 +50,8 @@ type Service interface {
 type service struct {
 	network.BaseService
 	blogQueryBuilder mongo.QueryBuilder[model.Blog]
-	blogCache        redis.Cache[dto.PublicBlog]
+	publicBlogCache  redis.Cache[dto.PublicBlog]
+	infoBlogCache    redis.Cache[dto.InfoBlog]
 	userService      user.Service
 }
 
@@ -56,29 +59,40 @@ func NewService(db mongo.Database, store redis.Store, userService user.Service) 
 	return &service{
 		BaseService:      network.NewBaseService(),
 		blogQueryBuilder: mongo.NewQueryBuilder[model.Blog](db, model.CollectionName),
-		blogCache:        redis.NewCache[dto.PublicBlog](store),
+		publicBlogCache:  redis.NewCache[dto.PublicBlog](store),
+		infoBlogCache:    redis.NewCache[dto.InfoBlog](store),
 		userService:      userService,
 	}
 }
 
 func (s *service) SetBlogDtoCacheById(blog *dto.PublicBlog) error {
 	key := "blog_" + blog.ID.Hex()
-	return s.blogCache.SetJSON(key, blog, time.Duration(10*time.Minute))
+	return s.publicBlogCache.SetJSON(key, blog, time.Duration(10*time.Minute))
 }
 
 func (s *service) GetBlogDtoCacheById(id primitive.ObjectID) (*dto.PublicBlog, error) {
 	key := "blog_" + id.Hex()
-	return s.blogCache.GetJSON(key)
+	return s.publicBlogCache.GetJSON(key)
 }
 
 func (s *service) SetBlogDtoCacheBySlug(blog *dto.PublicBlog) error {
 	key := "blog_" + blog.Slug
-	return s.blogCache.SetJSON(key, blog, time.Duration(10*time.Minute))
+	return s.publicBlogCache.SetJSON(key, blog, time.Duration(10*time.Minute))
 }
 
 func (s *service) GetBlogDtoCacheBySlug(slug string) (*dto.PublicBlog, error) {
 	key := "blog_" + slug
-	return s.blogCache.GetJSON(key)
+	return s.publicBlogCache.GetJSON(key)
+}
+
+func (s *service) SetSimilarBlogsDtoCache(blogId primitive.ObjectID, blogs []*dto.InfoBlog) error {
+	key := "similar_blogs_" + blogId.Hex()
+	return s.infoBlogCache.SetJSONList(key, blogs, 6*time.Hour)
+}
+
+func (s *service) GetSimilarBlogsDtoCache(blogId primitive.ObjectID) ([]*dto.InfoBlog, error) {
+	key := "similar_blogs_" + blogId.Hex()
+	return s.infoBlogCache.GetJSONList(key)
 }
 
 func (s *service) BlogSlugExists(slug string) bool {
@@ -326,10 +340,10 @@ func (s *service) GetSimilarBlogs(blogId primitive.ObjectID) ([]*dto.InfoBlog, e
 	}
 
 	filter := bson.M{
-		"$text":       bson.M{"$search": dto.Title, "$caseSensitive": false},
-		"status":      true,
+		"$text":     bson.M{"$search": dto.Title, "$caseSensitive": false},
+		"status":    true,
 		"published": true,
-		"_id":         bson.M{"$ne": dto.ID},
+		"_id":       bson.M{"$ne": dto.ID},
 	}
 
 	opts := options.Find()
