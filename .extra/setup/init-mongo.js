@@ -27,7 +27,7 @@ function seed(dbName, user, password) {
       updatedAt: new Date(),
     },
     {
-      code: "WRITER",
+      code: "AUTHOR",
       status: true,
       createdAt: new Date(),
       updatedAt: new Date(),

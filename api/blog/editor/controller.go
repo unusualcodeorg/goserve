@@ -1,4 +1,4 @@
-package blog
+package editor
 
 import (
 	"github.com/gin-gonic/gin"
@@ -8,25 +8,25 @@ import (
 	"github.com/unusualcodeorg/goserve/common"
 )
 
-type editorController struct {
+type controller struct {
 	network.BaseController
 	common.ContextPayload
 	service Service
 }
 
-func NewEditorController(
+func NewController(
 	authMFunc network.AuthenticationProvider,
 	authorizeMFunc network.AuthorizationProvider,
 	service Service,
 ) network.Controller {
-	return &editorController{
+	return &controller{
 		BaseController: network.NewBaseController("/blog/editor", authMFunc, authorizeMFunc),
 		ContextPayload: common.NewContextPayload(),
 		service:        service,
 	}
 }
 
-func (c *editorController) MountRoutes(group *gin.RouterGroup) {
+func (c *controller) MountRoutes(group *gin.RouterGroup) {
 	group.Use(c.Authentication(), c.Authorization(string(userModel.RoleCodeEditor)))
 	group.GET("/id/:id", c.getBlogHandler)
 	group.PUT("/publish/id/:id", c.publishBlogHandler)
@@ -35,14 +35,14 @@ func (c *editorController) MountRoutes(group *gin.RouterGroup) {
 	group.GET("/published", c.getPublishedBlogsHandler)
 }
 
-func (c *editorController) getBlogHandler(ctx *gin.Context) {
+func (c *controller) getBlogHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
 		return
 	}
 
-	blog, err := c.service.GetBlogByIdForEditor(mongoId.ID)
+	blog, err := c.service.GetBlogById(mongoId.ID)
 	if err != nil {
 		c.Send(ctx).NotFoundError(mongoId.Id+" not found", err)
 		return
@@ -51,7 +51,7 @@ func (c *editorController) getBlogHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessDataResponse("success", blog)
 }
 
-func (c *editorController) publishBlogHandler(ctx *gin.Context) {
+func (c *controller) publishBlogHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -60,7 +60,7 @@ func (c *editorController) publishBlogHandler(ctx *gin.Context) {
 
 	user := c.MustGetUser(ctx)
 
-	err = c.service.BlogPublicationForEditor(mongoId.ID, user, true)
+	err = c.service.BlogPublication(mongoId.ID, user, true)
 	if err != nil {
 		c.Send(ctx).MixedError(err)
 		return
@@ -69,7 +69,7 @@ func (c *editorController) publishBlogHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessMsgResponse("blog published successfully")
 }
 
-func (c *editorController) unpublishBlogHandler(ctx *gin.Context) {
+func (c *controller) unpublishBlogHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -78,7 +78,7 @@ func (c *editorController) unpublishBlogHandler(ctx *gin.Context) {
 
 	user := c.MustGetUser(ctx)
 
-	err = c.service.BlogPublicationForEditor(mongoId.ID, user, false)
+	err = c.service.BlogPublication(mongoId.ID, user, false)
 	if err != nil {
 		c.Send(ctx).MixedError(err)
 		return
@@ -87,14 +87,14 @@ func (c *editorController) unpublishBlogHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessMsgResponse("blog unpublished successfully")
 }
 
-func (c *editorController) getSubmittedBlogsHandler(ctx *gin.Context) {
+func (c *controller) getSubmittedBlogsHandler(ctx *gin.Context) {
 	pagination, err := network.ReqQuery(ctx, coredto.EmptyPagination())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
 		return
 	}
 
-	blog, err := c.service.GetPaginatedSubmittedForEditor(pagination)
+	blog, err := c.service.GetPaginatedSubmitted(pagination)
 	if err != nil {
 		c.Send(ctx).MixedError(err)
 		return
@@ -103,14 +103,14 @@ func (c *editorController) getSubmittedBlogsHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessDataResponse("success", blog)
 }
 
-func (c *editorController) getPublishedBlogsHandler(ctx *gin.Context) {
+func (c *controller) getPublishedBlogsHandler(ctx *gin.Context) {
 	pagination, err := network.ReqQuery(ctx, coredto.EmptyPagination())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
 		return
 	}
 
-	blogs, err := c.service.GetPaginatedPublishedForEditor(pagination)
+	blogs, err := c.service.GetPaginatedPublished(pagination)
 	if err != nil {
 		c.Send(ctx).MixedError(err)
 		return

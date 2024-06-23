@@ -1,4 +1,4 @@
-package blog
+package author
 
 import (
 	"github.com/gin-gonic/gin"
@@ -9,26 +9,26 @@ import (
 	"github.com/unusualcodeorg/goserve/common"
 )
 
-type writerController struct {
+type controller struct {
 	network.BaseController
 	common.ContextPayload
 	service Service
 }
 
-func NewWriterController(
+func NewController(
 	authMFunc network.AuthenticationProvider,
 	authorizeMFunc network.AuthorizationProvider,
 	service Service,
 ) network.Controller {
-	return &writerController{
-		BaseController: network.NewBaseController("/blog/writer", authMFunc, authorizeMFunc),
+	return &controller{
+		BaseController: network.NewBaseController("/blog/author", authMFunc, authorizeMFunc),
 		ContextPayload: common.NewContextPayload(),
 		service:        service,
 	}
 }
 
-func (c *writerController) MountRoutes(group *gin.RouterGroup) {
-	group.Use(c.Authentication(), c.Authorization(string(userModel.RoleCodeWriter)))
+func (c *controller) MountRoutes(group *gin.RouterGroup) {
+	group.Use(c.Authentication(), c.Authorization(string(userModel.RoleCodeAuthor)))
 	group.POST("/", c.postBlogHandler)
 	group.PUT("/", c.updateBlogHandler)
 	group.GET("/id/:id", c.getBlogHandler)
@@ -40,7 +40,7 @@ func (c *writerController) MountRoutes(group *gin.RouterGroup) {
 	group.GET("/published", c.getPublishedBlogsHandler)
 }
 
-func (c *writerController) postBlogHandler(ctx *gin.Context) {
+func (c *controller) postBlogHandler(ctx *gin.Context) {
 	body, err := network.ReqBody(ctx, dto.EmptyCreateBlog())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -58,7 +58,7 @@ func (c *writerController) postBlogHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessDataResponse("blog created successfully", b)
 }
 
-func (c *writerController) updateBlogHandler(ctx *gin.Context) {
+func (c *controller) updateBlogHandler(ctx *gin.Context) {
 	body, err := network.ReqBody(ctx, dto.EmptyUpdateBlog())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -76,7 +76,7 @@ func (c *writerController) updateBlogHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessDataResponse("blog updated successfully", b)
 }
 
-func (c *writerController) getBlogHandler(ctx *gin.Context) {
+func (c *controller) getBlogHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -85,7 +85,7 @@ func (c *writerController) getBlogHandler(ctx *gin.Context) {
 
 	user := c.MustGetUser(ctx)
 
-	blog, err := c.service.GetBlogByIdForAuthor(mongoId.ID, user)
+	blog, err := c.service.GetBlogById(mongoId.ID, user)
 	if err != nil {
 		c.Send(ctx).NotFoundError(mongoId.Id+" not found", err)
 		return
@@ -94,7 +94,7 @@ func (c *writerController) getBlogHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessDataResponse("success", blog)
 }
 
-func (c *writerController) submitBlogHandler(ctx *gin.Context) {
+func (c *controller) submitBlogHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -112,7 +112,7 @@ func (c *writerController) submitBlogHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessMsgResponse("blog submitted successfully")
 }
 
-func (c *writerController) withdrawBlogHandler(ctx *gin.Context) {
+func (c *controller) withdrawBlogHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -130,7 +130,7 @@ func (c *writerController) withdrawBlogHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessMsgResponse("blog withdrawn successfully")
 }
 
-func (c *writerController) deleteBlogHandler(ctx *gin.Context) {
+func (c *controller) deleteBlogHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -148,7 +148,7 @@ func (c *writerController) deleteBlogHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessMsgResponse("blog deleted successfully")
 }
 
-func (c *writerController) getDraftsBlogsHandler(ctx *gin.Context) {
+func (c *controller) getDraftsBlogsHandler(ctx *gin.Context) {
 	pagination, err := network.ReqQuery(ctx, coredto.EmptyPagination())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -157,7 +157,7 @@ func (c *writerController) getDraftsBlogsHandler(ctx *gin.Context) {
 
 	user := c.MustGetUser(ctx)
 
-	blog, err := c.service.GetPaginatedDraftsForAuthor(user, pagination)
+	blog, err := c.service.GetPaginatedDrafts(user, pagination)
 	if err != nil {
 		c.Send(ctx).MixedError(err)
 		return
@@ -166,7 +166,7 @@ func (c *writerController) getDraftsBlogsHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessDataResponse("success", blog)
 }
 
-func (c *writerController) getSubmittedBlogsHandler(ctx *gin.Context) {
+func (c *controller) getSubmittedBlogsHandler(ctx *gin.Context) {
 	pagination, err := network.ReqQuery(ctx, coredto.EmptyPagination())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -175,7 +175,7 @@ func (c *writerController) getSubmittedBlogsHandler(ctx *gin.Context) {
 
 	user := c.MustGetUser(ctx)
 
-	blog, err := c.service.GetPaginatedSubmittedForAuthor(user, pagination)
+	blog, err := c.service.GetPaginatedSubmitted(user, pagination)
 	if err != nil {
 		c.Send(ctx).MixedError(err)
 		return
@@ -184,7 +184,7 @@ func (c *writerController) getSubmittedBlogsHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessDataResponse("success", blog)
 }
 
-func (c *writerController) getPublishedBlogsHandler(ctx *gin.Context) {
+func (c *controller) getPublishedBlogsHandler(ctx *gin.Context) {
 	pagination, err := network.ReqQuery(ctx, coredto.EmptyPagination())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -193,7 +193,7 @@ func (c *writerController) getPublishedBlogsHandler(ctx *gin.Context) {
 
 	user := c.MustGetUser(ctx)
 
-	blogs, err := c.service.GetPaginatedPublishedForAuthor(user, pagination)
+	blogs, err := c.service.GetPaginatedPublished(user, pagination)
 	if err != nil {
 		c.Send(ctx).MixedError(err)
 		return

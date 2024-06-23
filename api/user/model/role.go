@@ -17,7 +17,7 @@ type RoleCode string
 const (
 	RoleCodeLearner RoleCode = "LEARNER"
 	RoleCodeAdmin   RoleCode = "ADMIN"
-	RoleCodeWriter  RoleCode = "WRITER"
+	RoleCodeAuthor  RoleCode = "AUTHOR"
 	RoleCodeEditor  RoleCode = "EDITOR"
 )
 
@@ -55,7 +55,7 @@ func (role *Role) Validate() error {
 	_ = validate.RegisterValidation("rolecode", func(fl validator.FieldLevel) bool {
 		code := RoleCode(fl.Field().String())
 		switch code {
-		case RoleCodeLearner, RoleCodeAdmin, RoleCodeWriter, RoleCodeEditor:
+		case RoleCodeLearner, RoleCodeAdmin, RoleCodeAuthor, RoleCodeEditor:
 			return true
 		}
 		return false
