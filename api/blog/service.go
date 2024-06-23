@@ -213,8 +213,17 @@ func (s *service) BlogPublicationForEditor(blogId primitive.ObjectID, editor *us
 		return network.NewNotFoundError("blog for _id "+blogId.Hex()+" not found", err)
 	}
 
-	if !blog.Submitted {
-		return network.NewBadRequestError("blog for _id "+blogId.Hex()+" is not submitted", err)
+	if publish {
+		if blog.Published {
+			return network.NewBadRequestError("blog for _id "+blogId.Hex()+" is already published", err)
+		}
+		if !blog.Submitted {
+			return network.NewBadRequestError("blog for _id "+blogId.Hex()+" is not submitted", err)
+		}
+	} else {
+		if !blog.Published {
+			return network.NewBadRequestError("blog for _id "+blogId.Hex()+" is not published", err)
+		}
 	}
 
 	var update bson.M
