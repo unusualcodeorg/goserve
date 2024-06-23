@@ -60,6 +60,6 @@ function seed(dbName, user, password) {
   });
 }
 
-seed("unusualcode-org-prod-db", "unusualcode-org-prod-db-user", "changeit");
-seed("unusualcode-org-dev-db", "unusualcode-org-dev-db-user", "changeit");
-seed("unusualcode-org-test-db", "unusualcode-org-test-db-user", "changeit");
+seed("goserver-prod-db", "goserver-prod-db-user", "changeit");
+seed("goserver-dev-db", "goserver-dev-db-user", "changeit");
+seed("goserver-test-db", "goserver-test-db-user", "changeit");
