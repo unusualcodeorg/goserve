@@ -37,7 +37,7 @@ func (m *module) Controllers() []network.Controller {
 		auth.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.authService),
 		user.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.userService),
 		blog.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.blogService),
-		author.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), author.NewService(m.db, m.store, m.blogService)),
+		author.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), author.NewService(m.db, m.blogService)),
 		editor.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), editor.NewService(m.db, m.userService)),
 		blogs.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), blogs.NewService(m.db, m.store)),
 		contact.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), contact.NewService(m.db)),

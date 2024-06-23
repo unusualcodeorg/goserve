@@ -10,7 +10,6 @@ import (
 	coredto "github.com/unusualcodeorg/goserve/arch/dto"
 	"github.com/unusualcodeorg/goserve/arch/mongo"
 	"github.com/unusualcodeorg/goserve/arch/network"
-	"github.com/unusualcodeorg/goserve/arch/redis"
 	"github.com/unusualcodeorg/goserve/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -32,15 +31,13 @@ type Service interface {
 type service struct {
 	network.BaseService
 	blogQueryBuilder mongo.QueryBuilder[model.Blog]
-	publicBlogCache  redis.Cache[dto.PublicBlog]
 	blogService      blog.Service
 }
 
-func NewService(db mongo.Database, store redis.Store, blogService blog.Service) Service {
+func NewService(db mongo.Database, blogService blog.Service) Service {
 	return &service{
 		BaseService:      network.NewBaseService(),
 		blogQueryBuilder: mongo.NewQueryBuilder[model.Blog](db, model.CollectionName),
-		publicBlogCache:  redis.NewCache[dto.PublicBlog](store),
 		blogService:      blogService,
 	}
 }
