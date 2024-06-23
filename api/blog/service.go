@@ -38,7 +38,9 @@ type Service interface {
 	GetPaginatedPublishedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedSubmittedForEditor(p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	GetPaginatedLatestBlogs(p *coredto.Pagination) ([]*dto.InfoBlog, error)
+	GetPaginatedTaggedBlogs(tag string, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	getPublicPublishedBlog(filter bson.M) (*dto.PublicBlog, error)
+	getPublicPaginated(filter bson.M, p *coredto.Pagination) ([]*dto.InfoBlog, error)
 	getPaginated(filter bson.M, p *coredto.Pagination, opts *options.FindOptions) ([]*dto.InfoBlog, error)
 }
 
@@ -307,6 +309,15 @@ func (s *service) GetPaginatedSubmittedForEditor(p *coredto.Pagination) ([]*dto.
 
 func (s *service) GetPaginatedLatestBlogs(p *coredto.Pagination) ([]*dto.InfoBlog, error) {
 	filter := bson.M{"status": true, "published": true}
+	return s.getPublicPaginated(filter, p)
+}
+
+func (s *service) GetPaginatedTaggedBlogs(tag string, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
+	filter := bson.M{"status": true, "published": true, "tags": tag}
+	return s.getPublicPaginated(filter, p)
+}
+
+func (s *service) getPublicPaginated(filter bson.M, p *coredto.Pagination) ([]*dto.InfoBlog, error) {
 	projection := bson.D{{Key: "draftText", Value: 0}}
 	opts := options.Find().SetProjection(projection)
 	opts.SetSort(bson.D{{Key: "updatedAt", Value: -1}, {Key: "score", Value: -1}})
