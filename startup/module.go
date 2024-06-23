@@ -11,6 +11,7 @@ import (
 	coreMW "github.com/unusualcodeorg/goserve/arch/middleware"
 	"github.com/unusualcodeorg/goserve/arch/mongo"
 	"github.com/unusualcodeorg/goserve/arch/network"
+	"github.com/unusualcodeorg/goserve/arch/redis"
 	"github.com/unusualcodeorg/goserve/config"
 )
 
@@ -18,6 +19,7 @@ type module struct {
 	context     context.Context
 	env         *config.Env
 	db          mongo.Database
+	store       redis.Store
 	userService user.Service
 	authService auth.Service
 }
@@ -30,9 +32,9 @@ func (m *module) Controllers() []network.Controller {
 	return []network.Controller{
 		auth.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.authService),
 		user.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.userService),
-		blog.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.userService)),
-		blog.NewWriterController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.userService)),
-		blog.NewEditorController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.userService)),
+		blog.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.store, m.userService)),
+		blog.NewWriterController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.store, m.userService)),
+		blog.NewEditorController(m.AuthenticationProvider(), m.AuthorizationProvider(), blog.NewService(m.db, m.store, m.userService)),
 		contact.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), contact.NewService(m.db)),
 	}
 }
@@ -53,7 +55,7 @@ func (m *module) AuthorizationProvider() network.AuthorizationProvider {
 	return authMW.NewAuthorizationProvider()
 }
 
-func NewModule(context context.Context, env *config.Env, db mongo.Database) network.Module[module] {
+func NewModule(context context.Context, env *config.Env, db mongo.Database, store redis.Store) network.Module[module] {
 	userService := user.NewService(db)
 	authService := auth.NewService(db, env, userService)
 
@@ -61,6 +63,7 @@ func NewModule(context context.Context, env *config.Env, db mongo.Database) netw
 		context:     context,
 		env:         env,
 		db:          db,
+		store:       store,
 		userService: userService,
 		authService: authService,
 	}

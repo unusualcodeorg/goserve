@@ -6,6 +6,7 @@ import (
 
 	"github.com/unusualcodeorg/goserve/arch/mongo"
 	"github.com/unusualcodeorg/goserve/arch/network"
+	"github.com/unusualcodeorg/goserve/arch/redis"
 	"github.com/unusualcodeorg/goserve/config"
 )
 
@@ -29,7 +30,18 @@ func Server() {
 	defer db.Disconnect()
 	EnsureDbIndexes(db)
 
-	module := NewModule(context, env, db)
+	redisConfig := redis.Config{
+		Host: env.RedisHost,
+		Port: env.RedisPort,
+		Pwd:  env.RedisPwd,
+		DB:   env.RedisDB,
+	}
+
+	store := redis.NewStore(context, &redisConfig)
+	store.Connect()
+	defer store.Disconnect()
+
+	module := NewModule(context, env, db, store)
 
 	router := network.NewRouter(env.GoMode)
 	router.RegisterValidationParsers(network.CustomTagNameFunc())
