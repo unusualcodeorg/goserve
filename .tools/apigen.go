@@ -56,9 +56,11 @@ func generateService(featureDir, featureName string) error {
 	template := fmt.Sprintf(`package %s
 
 import (
+  "github.com/unusualcodeorg/goserve/api/%s/dto"
 	"github.com/unusualcodeorg/goserve/api/%s/model"
 	"github.com/unusualcodeorg/goserve/arch/mongo"
 	"github.com/unusualcodeorg/goserve/arch/network"
+	"github.com/unusualcodeorg/goserve/arch/redis"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -70,14 +72,15 @@ type Service interface {
 type service struct {
 	network.BaseService
 	%sQueryBuilder mongo.QueryBuilder[model.%s]
+	info%sCache    redis.Cache[dto.Info%s]
 }
 
-func NewService(db mongo.Database) Service {
-	s := service{
+func NewService(db mongo.Database, store redis.Store) Service {
+	return &service{
 		BaseService:  network.NewBaseService(),
 		%sQueryBuilder: mongo.NewQueryBuilder[model.%s](db, model.CollectionName),
+		info%sCache: redis.NewCache[dto.Info%s](store),
 	}
-	return &s
 }
 
 func (s *service) Find%s(id primitive.ObjectID) (*model.%s, error) {
@@ -90,7 +93,7 @@ func (s *service) Find%s(id primitive.ObjectID) (*model.%s, error) {
 
 	return msg, nil
 }
-`, featureLower, featureLower, featureCaps, featureCaps, featureLower, featureCaps, featureLower, featureCaps, featureCaps, featureCaps, featureLower)
+`, featureLower, featureLower, featureLower, featureCaps, featureCaps, featureLower, featureCaps, featureCaps, featureCaps, featureLower, featureCaps, featureCaps, featureCaps, featureCaps, featureCaps, featureLower)
 
 	return os.WriteFile(servicePath, []byte(template), os.ModePerm)
 }
