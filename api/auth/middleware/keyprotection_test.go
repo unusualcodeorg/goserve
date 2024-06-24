@@ -17,7 +17,7 @@ import (
 func TestKeyProtectionMiddleware_NoApiKey(t *testing.T) {
 	mockAuthService := new(auth.MockService)
 
-	rr := network.MockTestRootMiddleware(t, "GET", "/test", "/no", "",
+	rr := network.MockTestRootMiddleware(t, "GET", "/test", "/test", "",
 		NewKeyProtection(mockAuthService),
 		network.MockSuccessMsgHandler("success"),
 	)

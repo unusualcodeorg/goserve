@@ -80,7 +80,7 @@ func MockTestHandler(
 
 func MockTestRootMiddleware(
 	t *testing.T, httpMethod, path, url, body string,
-	m RootMiddleware,
+	middleware RootMiddleware,
 	handler gin.HandlerFunc,
 	headers ...primitive.E,
 ) *httptest.ResponseRecorder {
@@ -88,7 +88,77 @@ func MockTestRootMiddleware(
 
 	rr := httptest.NewRecorder()
 	ctx, r := gin.CreateTestContext(rr)
-	m.Attach(r)
+	middleware.Attach(r)
+	r.Handle(httpMethod, path, handler)
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterTagNameFunc(CustomTagNameFunc())
+	}
+
+	req, err := http.NewRequest(httpMethod, url, bytes.NewBuffer([]byte(body)))
+	if err != nil {
+		t.Fatalf("could not create request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	for _, h := range headers {
+		req.Header.Set(h.Key, h.Value.(string))
+	}
+
+	ctx.Request = req
+
+	r.ServeHTTP(rr, req)
+
+	return rr
+}
+
+func MockTestAuthenticationProvider(
+	t *testing.T, httpMethod, path, url, body string,
+	auth AuthenticationProvider,
+	handler gin.HandlerFunc,
+	headers ...primitive.E,
+) *httptest.ResponseRecorder {
+	gin.SetMode(gin.TestMode)
+
+	rr := httptest.NewRecorder()
+	ctx, r := gin.CreateTestContext(rr)
+	r.Use(auth.Middleware())
+	r.Handle(httpMethod, path, handler)
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterTagNameFunc(CustomTagNameFunc())
+	}
+
+	req, err := http.NewRequest(httpMethod, url, bytes.NewBuffer([]byte(body)))
+	if err != nil {
+		t.Fatalf("could not create request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	for _, h := range headers {
+		req.Header.Set(h.Key, h.Value.(string))
+	}
+
+	ctx.Request = req
+
+	r.ServeHTTP(rr, req)
+
+	return rr
+}
+
+func MockTestAuthorizationProvider(
+	t *testing.T, httpMethod, path, url, body string,
+	auth AuthenticationProvider,
+	authz AuthenticationProvider,
+	handler gin.HandlerFunc,
+	headers ...primitive.E,
+) *httptest.ResponseRecorder {
+	gin.SetMode(gin.TestMode)
+
+	rr := httptest.NewRecorder()
+	ctx, r := gin.CreateTestContext(rr)
+	r.Use(auth.Middleware())
+	r.Use(authz.Middleware())
 	r.Handle(httpMethod, path, handler)
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
