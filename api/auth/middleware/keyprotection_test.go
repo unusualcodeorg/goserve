@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func TestNotFoundMiddleware_NoApiKey(t *testing.T) {
+func TestKeyProtectionMiddleware_NoApiKey(t *testing.T) {
 	mockAuthService := new(auth.MockService)
 
 	rr := network.MockTestRootMiddleware(t, "GET", "/test", "/no", "",
@@ -26,7 +26,7 @@ func TestNotFoundMiddleware_NoApiKey(t *testing.T) {
 	assert.Contains(t, rr.Body.String(), `"message":"permission denied: missing x-api-key header"`)
 }
 
-func TestNotFoundMiddleware_WrongApiKey(t *testing.T) {
+func TestKeyProtectionMiddleware_WrongApiKey(t *testing.T) {
 	mockAuthService := new(auth.MockService)
 	key := "wrong"
 	mockAuthService.On("FindApiKey", key).Return(nil, errors.New(""))
@@ -41,7 +41,7 @@ func TestNotFoundMiddleware_WrongApiKey(t *testing.T) {
 	assert.Contains(t, rr.Body.String(), `"message":"permission denied: invalid x-api-key"`)
 }
 
-func TestNotFoundMiddleware_CorrectApiKey(t *testing.T) {
+func TestKeyProtectionMiddleware_CorrectApiKey(t *testing.T) {
 	mockAuthService := new(auth.MockService)
 	key := "correct"
 	mockAuthService.On("FindApiKey", key).Return(&model.ApiKey{Key: key}, nil)
