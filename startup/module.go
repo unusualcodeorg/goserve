@@ -18,6 +18,8 @@ import (
 	"github.com/unusualcodeorg/goserve/config"
 )
 
+type Module network.Module[module]
+
 type module struct {
 	Context     context.Context
 	Env         *config.Env
@@ -60,7 +62,7 @@ func (m *module) AuthorizationProvider() network.AuthorizationProvider {
 	return authMW.NewAuthorizationProvider()
 }
 
-func NewModule(context context.Context, env *config.Env, db mongo.Database, store redis.Store) network.Module[module] {
+func NewModule(context context.Context, env *config.Env, db mongo.Database, store redis.Store) Module {
 	userService := user.NewService(db)
 	authService := auth.NewService(db, env, userService)
 	blogService := blog.NewService(db, store, userService)

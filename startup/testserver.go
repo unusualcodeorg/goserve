@@ -9,7 +9,7 @@ import (
 
 type Teardown = func()
 
-func TestServer() (network.Router, network.Module[module], Teardown) {
+func TestServer() (network.Router, Module, Teardown) {
 	env := config.NewEnv("../.test.env")
 	router, module, shutdown := create(env)
 	ts := httptest.NewServer(router.GetEngine())

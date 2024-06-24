@@ -20,7 +20,7 @@ func Server() {
 	router.Start(env.ServerHost, env.ServerPort)
 }
 
-func create(env *config.Env) (network.Router, network.Module[module], Shutdown) {
+func create(env *config.Env) (network.Router, Module, Shutdown) {
 	context := context.Background()
 
 	dbConfig := mongo.DbConfig{
