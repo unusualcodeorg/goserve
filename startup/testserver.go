@@ -7,7 +7,9 @@ import (
 	"github.com/unusualcodeorg/goserve/config"
 )
 
-func TestServer() (network.Router, network.Module[module], Shutdown) {
+type Teardown = func()
+
+func TestServer() (network.Router, network.Module[module], Teardown) {
 	env := config.NewEnv("../.test.env")
 	router, module, shutdown := create(env)
 	ts := httptest.NewServer(router.GetEngine())
