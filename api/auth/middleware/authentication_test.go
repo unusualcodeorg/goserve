@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -13,6 +14,7 @@ import (
 	"github.com/unusualcodeorg/goserve/api/user"
 	userModel "github.com/unusualcodeorg/goserve/api/user/model"
 	"github.com/unusualcodeorg/goserve/arch/network"
+	"github.com/unusualcodeorg/goserve/common"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -169,18 +171,25 @@ func TestAuthenticationProvider_Success(t *testing.T) {
 
 	token := "Bearer token"
 	userId := primitive.NewObjectID()
+	keystoreId := primitive.NewObjectID()
 	claims := &jwt.RegisteredClaims{ID: "claimId", Subject: userId.Hex()}
 	user := &userModel.User{ID: userId}
-	keystore := &model.Keystore{}
+	keystore := &model.Keystore{ID: keystoreId}
 
 	mockAuthService.On("VerifyToken", "token").Return(claims, nil)
 	mockAuthService.On("ValidateClaims", claims).Return(true)
 	mockUserService.On("FindUserById", userId).Return(user, nil)
 	mockAuthService.On("FindKeystore", user, claims.ID).Return(keystore, nil)
 
+	mockHandler := func(ctx *gin.Context) {
+		assert.Equal(t, common.NewContextPayload().MustGetUser(ctx).ID, userId)
+		assert.Equal(t, common.NewContextPayload().MustGetKeystore(ctx).ID, keystoreId)
+		network.NewResponseSender().Send(ctx).SuccessMsgResponse("success")
+	}
+
 	rr := network.MockTestAuthenticationProvider(t, "GET", "/test", "/test", "",
 		NewAuthenticationProvider(mockAuthService, mockUserService),
-		network.MockSuccessMsgHandler("success"),
+		mockHandler,
 		primitive.E{Key: network.AuthorizationHeader, Value: token},
 	)
 

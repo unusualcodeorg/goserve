@@ -147,9 +147,9 @@ func MockTestAuthenticationProvider(
 }
 
 func MockTestAuthorizationProvider(
-	t *testing.T, httpMethod, path, url, body string,
+	t *testing.T, httpMethod, path, url, role, body string,
 	auth AuthenticationProvider,
-	authz AuthenticationProvider,
+	authz AuthorizationProvider,
 	handler gin.HandlerFunc,
 	headers ...primitive.E,
 ) *httptest.ResponseRecorder {
@@ -158,7 +158,11 @@ func MockTestAuthorizationProvider(
 	rr := httptest.NewRecorder()
 	ctx, r := gin.CreateTestContext(rr)
 	r.Use(auth.Middleware())
-	r.Use(authz.Middleware())
+	if len(role) == 0 {
+		r.Use(authz.Middleware())
+	} else {
+		r.Use(authz.Middleware(role))
+	}
 	r.Handle(httpMethod, path, handler)
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
