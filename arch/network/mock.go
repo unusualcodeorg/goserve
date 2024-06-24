@@ -45,7 +45,10 @@ func MockSuccessDataHandler(msg string, data any) gin.HandlerFunc {
 	}
 }
 
-func MockHttp(t *testing.T, httpMethod, path, url string, handler gin.HandlerFunc) (*gin.Context, *httptest.ResponseRecorder) {
+func MockTestHttp(
+	t *testing.T, httpMethod, path, url, body string,
+	handler gin.HandlerFunc,
+) (*gin.Context, *httptest.ResponseRecorder) {
 	gin.SetMode(gin.TestMode)
 
 	rr := httptest.NewRecorder()
@@ -56,7 +59,7 @@ func MockHttp(t *testing.T, httpMethod, path, url string, handler gin.HandlerFun
 		v.RegisterTagNameFunc(CustomTagNameFunc())
 	}
 
-	req, err := http.NewRequest(httpMethod, url, nil)
+	req, err := http.NewRequest(httpMethod, url, bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		t.Fatalf("could not create request: %v", err)
 	}
@@ -69,11 +72,16 @@ func MockHttp(t *testing.T, httpMethod, path, url string, handler gin.HandlerFun
 	return ctx, rr
 }
 
-func MockHttpWithBody(t *testing.T, httpMethod, path, url string, handler gin.HandlerFunc, body string) (*gin.Context, *httptest.ResponseRecorder) {
+func MockTestRootMiddleware(
+	t *testing.T, httpMethod, path, url, body string,
+	m RootMiddleware,
+	handler gin.HandlerFunc,
+) (*gin.Context, *httptest.ResponseRecorder) {
 	gin.SetMode(gin.TestMode)
 
 	rr := httptest.NewRecorder()
 	ctx, r := gin.CreateTestContext(rr)
+	m.Attach(r)
 	r.Handle(httpMethod, path, handler)
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {

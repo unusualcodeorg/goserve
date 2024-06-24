@@ -8,7 +8,7 @@ import (
 
 func TestReqBody(t *testing.T) {
 	body := `{"field": "test"}`
-	ctx, _ := MockHttpWithBody(t, "POST", "/mock", "/mock", MockSuccessMsgHandler("success"), body)
+	ctx, _ := MockTestHttp(t, "POST", "/mock", "/mock", body, MockSuccessMsgHandler("success"))
 
 	dto, err := ReqBody(ctx, &MockDto{})
 
@@ -18,7 +18,7 @@ func TestReqBody(t *testing.T) {
 
 func TestReqBody_Error(t *testing.T) {
 	body := `{"wrong": "test"}`
-	ctx, _ := MockHttpWithBody(t, "POST", "/mock", "/mock", MockSuccessMsgHandler("success"), body)
+	ctx, _ := MockTestHttp(t, "POST", "/mock", "/mock", body, MockSuccessMsgHandler("success"))
 
 	dto, err := ReqBody(ctx, &MockDto{})
 
@@ -28,7 +28,7 @@ func TestReqBody_Error(t *testing.T) {
 }
 
 func TestReqQuery(t *testing.T) {
-	ctx, _ := MockHttp(t, "GET", "/mock", "/mock?field=test", MockSuccessMsgHandler("success"))
+	ctx, _ := MockTestHttp(t, "GET", "/mock", "/mock?field=test", "", MockSuccessMsgHandler("success"))
 
 	dto, err := ReqQuery(ctx, &MockDto{})
 
@@ -37,7 +37,7 @@ func TestReqQuery(t *testing.T) {
 }
 
 func TestReqQuery_Error(t *testing.T) {
-	ctx, _ := MockHttp(t, "GET", "/mock", "/mock?wrong=test", MockSuccessMsgHandler("success"))
+	ctx, _ := MockTestHttp(t, "GET", "/mock", "/mock?wrong=test", "", MockSuccessMsgHandler("success"))
 
 	dto, err := ReqQuery(ctx, &MockDto{})
 
@@ -45,4 +45,3 @@ func TestReqQuery_Error(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, err.Error(), "field is required")
 }
-
