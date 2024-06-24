@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 )
 
-func GenerateRandomString(n int) (string, error) {
+func GenerateRandomString(n uint64) (string, error) {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
 	if err != nil {
