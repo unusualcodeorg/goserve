@@ -19,13 +19,13 @@ import (
 )
 
 type module struct {
-	context     context.Context
-	env         *config.Env
-	db          mongo.Database
-	store       redis.Store
-	userService user.Service
-	authService auth.Service
-	blogService blog.Service
+	Context     context.Context
+	Env         *config.Env
+	DB          mongo.Database
+	Store       redis.Store
+	UserService user.Service
+	AuthService auth.Service
+	BlogService blog.Service
 }
 
 func (m *module) GetInstance() *module {
@@ -34,26 +34,26 @@ func (m *module) GetInstance() *module {
 
 func (m *module) Controllers() []network.Controller {
 	return []network.Controller{
-		auth.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.authService),
-		user.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.userService),
-		blog.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.blogService),
-		author.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), author.NewService(m.db, m.blogService)),
-		editor.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), editor.NewService(m.db, m.userService)),
-		blogs.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), blogs.NewService(m.db, m.store)),
-		contact.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), contact.NewService(m.db)),
+		auth.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.AuthService),
+		user.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.UserService),
+		blog.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), m.BlogService),
+		author.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), author.NewService(m.DB, m.BlogService)),
+		editor.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), editor.NewService(m.DB, m.UserService)),
+		blogs.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), blogs.NewService(m.DB, m.Store)),
+		contact.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), contact.NewService(m.DB)),
 	}
 }
 
 func (m *module) RootMiddlewares() []network.RootMiddleware {
 	return []network.RootMiddleware{
 		coreMW.NewErrorCatcher(), // NOTE: this should be the first handler to be mounted
-		authMW.NewKeyProtection(m.authService),
+		authMW.NewKeyProtection(m.AuthService),
 		coreMW.NewNotFound(),
 	}
 }
 
 func (m *module) AuthenticationProvider() network.AuthenticationProvider {
-	return authMW.NewAuthenticationProvider(m.authService, m.userService)
+	return authMW.NewAuthenticationProvider(m.AuthService, m.UserService)
 }
 
 func (m *module) AuthorizationProvider() network.AuthorizationProvider {
@@ -66,12 +66,12 @@ func NewModule(context context.Context, env *config.Env, db mongo.Database, stor
 	blogService := blog.NewService(db, store, userService)
 
 	return &module{
-		context:     context,
-		env:         env,
-		db:          db,
-		store:       store,
-		userService: userService,
-		authService: authService,
-		blogService: blogService,
+		Context:     context,
+		Env:         env,
+		DB:          db,
+		Store:       store,
+		UserService: userService,
+		AuthService: authService,
+		BlogService: blogService,
 	}
 }

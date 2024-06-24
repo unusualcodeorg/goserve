@@ -4,15 +4,24 @@ import (
 	"context"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/unusualcodeorg/goserve/arch/mongo"
 	"github.com/unusualcodeorg/goserve/arch/network"
 	"github.com/unusualcodeorg/goserve/arch/redis"
 	"github.com/unusualcodeorg/goserve/config"
 )
 
+type Shutdown = func()
+
 func Server() {
-	context := context.Background()
 	env := config.NewEnv(".env")
+	router, _, shutdown := create(env)
+	defer shutdown()
+	router.Start(env.ServerHost, env.ServerPort)
+}
+
+func create(env *config.Env) (network.Router, network.Module[module], Shutdown) {
+	context := context.Background()
 
 	dbConfig := mongo.DbConfig{
 		User:        env.DBUser,
@@ -27,8 +36,10 @@ func Server() {
 
 	db := mongo.NewDatabase(context, dbConfig)
 	db.Connect()
-	defer db.Disconnect()
-	EnsureDbIndexes(db)
+
+	if env.GoMode != gin.TestMode {
+		EnsureDbIndexes(db)
+	}
 
 	redisConfig := redis.Config{
 		Host: env.RedisHost,
@@ -39,7 +50,6 @@ func Server() {
 
 	store := redis.NewStore(context, &redisConfig)
 	store.Connect()
-	defer store.Disconnect()
 
 	module := NewModule(context, env, db, store)
 
@@ -47,5 +57,11 @@ func Server() {
 	router.RegisterValidationParsers(network.CustomTagNameFunc())
 	router.LoadRootMiddlewares(module.RootMiddlewares())
 	router.LoadControllers(module.Controllers())
-	router.Start(env.ServerHost, env.ServerPort)
+
+	shutdown := func() {
+		db.Disconnect()
+		store.Disconnect()
+	}
+
+	return router, module, shutdown
 }

@@ -32,6 +32,8 @@ type Service interface {
 	SignToken(claims jwt.RegisteredClaims) (string, error)
 	ValidateClaims(claims *jwt.RegisteredClaims) bool
 	FindApiKey(key string) (*model.ApiKey, error)
+	CreateApiKey(key string, version int, permissions []model.Permission, comments []string) (*model.ApiKey, error)
+	DeleteApiKey(apikey *model.ApiKey) (bool, error)
 }
 
 type service struct {
@@ -346,4 +348,25 @@ func (s *service) FindApiKey(key string) (*model.ApiKey, error) {
 	}
 
 	return apikey, nil
+}
+
+func (s *service) CreateApiKey(key string, version int, permissions []model.Permission, comments []string) (*model.ApiKey, error) {
+	doc := model.NewApiKey(key, version, permissions, comments)
+
+	id, err := s.apikeyQueryBuilder.SingleQuery().InsertOne(doc)
+	if err != nil {
+		return nil, err
+	}
+
+	doc.ID = *id
+	return doc, nil
+}
+
+func (s *service) DeleteApiKey(apikey *model.ApiKey) (bool, error) {
+	filter := bson.M{"_id": apikey.ID}
+	result, err := s.apikeyQueryBuilder.SingleQuery().DeleteOne(filter)
+	if err != nil {
+		return false, err
+	}
+	return result.DeletedCount > 0, nil
 }

@@ -108,3 +108,16 @@ func (m *MockService) FindApiKey(key string) (*model.ApiKey, error) {
 	}
 	return args.Get(0).(*model.ApiKey), args.Error(1)
 }
+
+func (m *MockService) CreateApiKey(key string, version int, permissions []model.Permission, comments []string) (*model.ApiKey, error) {
+	args := m.Called(key, version, permissions, comments)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.ApiKey), args.Error(1)
+}
+
+func (m *MockService) DeleteApiKey(apikey *model.ApiKey) (bool, error) {
+	args := m.Called(apikey)
+	return args.Bool(0), args.Error(1)
+}

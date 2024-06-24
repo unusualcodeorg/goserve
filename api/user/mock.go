@@ -82,3 +82,8 @@ func (m *MockService) FindUserPublicProfile(userId primitive.ObjectID) (*model.U
 	}
 	return args.Get(0).(*model.User), args.Error(1)
 }
+
+func (m *MockService) DeleteUserByEmail(email string) (bool, error) {
+	args := m.Called(email)
+	return args.Bool(0), args.Error(1)
+}
