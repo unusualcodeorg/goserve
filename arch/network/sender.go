@@ -14,7 +14,7 @@ func NewResponseSender() ResponseSender {
 }
 
 func (m *sender) Debug() bool {
-	return gin.Mode() == gin.DebugMode
+	return gin.Mode() != gin.ReleaseMode
 }
 
 func (m *sender) Send(ctx *gin.Context) SendResponse {
