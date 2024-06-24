@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -247,4 +248,40 @@ func MockTestController(
 	r.ServeHTTP(rr, req)
 
 	return rr
+}
+
+type MockAuthenticationProvider struct {
+	mock.Mock
+}
+
+func (m *MockAuthenticationProvider) Debug() bool {
+	return true
+}
+
+func (m *MockAuthenticationProvider) Middleware() gin.HandlerFunc {
+	args := m.Called()
+	return args.Get(0).(gin.HandlerFunc)
+}
+
+func (m *MockAuthenticationProvider) Send(ctx *gin.Context) SendResponse {
+	args := m.Called(ctx)
+	return args.Get(0).(SendResponse)
+}
+
+type MockAuthorizationProvider struct {
+	mock.Mock
+}
+
+func (m *MockAuthorizationProvider) Debug() bool {
+	return true
+}
+
+func (m *MockAuthorizationProvider) Middleware(params ...string) gin.HandlerFunc {
+	args := m.Called(params)
+	return args.Get(0).(gin.HandlerFunc)
+}
+
+func (m *MockAuthorizationProvider) Send(ctx *gin.Context) SendResponse {
+	args := m.Called(ctx)
+	return args.Get(0).(SendResponse)
 }
