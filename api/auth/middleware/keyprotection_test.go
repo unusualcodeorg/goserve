@@ -17,7 +17,8 @@ import (
 func TestKeyProtectionMiddleware_NoApiKey(t *testing.T) {
 	mockAuthService := new(auth.MockService)
 
-	rr := network.MockTestRootMiddleware(t, "GET", "/test", "/test", "",
+	rr := network.MockTestRootMiddleware(
+		t,
 		NewKeyProtection(mockAuthService),
 		network.MockSuccessMsgHandler("success"),
 	)
@@ -31,7 +32,8 @@ func TestKeyProtectionMiddleware_WrongApiKey(t *testing.T) {
 	key := "wrong"
 	mockAuthService.On("FindApiKey", key).Return(nil, errors.New(""))
 
-	rr := network.MockTestRootMiddleware(t, "GET", "/test", "/test", "",
+	rr := network.MockTestRootMiddleware(
+		t,
 		NewKeyProtection(mockAuthService),
 		network.MockSuccessMsgHandler("success"),
 		primitive.E{Key: network.ApiKeyHeader, Value: key},
@@ -51,7 +53,8 @@ func TestKeyProtectionMiddleware_CorrectApiKey(t *testing.T) {
 		network.NewResponseSender().Send(ctx).SuccessMsgResponse("success")
 	}
 
-	rr := network.MockTestRootMiddleware(t, "GET", "/test", "/test", "",
+	rr := network.MockTestRootMiddleware(
+		t,
 		NewKeyProtection(mockAuthService),
 		mockHandler,
 		primitive.E{Key: network.ApiKeyHeader, Value: key},

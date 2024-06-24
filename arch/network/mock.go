@@ -79,7 +79,7 @@ func MockTestHandler(
 }
 
 func MockTestRootMiddleware(
-	t *testing.T, httpMethod, path, url, body string,
+	t *testing.T,
 	middleware RootMiddleware,
 	handler gin.HandlerFunc,
 	headers ...primitive.E,
@@ -89,13 +89,47 @@ func MockTestRootMiddleware(
 	rr := httptest.NewRecorder()
 	ctx, r := gin.CreateTestContext(rr)
 	middleware.Attach(r)
-	r.Handle(httpMethod, path, handler)
+	r.GET("/", handler)
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterTagNameFunc(CustomTagNameFunc())
 	}
 
-	req, err := http.NewRequest(httpMethod, url, bytes.NewBuffer([]byte(body)))
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatalf("could not create request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	for _, h := range headers {
+		req.Header.Set(h.Key, h.Value.(string))
+	}
+
+	ctx.Request = req
+
+	r.ServeHTTP(rr, req)
+
+	return rr
+}
+
+func MockTestRootMiddlewareWithUrl(
+	t *testing.T, path, url string,
+	middleware RootMiddleware,
+	handler gin.HandlerFunc,
+	headers ...primitive.E,
+) *httptest.ResponseRecorder {
+	gin.SetMode(gin.TestMode)
+
+	rr := httptest.NewRecorder()
+	ctx, r := gin.CreateTestContext(rr)
+	middleware.Attach(r)
+	r.GET(path, handler)
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterTagNameFunc(CustomTagNameFunc())
+	}
+
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Fatalf("could not create request: %v", err)
 	}
@@ -113,7 +147,7 @@ func MockTestRootMiddleware(
 }
 
 func MockTestAuthenticationProvider(
-	t *testing.T, httpMethod, path, url, body string,
+	t *testing.T,
 	auth AuthenticationProvider,
 	handler gin.HandlerFunc,
 	headers ...primitive.E,
@@ -123,13 +157,13 @@ func MockTestAuthenticationProvider(
 	rr := httptest.NewRecorder()
 	ctx, r := gin.CreateTestContext(rr)
 	r.Use(auth.Middleware())
-	r.Handle(httpMethod, path, handler)
+	r.GET("/", handler)
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterTagNameFunc(CustomTagNameFunc())
 	}
 
-	req, err := http.NewRequest(httpMethod, url, bytes.NewBuffer([]byte(body)))
+	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
 		t.Fatalf("could not create request: %v", err)
 	}
@@ -147,7 +181,8 @@ func MockTestAuthenticationProvider(
 }
 
 func MockTestAuthorizationProvider(
-	t *testing.T, httpMethod, path, url, role, body string,
+	t *testing.T,
+	role string,
 	auth AuthenticationProvider,
 	authz AuthorizationProvider,
 	handler gin.HandlerFunc,
@@ -163,7 +198,39 @@ func MockTestAuthorizationProvider(
 	} else {
 		r.Use(authz.Middleware(role))
 	}
-	r.Handle(httpMethod, path, handler)
+	r.GET("/", handler)
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterTagNameFunc(CustomTagNameFunc())
+	}
+
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatalf("could not create request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	for _, h := range headers {
+		req.Header.Set(h.Key, h.Value.(string))
+	}
+
+	ctx.Request = req
+
+	r.ServeHTTP(rr, req)
+
+	return rr
+}
+
+func MockTestController(
+	t *testing.T, httpMethod, url, body string,
+	controller Controller,
+) *httptest.ResponseRecorder {
+	gin.SetMode(gin.TestMode)
+
+	rr := httptest.NewRecorder()
+	ctx, r := gin.CreateTestContext(rr)
+
+	controller.MountRoutes(r.Group(controller.Path()))
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterTagNameFunc(CustomTagNameFunc())
@@ -174,10 +241,6 @@ func MockTestAuthorizationProvider(
 		t.Fatalf("could not create request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-
-	for _, h := range headers {
-		req.Header.Set(h.Key, h.Value.(string))
-	}
 
 	ctx.Request = req
 

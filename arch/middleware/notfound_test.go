@@ -9,10 +9,7 @@ import (
 )
 
 func TestNotFoundMiddleware(t *testing.T) {
-	rr := network.MockTestRootMiddleware(t, "GET", "/test", "/no", "",
-		NewNotFound(),
-		network.MockSuccessMsgHandler("success"),
-	)
+	rr := network.MockTestRootMiddlewareWithUrl(t, "/test", "/wrong", NewNotFound(), network.MockSuccessMsgHandler("success"))
 
 	assert.Equal(t, http.StatusNotFound, rr.Code)
 	assert.Contains(t, rr.Body.String(), `"message":"url not found"`)

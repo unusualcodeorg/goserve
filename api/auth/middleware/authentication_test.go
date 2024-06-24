@@ -24,7 +24,8 @@ func TestAuthenticationProvider_NoAccessToken(t *testing.T) {
 
 	mockAuthService.AssertNotCalled(t, "VerifyToken", mock.Anything)
 
-	rr := network.MockTestAuthenticationProvider(t, "GET", "/test", "/test", "",
+	rr := network.MockTestAuthenticationProvider(
+		t,
 		NewAuthenticationProvider(mockAuthService, mockUserService),
 		network.MockSuccessMsgHandler("success"),
 	)
@@ -42,7 +43,8 @@ func TestAuthenticationProvider_WrongAccessToken(t *testing.T) {
 
 	token := "token"
 
-	rr := network.MockTestAuthenticationProvider(t, "GET", "/test", "/test", "",
+	rr := network.MockTestAuthenticationProvider(
+		t,
 		NewAuthenticationProvider(mockAuthService, mockUserService),
 		network.MockSuccessMsgHandler("success"),
 		primitive.E{Key: network.AuthorizationHeader, Value: token},
@@ -62,7 +64,8 @@ func TestAuthenticationProvider_VerifyTokenInvalid(t *testing.T) {
 
 	mockAuthService.On("VerifyToken", "token").Return(nil, errors.New("invalid token"))
 
-	rr := network.MockTestAuthenticationProvider(t, "GET", "/test", "/test", "",
+	rr := network.MockTestAuthenticationProvider(
+		t,
 		NewAuthenticationProvider(mockAuthService, mockUserService),
 		network.MockSuccessMsgHandler("success"),
 		primitive.E{Key: network.AuthorizationHeader, Value: token},
@@ -84,7 +87,8 @@ func TestAuthenticationProvider_VerifyTokenInvalidClaim(t *testing.T) {
 	mockAuthService.On("VerifyToken", "token").Return(claims, nil)
 	mockAuthService.On("ValidateClaims", claims).Return(false)
 
-	rr := network.MockTestAuthenticationProvider(t, "GET", "/test", "/test", "",
+	rr := network.MockTestAuthenticationProvider(
+		t,
 		NewAuthenticationProvider(mockAuthService, mockUserService),
 		network.MockSuccessMsgHandler("success"),
 		primitive.E{Key: network.AuthorizationHeader, Value: token},
@@ -106,7 +110,8 @@ func TestAuthenticationProvider_VerifyTokenInvalidClaimUser(t *testing.T) {
 	mockAuthService.On("VerifyToken", "token").Return(claims, nil)
 	mockAuthService.On("ValidateClaims", claims).Return(true)
 
-	rr := network.MockTestAuthenticationProvider(t, "GET", "/test", "/test", "",
+	rr := network.MockTestAuthenticationProvider(
+		t,
 		NewAuthenticationProvider(mockAuthService, mockUserService),
 		network.MockSuccessMsgHandler("success"),
 		primitive.E{Key: network.AuthorizationHeader, Value: token},
@@ -130,7 +135,8 @@ func TestAuthenticationProvider_VerifyTokenInvalidUser(t *testing.T) {
 	mockAuthService.On("ValidateClaims", claims).Return(true)
 	mockUserService.On("FindUserById", userId).Return(nil, errors.New("user not found"))
 
-	rr := network.MockTestAuthenticationProvider(t, "GET", "/test", "/test", "",
+	rr := network.MockTestAuthenticationProvider(
+		t,
 		NewAuthenticationProvider(mockAuthService, mockUserService),
 		network.MockSuccessMsgHandler("success"),
 		primitive.E{Key: network.AuthorizationHeader, Value: token},
@@ -155,7 +161,8 @@ func TestAuthenticationProvider_VerifyTokenInvalidKaystore(t *testing.T) {
 	mockUserService.On("FindUserById", userId).Return(user, nil)
 	mockAuthService.On("FindKeystore", user, claims.ID).Return(nil, errors.New("not found"))
 
-	rr := network.MockTestAuthenticationProvider(t, "GET", "/test", "/test", "",
+	rr := network.MockTestAuthenticationProvider(
+		t,
 		NewAuthenticationProvider(mockAuthService, mockUserService),
 		network.MockSuccessMsgHandler("success"),
 		primitive.E{Key: network.AuthorizationHeader, Value: token},
@@ -187,7 +194,8 @@ func TestAuthenticationProvider_Success(t *testing.T) {
 		network.NewResponseSender().Send(ctx).SuccessMsgResponse("success")
 	}
 
-	rr := network.MockTestAuthenticationProvider(t, "GET", "/test", "/test", "",
+	rr := network.MockTestAuthenticationProvider(
+		t,
 		NewAuthenticationProvider(mockAuthService, mockUserService),
 		mockHandler,
 		primitive.E{Key: network.AuthorizationHeader, Value: token},

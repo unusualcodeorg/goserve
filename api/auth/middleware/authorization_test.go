@@ -30,7 +30,7 @@ func TestAuthorizationProvider_NoRole(t *testing.T) {
 	mockUserService.On("FindUserById", userId).Return(user, nil)
 	mockAuthService.On("FindKeystore", user, claims.ID).Return(keystore, nil)
 
-	rr := network.MockTestAuthorizationProvider(t, "GET", "/test", "/test", "", "",
+	rr := network.MockTestAuthorizationProvider(t, "",
 		NewAuthenticationProvider(mockAuthService, mockUserService),
 		NewAuthorizationProvider(),
 		network.MockSuccessMsgHandler("success"),
@@ -59,7 +59,7 @@ func TestAuthorizationProvider_WrongRole(t *testing.T) {
 	mockUserService.On("FindUserById", userId).Return(user, nil)
 	mockAuthService.On("FindKeystore", user, claims.ID).Return(keystore, nil)
 
-	rr := network.MockTestAuthorizationProvider(t, "GET", "/test", "/test", "WRONG", "",
+	rr := network.MockTestAuthorizationProvider(t, "WRONG",
 		NewAuthenticationProvider(mockAuthService, mockUserService),
 		NewAuthorizationProvider(),
 		network.MockSuccessMsgHandler("success"),
@@ -88,7 +88,7 @@ func TestAuthorizationProvider_Success(t *testing.T) {
 	mockUserService.On("FindUserById", userId).Return(user, nil)
 	mockAuthService.On("FindKeystore", user, claims.ID).Return(keystore, nil)
 
-	rr := network.MockTestAuthorizationProvider(t, "GET", "/test", "/test", string(role.Code), "",
+	rr := network.MockTestAuthorizationProvider(t, "TEST",
 		NewAuthenticationProvider(mockAuthService, mockUserService),
 		NewAuthorizationProvider(),
 		network.MockSuccessMsgHandler("success"),
