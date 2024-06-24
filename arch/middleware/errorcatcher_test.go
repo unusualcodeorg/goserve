@@ -11,22 +11,22 @@ import (
 )
 
 func TestErrorCatcherMiddleware(t *testing.T) {
-	_, rr := network.MockTestRootMiddleware(t, "GET", "/test", "/test", "",
-		NewErrorCatcher(),
-		func(ctx *gin.Context) {
-			panic(errors.New("panic test"))
-		})
+	mockHandler := func(ctx *gin.Context) {
+		panic(errors.New("panic test"))
+	}
+
+	rr := network.MockTestRootMiddleware(t, "GET", "/test", "/test", "", NewErrorCatcher(), mockHandler)
 
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	assert.Contains(t, rr.Body.String(), `"message":"panic test"`)
 }
 
 func TestErrorCatcherMiddleware_NonError(t *testing.T) {
-	_, rr := network.MockTestRootMiddleware(t, "GET", "/test", "/test", "",
-		NewErrorCatcher(),
-		func(ctx *gin.Context) {
-			panic(1)
-		})
+	mockHandler := func(ctx *gin.Context) {
+		panic(1)
+	}
+
+	rr := network.MockTestRootMiddleware(t, "GET", "/test", "/test", "", NewErrorCatcher(), mockHandler)
 
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	assert.Contains(t, rr.Body.String(), `"message":"something went wrong"`)

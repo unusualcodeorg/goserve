@@ -3,45 +3,52 @@ package network
 import (
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestReqBody(t *testing.T) {
 	body := `{"field": "test"}`
-	ctx, _ := MockTestHttp(t, "POST", "/mock", "/mock", body, MockSuccessMsgHandler("success"))
 
-	dto, err := ReqBody(ctx, &MockDto{})
+	mockHandler := func(ctx *gin.Context) {
+		dto, err := ReqBody(ctx, &MockDto{})
+		assert.NoError(t, err)
+		assert.Equal(t, dto.Field, "test")
+	}
 
-	assert.NoError(t, err)
-	assert.Equal(t, dto.Field, "test")
+	MockTestHandler(t, "POST", "/mock", "/mock", body, mockHandler)
 }
 
 func TestReqBody_Error(t *testing.T) {
 	body := `{"wrong": "test"}`
-	ctx, _ := MockTestHttp(t, "POST", "/mock", "/mock", body, MockSuccessMsgHandler("success"))
 
-	dto, err := ReqBody(ctx, &MockDto{})
+	mockHandler := func(ctx *gin.Context) {
+		dto, err := ReqBody(ctx, &MockDto{})
+		assert.Nil(t, dto)
+		assert.Error(t, err)
+		assert.Equal(t, err.Error(), "field is required")
+	}
 
-	assert.Nil(t, dto)
-	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "field is required")
+	MockTestHandler(t, "POST", "/mock", "/mock", body, mockHandler)
 }
 
 func TestReqQuery(t *testing.T) {
-	ctx, _ := MockTestHttp(t, "GET", "/mock", "/mock?field=test", "", MockSuccessMsgHandler("success"))
+	mockHandler := func(ctx *gin.Context) {
+		dto, err := ReqQuery(ctx, &MockDto{})
+		assert.NoError(t, err)
+		assert.Equal(t, dto.Field, "test")
+	}
 
-	dto, err := ReqQuery(ctx, &MockDto{})
-
-	assert.NoError(t, err)
-	assert.Equal(t, dto.Field, "test")
+	MockTestHandler(t, "GET", "/mock", "/mock?field=test", "", mockHandler)
 }
 
 func TestReqQuery_Error(t *testing.T) {
-	ctx, _ := MockTestHttp(t, "GET", "/mock", "/mock?wrong=test", "", MockSuccessMsgHandler("success"))
+	mockHandler := func(ctx *gin.Context) {
+		dto, err := ReqQuery(ctx, &MockDto{})
+		assert.Nil(t, dto)
+		assert.Error(t, err)
+		assert.Equal(t, err.Error(), "field is required")
+	}
 
-	dto, err := ReqQuery(ctx, &MockDto{})
-
-	assert.Nil(t, dto)
-	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "field is required")
+	MockTestHandler(t, "GET", "/mock", "/mock?wrong=test", "", mockHandler)
 }

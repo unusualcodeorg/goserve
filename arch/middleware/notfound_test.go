@@ -9,7 +9,7 @@ import (
 )
 
 func TestNotFoundMiddleware(t *testing.T) {
-	_, rr := network.MockTestRootMiddleware(t, "GET", "/test", "/no", "",
+	rr := network.MockTestRootMiddleware(t, "GET", "/test", "/no", "",
 		NewNotFound(),
 		network.MockSuccessMsgHandler("success"),
 	)

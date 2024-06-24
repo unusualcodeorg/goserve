@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MockDto struct {
@@ -45,10 +46,11 @@ func MockSuccessDataHandler(msg string, data any) gin.HandlerFunc {
 	}
 }
 
-func MockTestHttp(
+func MockTestHandler(
 	t *testing.T, httpMethod, path, url, body string,
 	handler gin.HandlerFunc,
-) (*gin.Context, *httptest.ResponseRecorder) {
+	headers ...primitive.E,
+) *httptest.ResponseRecorder {
 	gin.SetMode(gin.TestMode)
 
 	rr := httptest.NewRecorder()
@@ -65,18 +67,23 @@ func MockTestHttp(
 	}
 	req.Header.Set("Content-Type", "application/json")
 
+	for _, h := range headers {
+		req.Header.Set(h.Key, h.Value.(string))
+	}
+
 	ctx.Request = req
 
 	r.ServeHTTP(rr, req)
 
-	return ctx, rr
+	return rr
 }
 
 func MockTestRootMiddleware(
 	t *testing.T, httpMethod, path, url, body string,
 	m RootMiddleware,
 	handler gin.HandlerFunc,
-) (*gin.Context, *httptest.ResponseRecorder) {
+	headers ...primitive.E,
+) *httptest.ResponseRecorder {
 	gin.SetMode(gin.TestMode)
 
 	rr := httptest.NewRecorder()
@@ -94,9 +101,13 @@ func MockTestRootMiddleware(
 	}
 	req.Header.Set("Content-Type", "application/json")
 
+	for _, h := range headers {
+		req.Header.Set(h.Key, h.Value.(string))
+	}
+
 	ctx.Request = req
 
 	r.ServeHTTP(rr, req)
 
-	return ctx, rr
+	return rr
 }
