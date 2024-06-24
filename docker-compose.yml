@@ -1,14 +1,4 @@
 services:
-  tester:
-    build:
-      context: .
-      dockerfile: Dockerfile.test
-    image: tester
-    container_name: tester
-    env_file: .test.env
-    depends_on:
-      - mongo
-      - redis
   goserver:
     build:
       context: .
