@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -42,14 +43,19 @@ func (r *store) GetInstance() *store {
 }
 
 func (r *store) Connect() {
-	fmt.Println("connecting to Redis")
+	fmt.Println("connecting to redis")
 	pong, err := r.Ping(r.context).Result()
 	if err != nil {
-		panic(fmt.Errorf("could not connect to Redis: %v", err))
+		panic(fmt.Errorf("could not connect to redis: %v", err))
 	}
 	fmt.Println("connected to Redis:", pong)
 }
 
 func (r *store) Disconnect() {
-	r.Close()
+	fmt.Println("disconnecting redis...")
+	err := r.Close()
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println("disconnected redis")
 }

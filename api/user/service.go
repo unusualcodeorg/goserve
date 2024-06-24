@@ -20,8 +20,7 @@ type Service interface {
 	CreateUser(user *model.User) (*model.User, error)
 	FindUserPrivateProfile(user *model.User) (*model.User, error)
 	FindUserPublicProfile(userId primitive.ObjectID) (*model.User, error)
-	// UpdateUserInfo(user *model.User) (*model.User, error)
-	// DeactivateUser(user *model.User) (*model.User, error)
+	DeleteUserByEmail(email string) (bool, error)
 }
 
 type service struct {
@@ -116,4 +115,13 @@ func (s *service) FindUserPublicProfile(userId primitive.ObjectID) (*model.User,
 	projection := bson.D{{Key: "name", Value: 1}, {Key: "profilePicUrl", Value: 1}}
 	opts := options.FindOne().SetProjection(projection)
 	return s.userQueryBuilder.SingleQuery().FindOne(filter, opts)
+}
+
+func (s *service) DeleteUserByEmail(email string) (bool, error) {
+	filter := bson.M{"email": email}
+	result, err := s.userQueryBuilder.SingleQuery().DeleteOne(filter)
+	if err != nil {
+		return false, err
+	}
+	return result.DeletedCount > 0, nil
 }

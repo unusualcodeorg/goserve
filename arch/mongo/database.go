@@ -63,27 +63,28 @@ func (db *database) Connect() {
 	clientOptions.SetMaxPoolSize(uint64(db.config.MaxPoolSize))
 	clientOptions.SetMaxPoolSize(uint64(db.config.MinPoolSize))
 
-	fmt.Println("Connecting Mongo...")
+	fmt.Println("connecting mongo...")
 	client, err := mongo.Connect(db.context, clientOptions)
 	if err != nil {
-		log.Fatal("Connection to Mongo Failed!: ", err)
+		log.Fatal("connection to mongo failed!: ", err)
 	}
 
 	err = client.Ping(db.context, nil)
 	if err != nil {
-		log.Panic("Pinging to Mongo Failed!: ", err)
+		log.Panic("pinging to mongo failed!: ", err)
 	}
-	fmt.Println("Connected to Mongo!")
+	fmt.Println("connected to mongo!")
 
 	db.Database = client.Database(db.config.Name)
 }
 
 func (db *database) Disconnect() {
-	fmt.Println("Disconnecting Mongo...")
+	fmt.Println("disconnecting mongo...")
 	err := db.Client().Disconnect(db.context)
 	if err != nil {
 		log.Panic(err)
 	}
+	fmt.Println("disconnected mongo")
 }
 
 func NewObjectID(id string) (primitive.ObjectID, error) {

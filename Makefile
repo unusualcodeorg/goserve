@@ -9,6 +9,12 @@ build:
 run:
 	go run cmd/main.go
 
+test:
+	go test -v ./...
+
+cover:
+	go test -cover ./...
+
 keygen:
 	go run .tools/rsa/keygen.go
 
