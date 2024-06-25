@@ -68,6 +68,10 @@ Sample API
 3. **.tools**: api code, RSA key generator, and .env copier
 4. **.vscode**: editor config and debug launch settings
 
+# Documentation
+Check the [Wiki](https://github.com/unusualcodeorg/goserve/wiki/Architecture) for the detailed documentation on the architecture. 
+
+Note: We will keep on adding documentations progressively
 
 ## API Design
 ![Request-Response-Design](.extra/docs/api-structure.png)
