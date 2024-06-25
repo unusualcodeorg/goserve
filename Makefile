@@ -15,8 +15,9 @@ test:
 cover:
 	go test -cover ./...
 
-keygen:
+setup:
 	go run .tools/rsa/keygen.go
+	go run .tools/copy/envs.go 
 
 # make apigen ARGS="sample"
 apigen:
