@@ -1,6 +1,7 @@
 # goserve - Go Backend Architecture
 
 [![Docker Compose CI](https://github.com/unusualcodeorg/goserve/actions/workflows/docker_compose.yml/badge.svg)](https://github.com/unusualcodeorg/goserve/actions/workflows/docker_compose.yml)
+[![Starter Project](https://img.shields.io/badge/Starter%20Project-red?label=Get&logo=go)](https://github.com/unusualcodeorg/goservegen)
 
 ![Banner](.extra/docs/goserve-banner.png)
 
