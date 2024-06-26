@@ -2,9 +2,9 @@ package startup
 
 import (
 	auth "github.com/unusualcodeorg/goserve/api/auth/model"
+	blog "github.com/unusualcodeorg/goserve/api/blog/model"
 	contact "github.com/unusualcodeorg/goserve/api/contact/model"
 	user "github.com/unusualcodeorg/goserve/api/user/model"
-	blog "github.com/unusualcodeorg/goserve/api/blog/model"
 	"github.com/unusualcodeorg/goserve/arch/mongo"
 )
 

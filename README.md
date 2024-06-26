@@ -148,60 +148,60 @@ api/sample/model/sample.go
 package model
 
 import (
-	"context"
-	"time"
+  "context"
+  "time"
 
-	"github.com/go-playground/validator/v10"
-	"github.com/unusualcodeorg/goserve/arch/mongo"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	mongod "go.mongodb.org/mongo-driver/mongo"
+  "github.com/go-playground/validator/v10"
+  "github.com/unusualcodeorg/goserve/arch/mongo"
+  "go.mongodb.org/mongo-driver/bson"
+  "go.mongodb.org/mongo-driver/bson/primitive"
+  mongod "go.mongodb.org/mongo-driver/mongo"
 )
 
 const CollectionName = "samples"
 
 type Sample struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty" validate:"-"`
-	Field     string             `bson:"field" validate:"required"`
-	Status    bool               `bson:"status" validate:"required"`
-	CreatedAt time.Time          `bson:"createdAt" validate:"required"`
-	UpdatedAt time.Time          `bson:"updatedAt" validate:"required"`
+  ID        primitive.ObjectID `bson:"_id,omitempty" validate:"-"`
+  Field     string             `bson:"field" validate:"required"`
+  Status    bool               `bson:"status" validate:"required"`
+  CreatedAt time.Time          `bson:"createdAt" validate:"required"`
+  UpdatedAt time.Time          `bson:"updatedAt" validate:"required"`
 }
 
 func NewSample(field string) (*Sample, error) {
-	time := time.Now()
-	doc := Sample{
-		Field:     field,
-		Status:    true,
-		CreatedAt: time,
-		UpdatedAt: time,
-	}
-	if err := doc.Validate(); err != nil {
-		return nil, err
-	}
-	return &doc, nil
+  time := time.Now()
+  doc := Sample{
+    Field:     field,
+    Status:    true,
+    CreatedAt: time,
+    UpdatedAt: time,
+  }
+  if err := doc.Validate(); err != nil {
+    return nil, err
+  }
+  return &doc, nil
 }
 
 func (doc *Sample) GetValue() *Sample {
-	return doc
+  return doc
 }
 
 func (doc *Sample) Validate() error {
-	validate := validator.New()
-	return validate.Struct(doc)
+  validate := validator.New()
+  return validate.Struct(doc)
 }
 
 func (*Sample) EnsureIndexes(db mongo.Database) {
-	indexes := []mongod.IndexModel{
-		{
-			Keys: bson.D{
-				{Key: "_id", Value: 1},
-				{Key: "status", Value: 1},
-			},
-		},
-	}
-	
-	mongo.NewQueryBuilder[Sample](db, CollectionName).Query(context.Background()).CreateIndexes(indexes)
+  indexes := []mongod.IndexModel{
+    {
+      Keys: bson.D{
+        {Key: "_id", Value: 1},
+        {Key: "status", Value: 1},
+      },
+    },
+  }
+  
+  mongo.NewQueryBuilder[Sample](db, CollectionName).Query(context.Background()).CreateIndexes(indexes)
 }
 ```
 
@@ -210,9 +210,9 @@ arch/mongo/database
 
 ```golang
 type Document[T any] interface {
-	EnsureIndexes(Database)
-	GetValue() *T
-	Validate() error
+  EnsureIndexes(Database)
+  GetValue() *T
+  Validate() error
 }
 ``` 
 
@@ -223,42 +223,42 @@ api/sample/model/create_sample.go
 package dto
 
 import (
-	"fmt"
-	"time"
+  "fmt"
+  "time"
 
-	"github.com/go-playground/validator/v10"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+  "github.com/go-playground/validator/v10"
+  "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type InfoSample struct {
-	ID        primitive.ObjectID `json:"_id" binding:"required"`
-	Field     string             `json:"field" binding:"required"`
-	CreatedAt time.Time          `json:"createdAt" binding:"required"`
+  ID        primitive.ObjectID `json:"_id" binding:"required"`
+  Field     string             `json:"field" binding:"required"`
+  CreatedAt time.Time          `json:"createdAt" binding:"required"`
 }
 
 func EmptyInfoSample() *InfoSample {
-	return &InfoSample{}
+  return &InfoSample{}
 }
 
 func (d *InfoSample) GetValue() *InfoSample {
-	return d
+  return d
 }
 
 func (d *InfoSample) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
-	var msgs []string
-	for _, err := range errs {
-		switch err.Tag() {
-		case "required":
-			msgs = append(msgs, fmt.Sprintf("%s is required", err.Field()))
-		case "min":
-			msgs = append(msgs, fmt.Sprintf("%s must be min %s", err.Field(), err.Param()))
-		case "max":
-			msgs = append(msgs, fmt.Sprintf("%s must be max %s", err.Field(), err.Param()))
-		default:
-			msgs = append(msgs, fmt.Sprintf("%s is invalid", err.Field()))
-		}
-	}
-	return msgs, nil
+  var msgs []string
+  for _, err := range errs {
+    switch err.Tag() {
+    case "required":
+      msgs = append(msgs, fmt.Sprintf("%s is required", err.Field()))
+    case "min":
+      msgs = append(msgs, fmt.Sprintf("%s must be min %s", err.Field(), err.Param()))
+    case "max":
+      msgs = append(msgs, fmt.Sprintf("%s must be max %s", err.Field(), err.Param()))
+    default:
+      msgs = append(msgs, fmt.Sprintf("%s is invalid", err.Field()))
+    }
+  }
+  return msgs, nil
 }
 ```
 #### Notes: The DTO implements the interface 
@@ -266,8 +266,8 @@ arch/network/interfaces.go
 
 ```golang
 type Dto[T any] interface {
-	GetValue() *T
-	ValidateErrors(errs validator.ValidationErrors) ([]string, error)
+  GetValue() *T
+  ValidateErrors(errs validator.ValidationErrors) ([]string, error)
 }
 ``` 
 
@@ -279,41 +279,41 @@ package sample
 
 import (
   "github.com/unusualcodeorg/goserve/api/sample/dto"
-	"github.com/unusualcodeorg/goserve/api/sample/model"
-	"github.com/unusualcodeorg/goserve/arch/mongo"
-	"github.com/unusualcodeorg/goserve/arch/network"
-	"github.com/unusualcodeorg/goserve/arch/redis"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+  "github.com/unusualcodeorg/goserve/api/sample/model"
+  "github.com/unusualcodeorg/goserve/arch/mongo"
+  "github.com/unusualcodeorg/goserve/arch/network"
+  "github.com/unusualcodeorg/goserve/arch/redis"
+  "go.mongodb.org/mongo-driver/bson"
+  "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Service interface {
-	FindSample(id primitive.ObjectID) (*model.Sample, error)
+  FindSample(id primitive.ObjectID) (*model.Sample, error)
 }
 
 type service struct {
-	network.BaseService
-	sampleQueryBuilder mongo.QueryBuilder[model.Sample]
-	infoSampleCache    redis.Cache[dto.InfoSample]
+  network.BaseService
+  sampleQueryBuilder mongo.QueryBuilder[model.Sample]
+  infoSampleCache    redis.Cache[dto.InfoSample]
 }
 
 func NewService(db mongo.Database, store redis.Store) Service {
-	return &service{
-		BaseService:  network.NewBaseService(),
-		sampleQueryBuilder: mongo.NewQueryBuilder[model.Sample](db, model.CollectionName),
-		infoSampleCache: redis.NewCache[dto.InfoSample](store),
-	}
+  return &service{
+    BaseService:  network.NewBaseService(),
+    sampleQueryBuilder: mongo.NewQueryBuilder[model.Sample](db, model.CollectionName),
+    infoSampleCache: redis.NewCache[dto.InfoSample](store),
+  }
 }
 
 func (s *service) FindSample(id primitive.ObjectID) (*model.Sample, error) {
-	filter := bson.M{"_id": id}
+  filter := bson.M{"_id": id}
 
-	msg, err := s.sampleQueryBuilder.SingleQuery().FindOne(filter, nil)
-	if err != nil {
-		return nil, err
-	}
+  msg, err := s.sampleQueryBuilder.SingleQuery().FindOne(filter, nil)
+  if err != nil {
+    return nil, err
+  }
 
-	return msg, nil
+  return msg, nil
 }
 ```
 
@@ -322,7 +322,7 @@ arch/network/interfaces.go
 
 ```golang
 type BaseService interface {
-	Context() context.Context
+  Context() context.Context
 }
 ``` 
 
@@ -336,56 +336,56 @@ api/sample/model/service.go
 package sample
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/unusualcodeorg/goserve/api/sample/dto"
-	"github.com/unusualcodeorg/goserve/common"
-	coredto "github.com/unusualcodeorg/goserve/arch/dto"
-	"github.com/unusualcodeorg/goserve/arch/network"
-	"github.com/unusualcodeorg/goserve/utils"
+  "github.com/gin-gonic/gin"
+  "github.com/unusualcodeorg/goserve/api/sample/dto"
+  "github.com/unusualcodeorg/goserve/common"
+  coredto "github.com/unusualcodeorg/goserve/arch/dto"
+  "github.com/unusualcodeorg/goserve/arch/network"
+  "github.com/unusualcodeorg/goserve/utils"
 )
 
 type controller struct {
-	network.BaseController
-	common.ContextPayload
-	service Service
+  network.BaseController
+  common.ContextPayload
+  service Service
 }
 
 func NewController(
-	authMFunc network.AuthenticationProvider,
-	authorizeMFunc network.AuthorizationProvider,
-	service Service,
+  authMFunc network.AuthenticationProvider,
+  authorizeMFunc network.AuthorizationProvider,
+  service Service,
 ) network.Controller {
-	return &controller{
-		BaseController: network.NewBaseController("/sample", authMFunc, authorizeMFunc),
-		ContextPayload: common.NewContextPayload(),
-		service:  service,
-	}
+  return &controller{
+    BaseController: network.NewBaseController("/sample", authMFunc, authorizeMFunc),
+    ContextPayload: common.NewContextPayload(),
+    service:  service,
+  }
 }
 
 func (c *controller) MountRoutes(group *gin.RouterGroup) {
-	group.GET("/id/:id", c.getSampleHandler)
+  group.GET("/id/:id", c.getSampleHandler)
 }
 
 func (c *controller) getSampleHandler(ctx *gin.Context) {
-	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
-	if err != nil {
-		c.Send(ctx).BadRequestError(err.Error(), err)
-		return
-	}
+  mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
+  if err != nil {
+    c.Send(ctx).BadRequestError(err.Error(), err)
+    return
+  }
 
-	sample, err := c.service.FindSample(mongoId.ID)
-	if err != nil {
-		c.Send(ctx).NotFoundError("sample not found", err)
-		return
-	}
+  sample, err := c.service.FindSample(mongoId.ID)
+  if err != nil {
+    c.Send(ctx).NotFoundError("sample not found", err)
+    return
+  }
 
-	data, err := utils.MapTo[dto.InfoSample](sample)
-	if err != nil {
-		c.Send(ctx).InternalServerError("something went wrong", err)
-		return
-	}
+  data, err := utils.MapTo[dto.InfoSample](sample)
+  if err != nil {
+    c.Send(ctx).InternalServerError("something went wrong", err)
+    return
+  }
 
-	c.Send(ctx).SuccessDataResponse("success", data)
+  c.Send(ctx).SuccessDataResponse("success", data)
 }
 ```
 #### Notes: The Controller implements the interface 
@@ -393,31 +393,31 @@ arch/network/interfaces.go
 
 ```golang
 type Controller interface {
-	BaseController
-	MountRoutes(group *gin.RouterGroup)
+  BaseController
+  MountRoutes(group *gin.RouterGroup)
 }
 
 type BaseController interface {
-	ResponseSender
-	Path() string
-	Authentication() gin.HandlerFunc
-	Authorization(role string) gin.HandlerFunc
+  ResponseSender
+  Path() string
+  Authentication() gin.HandlerFunc
+  Authorization(role string) gin.HandlerFunc
 }
 
 type ResponseSender interface {
-	Debug() bool
-	Send(ctx *gin.Context) SendResponse
+  Debug() bool
+  Send(ctx *gin.Context) SendResponse
 }
 
 type SendResponse interface {
-	SuccessMsgResponse(message string)
-	SuccessDataResponse(message string, data any)
-	BadRequestError(message string, err error)
-	ForbiddenError(message string, err error)
-	UnauthorizedError(message string, err error)
-	NotFoundError(message string, err error)
-	InternalServerError(message string, err error)
-	MixedError(err error)
+  SuccessMsgResponse(message string)
+  SuccessDataResponse(message string, data any)
+  BadRequestError(message string, err error)
+  ForbiddenError(message string, err error)
+  UnauthorizedError(message string, err error)
+  NotFoundError(message string, err error)
+  InternalServerError(message string, err error)
+  MixedError(err error)
 }
 ``` 
 
@@ -426,17 +426,17 @@ startup/module.go
 
 ```go
 import (
-	...
-	"github.com/unusualcodeorg/goserve/api/sample"
+  ...
+  "github.com/unusualcodeorg/goserve/api/sample"
 )
 
 ...
 
 func (m *module) Controllers() []network.Controller {
-	return []network.Controller{
-		...
-		sample.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), sample.NewService(m.DB, m.Store)),
-	}
+  return []network.Controller{
+    ...
+    sample.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), sample.NewService(m.DB, m.Store)),
+  }
 }
 ```
 
@@ -445,13 +445,13 @@ startup/indexes.go
 
 ```go
 import (
-	...
-	sample "github.com/unusualcodeorg/goserve/api/sample/model"
+  ...
+  sample "github.com/unusualcodeorg/goserve/api/sample/model"
 )
 
 func EnsureDbIndexes(db mongo.Database) {
-	go mongo.Document[sample.Sample](&sample.Sample{}).EnsureIndexes(db)
-	...
+  go mongo.Document[sample.Sample](&sample.Sample{}).EnsureIndexes(db)
+  ...
 }
 ```
 
