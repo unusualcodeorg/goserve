@@ -136,6 +136,20 @@ New api creation can be done using command. `go run .tools/apigen.go [feature_na
 go run .tools/apigen.go sample
 ```
 
+# How to use this architecture in your project?
+You can use [goservegen](https://github.com/unusualcodeorg/goservegen) CLI to generate starter project for this architecture. 
+> Check out the repo [github.com/unusualcodeorg/goservegen](https://github.com/unusualcodeorg/goservegen) for more information.
+
+> You can download the `goservegen` binary for your operating system from the latest release: [github.com/unusualcodeorg/goservegen/releases](https://github.com/unusualcodeorg/goservegen/releases)
+
+```bash
+cd ~/Downloads/goservegen_Darwin_arm64
+
+# ./goservegen [project directory path] [project module]
+./goservegen ~/Downloads/example github.com/yourusername/example
+```
+
+
 # Documentation
 Check the [Wiki](https://github.com/unusualcodeorg/goserve/wiki/Architecture) for the detailed documentation on the architecture. 
 
