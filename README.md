@@ -142,7 +142,7 @@ Check the [Wiki](https://github.com/unusualcodeorg/goserve/wiki/Architecture) fo
 Note: We will keep on adding documentations progressively
 
 ## Model
-api/sample/model/sample.go
+`api/sample/model/sample.go`
 
 ```go
 package model
@@ -206,7 +206,7 @@ func (*Sample) EnsureIndexes(db mongo.Database) {
 ```
 
 #### Notes: The Model implements the interface 
-arch/mongo/database
+`arch/mongo/database`
 
 ```golang
 type Document[T any] interface {
@@ -217,7 +217,7 @@ type Document[T any] interface {
 ``` 
 
 ## DTO
-api/sample/model/create_sample.go
+`api/sample/dto/create_sample.go`
 
 ```go
 package dto
@@ -261,8 +261,9 @@ func (d *InfoSample) ValidateErrors(errs validator.ValidationErrors) ([]string, 
   return msgs, nil
 }
 ```
+
 #### Notes: The DTO implements the interface 
-arch/network/interfaces.go
+`arch/network/interfaces.go`
 
 ```golang
 type Dto[T any] interface {
@@ -272,7 +273,7 @@ type Dto[T any] interface {
 ``` 
 
 ## Service
-api/sample/model/service.go
+`api/sample/service.go`
 
 ```go
 package sample
@@ -318,7 +319,7 @@ func (s *service) FindSample(id primitive.ObjectID) (*model.Sample, error) {
 ```
 
 #### Notes: The Service embeds the interface 
-arch/network/interfaces.go
+`arch/network/interfaces.go`
 
 ```golang
 type BaseService interface {
@@ -330,7 +331,7 @@ type BaseService interface {
 - Redis Cache: `redis.Cache[dto.InfoSample]` provide the methods to make common redis queries for the DTO `dto.InfoSample`
 
 ## Controller
-api/sample/model/service.go
+`api/sample/controller.go`
 
 ```go
 package sample
@@ -388,8 +389,9 @@ func (c *controller) getSampleHandler(ctx *gin.Context) {
   c.Send(ctx).SuccessDataResponse("success", data)
 }
 ```
+
 #### Notes: The Controller implements the interface 
-arch/network/interfaces.go
+`arch/network/interfaces.go`
 
 ```golang
 type Controller interface {
@@ -421,8 +423,8 @@ type SendResponse interface {
 }
 ``` 
 
-## Adding Controller In Module
-startup/module.go
+## Enable Controller In Module
+`startup/module.go`
 
 ```go
 import (
@@ -441,7 +443,7 @@ func (m *module) Controllers() []network.Controller {
 ```
 
 ## Indexing (If Needed)
-startup/indexes.go
+`startup/indexes.go`
 
 ```go
 import (
@@ -455,13 +457,13 @@ func EnsureDbIndexes(db mongo.Database) {
 }
 ```
 
-# Find this project useful ? :heart:
+## Find this project useful ? :heart:
 * Support it by clicking the :star: button on the upper right of this page. :v:
 
-# More on YouTube channel - Unusual Code
+## More on YouTube channel - Unusual Code
 Subscribe to the YouTube channel `UnusualCode` for understanding the concepts used in this project:
 
 [![YouTube](https://img.shields.io/badge/YouTube-Subscribe-red?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@unusualcode)
 
-# Contribution
+## Contribution
 Please feel free to fork it and open a PR.
