@@ -68,11 +68,6 @@ Sample API
 3. **.tools**: api code, RSA key generator, and .env copier
 4. **.vscode**: editor config and debug launch settings
 
-# Documentation
-Check the [Wiki](https://github.com/unusualcodeorg/goserve/wiki/Architecture) for the detailed documentation on the architecture. 
-
-Note: We will keep on adding documentations progressively
-
 ## API Design
 ![Request-Response-Design](.extra/docs/api-structure.png)
 
@@ -141,13 +136,332 @@ New api creation can be done using command. `go run .tools/apigen.go [feature_na
 go run .tools/apigen.go sample
 ```
 
-## Find this project useful ? :heart:
+# Documentation
+Check the [Wiki](https://github.com/unusualcodeorg/goserve/wiki/Architecture) for the detailed documentation on the architecture. 
+
+Note: We will keep on adding documentations progressively
+
+## Model
+api/sample/model/sample.go
+
+```go
+package model
+
+import (
+	"context"
+	"time"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/unusualcodeorg/goserve/arch/mongo"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	mongod "go.mongodb.org/mongo-driver/mongo"
+)
+
+const CollectionName = "samples"
+
+type Sample struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" validate:"-"`
+	Field     string             `bson:"field" validate:"required"`
+	Status    bool               `bson:"status" validate:"required"`
+	CreatedAt time.Time          `bson:"createdAt" validate:"required"`
+	UpdatedAt time.Time          `bson:"updatedAt" validate:"required"`
+}
+
+func NewSample(field string) (*Sample, error) {
+	time := time.Now()
+	doc := Sample{
+		Field:     field,
+		Status:    true,
+		CreatedAt: time,
+		UpdatedAt: time,
+	}
+	if err := doc.Validate(); err != nil {
+		return nil, err
+	}
+	return &doc, nil
+}
+
+func (doc *Sample) GetValue() *Sample {
+	return doc
+}
+
+func (doc *Sample) Validate() error {
+	validate := validator.New()
+	return validate.Struct(doc)
+}
+
+func (*Sample) EnsureIndexes(db mongo.Database) {
+	indexes := []mongod.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "_id", Value: 1},
+				{Key: "status", Value: 1},
+			},
+		},
+	}
+	
+	mongo.NewQueryBuilder[Sample](db, CollectionName).Query(context.Background()).CreateIndexes(indexes)
+}
+```
+
+#### Notes: The Model implements the interface 
+arch/mongo/database
+
+```golang
+type Document[T any] interface {
+	EnsureIndexes(Database)
+	GetValue() *T
+	Validate() error
+}
+``` 
+
+## DTO
+api/sample/model/create_sample.go
+
+```go
+package dto
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/go-playground/validator/v10"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+type InfoSample struct {
+	ID        primitive.ObjectID `json:"_id" binding:"required"`
+	Field     string             `json:"field" binding:"required"`
+	CreatedAt time.Time          `json:"createdAt" binding:"required"`
+}
+
+func EmptyInfoSample() *InfoSample {
+	return &InfoSample{}
+}
+
+func (d *InfoSample) GetValue() *InfoSample {
+	return d
+}
+
+func (d *InfoSample) ValidateErrors(errs validator.ValidationErrors) ([]string, error) {
+	var msgs []string
+	for _, err := range errs {
+		switch err.Tag() {
+		case "required":
+			msgs = append(msgs, fmt.Sprintf("%s is required", err.Field()))
+		case "min":
+			msgs = append(msgs, fmt.Sprintf("%s must be min %s", err.Field(), err.Param()))
+		case "max":
+			msgs = append(msgs, fmt.Sprintf("%s must be max %s", err.Field(), err.Param()))
+		default:
+			msgs = append(msgs, fmt.Sprintf("%s is invalid", err.Field()))
+		}
+	}
+	return msgs, nil
+}
+```
+#### Notes: The DTO implements the interface 
+arch/network/interfaces.go
+
+```golang
+type Dto[T any] interface {
+	GetValue() *T
+	ValidateErrors(errs validator.ValidationErrors) ([]string, error)
+}
+``` 
+
+## Service
+api/sample/model/service.go
+
+```go
+package sample
+
+import (
+  "github.com/unusualcodeorg/goserve/api/sample/dto"
+	"github.com/unusualcodeorg/goserve/api/sample/model"
+	"github.com/unusualcodeorg/goserve/arch/mongo"
+	"github.com/unusualcodeorg/goserve/arch/network"
+	"github.com/unusualcodeorg/goserve/arch/redis"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+type Service interface {
+	FindSample(id primitive.ObjectID) (*model.Sample, error)
+}
+
+type service struct {
+	network.BaseService
+	sampleQueryBuilder mongo.QueryBuilder[model.Sample]
+	infoSampleCache    redis.Cache[dto.InfoSample]
+}
+
+func NewService(db mongo.Database, store redis.Store) Service {
+	return &service{
+		BaseService:  network.NewBaseService(),
+		sampleQueryBuilder: mongo.NewQueryBuilder[model.Sample](db, model.CollectionName),
+		infoSampleCache: redis.NewCache[dto.InfoSample](store),
+	}
+}
+
+func (s *service) FindSample(id primitive.ObjectID) (*model.Sample, error) {
+	filter := bson.M{"_id": id}
+
+	msg, err := s.sampleQueryBuilder.SingleQuery().FindOne(filter, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return msg, nil
+}
+```
+
+#### Notes: The Service embeds the interface 
+arch/network/interfaces.go
+
+```golang
+type BaseService interface {
+	Context() context.Context
+}
+``` 
+
+- Database Query: `mongo.QueryBuilder[model.Sample]` provide the methods to make common mongo queries for the model `model.Sample`
+- Redis Cache: `redis.Cache[dto.InfoSample]` provide the methods to make common redis queries for the DTO `dto.InfoSample`
+
+## Controller
+api/sample/model/service.go
+
+```go
+package sample
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/unusualcodeorg/goserve/api/sample/dto"
+	"github.com/unusualcodeorg/goserve/common"
+	coredto "github.com/unusualcodeorg/goserve/arch/dto"
+	"github.com/unusualcodeorg/goserve/arch/network"
+	"github.com/unusualcodeorg/goserve/utils"
+)
+
+type controller struct {
+	network.BaseController
+	common.ContextPayload
+	service Service
+}
+
+func NewController(
+	authMFunc network.AuthenticationProvider,
+	authorizeMFunc network.AuthorizationProvider,
+	service Service,
+) network.Controller {
+	return &controller{
+		BaseController: network.NewBaseController("/sample", authMFunc, authorizeMFunc),
+		ContextPayload: common.NewContextPayload(),
+		service:  service,
+	}
+}
+
+func (c *controller) MountRoutes(group *gin.RouterGroup) {
+	group.GET("/id/:id", c.getSampleHandler)
+}
+
+func (c *controller) getSampleHandler(ctx *gin.Context) {
+	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
+	if err != nil {
+		c.Send(ctx).BadRequestError(err.Error(), err)
+		return
+	}
+
+	sample, err := c.service.FindSample(mongoId.ID)
+	if err != nil {
+		c.Send(ctx).NotFoundError("sample not found", err)
+		return
+	}
+
+	data, err := utils.MapTo[dto.InfoSample](sample)
+	if err != nil {
+		c.Send(ctx).InternalServerError("something went wrong", err)
+		return
+	}
+
+	c.Send(ctx).SuccessDataResponse("success", data)
+}
+```
+#### Notes: The Controller implements the interface 
+arch/network/interfaces.go
+
+```golang
+type Controller interface {
+	BaseController
+	MountRoutes(group *gin.RouterGroup)
+}
+
+type BaseController interface {
+	ResponseSender
+	Path() string
+	Authentication() gin.HandlerFunc
+	Authorization(role string) gin.HandlerFunc
+}
+
+type ResponseSender interface {
+	Debug() bool
+	Send(ctx *gin.Context) SendResponse
+}
+
+type SendResponse interface {
+	SuccessMsgResponse(message string)
+	SuccessDataResponse(message string, data any)
+	BadRequestError(message string, err error)
+	ForbiddenError(message string, err error)
+	UnauthorizedError(message string, err error)
+	NotFoundError(message string, err error)
+	InternalServerError(message string, err error)
+	MixedError(err error)
+}
+``` 
+
+## Adding Controller In Module
+startup/module.go
+
+```go
+import (
+	...
+	"github.com/unusualcodeorg/goserve/api/sample"
+)
+
+...
+
+func (m *module) Controllers() []network.Controller {
+	return []network.Controller{
+		...
+		sample.NewController(m.AuthenticationProvider(), m.AuthorizationProvider(), sample.NewService(m.DB, m.Store)),
+	}
+}
+```
+
+## Indexing (If Needed)
+startup/indexes.go
+
+```go
+import (
+	...
+	sample "github.com/unusualcodeorg/goserve/api/sample/model"
+)
+
+func EnsureDbIndexes(db mongo.Database) {
+	go mongo.Document[sample.Sample](&sample.Sample{}).EnsureIndexes(db)
+	...
+}
+```
+
+# Find this project useful ? :heart:
 * Support it by clicking the :star: button on the upper right of this page. :v:
 
-## More on YouTube channel - Unusual Code
+# More on YouTube channel - Unusual Code
 Subscribe to the YouTube channel `UnusualCode` for understanding the concepts used in this project:
 
 [![YouTube](https://img.shields.io/badge/YouTube-Subscribe-red?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@unusualcode)
 
-## Contribution
+# Contribution
 Please feel free to fork it and open a PR.
