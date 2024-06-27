@@ -156,9 +156,7 @@ cd ~/Downloads/goservegen_Darwin_arm64
 
 
 # Documentation
-Check the [Wiki](https://github.com/unusualcodeorg/goserve/wiki/Architecture) for the detailed documentation on the architecture. 
-
-Note: We will keep on adding documentations progressively
+Information about the framework
 
 ## Model
 `api/sample/model/sample.go`
