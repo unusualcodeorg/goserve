@@ -139,7 +139,7 @@ go run .tools/apigen.go sample
 ```
 
 # Read the Article to understand this project
-[How to Architecture Good Go Backend REST API Services](https://medium.com/@janishar.ali/how-to-architecture-good-go-backend-rest-api-services-14cc4730c05b)
+[How to Architect Good Go Backend REST API Services](https://medium.com/@janishar.ali/how-to-architecture-good-go-backend-rest-api-services-14cc4730c05b)
 
 # How to use this architecture in your project?
 You can use [goservegen](https://github.com/unusualcodeorg/goservegen) CLI to generate starter project for this architecture. 
