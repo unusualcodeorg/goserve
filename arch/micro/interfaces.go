@@ -9,12 +9,6 @@ type NatsGroup = micro.Group
 type NatsHandlerFunc = micro.HandlerFunc
 type NatsRequest = micro.Request
 
-type Config struct {
-	NatsUrl            string
-	NatsServiceName    string
-	NatsServiceVersion string
-}
-
 type BaseController interface {
 	network.BaseController
 	SetNatsContext(ctx *NatsContext)

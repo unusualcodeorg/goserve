@@ -8,6 +8,12 @@ import (
 	"github.com/nats-io/nats.go/micro"
 )
 
+type Config struct {
+	NatsUrl            string
+	NatsServiceName    string
+	NatsServiceVersion string
+}
+
 type NatsClient struct {
 	Conn        *nats.Conn
 	Service     micro.Service
