@@ -14,7 +14,7 @@ import (
 type Shutdown = func()
 
 func Server() {
-	env := config.NewEnv(".env")
+	env := config.NewEnv(".env", true)
 	router, _, shutdown := create(env)
 	defer shutdown()
 	router.Start(env.ServerHost, env.ServerPort)

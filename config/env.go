@@ -35,9 +35,13 @@ type Env struct {
 	TokenAudience           string `mapstructure:"TOKEN_AUDIENCE"`
 }
 
-func NewEnv(filename string) *Env {
+func NewEnv(filename string, override bool) *Env {
 	env := Env{}
 	viper.SetConfigFile(filename)
+
+	if override {
+		viper.AutomaticEnv()
+	}
 
 	err := viper.ReadInConfig()
 	if err != nil {
