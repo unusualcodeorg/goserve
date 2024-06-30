@@ -26,3 +26,8 @@ type Router interface {
 	Disconnect()
 	LoadControllers(controllers []Controller)
 }
+
+type Module[T any] interface {
+	network.BaseModule[T]
+	Controllers() []Controller
+}

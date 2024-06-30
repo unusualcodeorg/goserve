@@ -14,7 +14,7 @@ type router struct {
 	natsClient *NatsClient
 }
 
-func NewRouter(mode string, config Config) Router {
+func NewRouter(mode string, config *Config) Router {
 	natsClient := NewNatsClient(config)
 	return &router{
 		netRouter:  network.NewRouter(mode),

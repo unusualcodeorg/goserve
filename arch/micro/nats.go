@@ -20,7 +20,7 @@ type NatsClient struct {
 	Timeout time.Duration
 }
 
-func NewNatsClient(config Config) *NatsClient {
+func NewNatsClient(config *Config) *NatsClient {
 	fmt.Println("connecting to nats..")
 
 	nc, err := nats.Connect(config.NatsUrl)
