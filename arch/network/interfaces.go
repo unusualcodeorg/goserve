@@ -101,12 +101,16 @@ type ParamNMiddlewareProvider[T any] interface {
 type AuthenticationProvider Param0MiddlewareProvider
 type AuthorizationProvider ParamNMiddlewareProvider[string]
 
-type Router interface {
+type BaseRouter interface {
 	GetEngine() *gin.Engine
 	RegisterValidationParsers(tagNameFunc validator.TagNameFunc)
-	LoadControllers(controllers []Controller)
 	LoadRootMiddlewares(middlewares []RootMiddleware)
 	Start(ip string, port uint16)
+}
+
+type Router interface {
+	BaseRouter
+	LoadControllers(controllers []Controller)
 }
 
 type Module[T any] interface {
