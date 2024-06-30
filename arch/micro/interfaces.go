@@ -11,8 +11,7 @@ type NatsRequest = micro.Request
 
 type BaseController interface {
 	network.BaseController
-	SetNatsContext(ctx *NatsContext)
-	NatsContext() *NatsContext
+	Context() *Context
 }
 
 type Controller interface {

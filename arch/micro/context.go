@@ -4,16 +4,22 @@ import (
 	"context"
 )
 
-type NatsContext struct {
+type Context struct {
 	context.Context
-	Client  *NatsClient
-	Subject string
+	NatsClient  *NatsClient
+	NatsSubject string
 }
 
-func NewNatsContext(client *NatsClient, baseSub string) *NatsContext {
-	return &NatsContext{
+func EmptyContext() *Context {
+	return &Context{
 		Context: context.Background(),
-		Client:  client,
-		Subject: baseSub,
+	}
+}
+
+func NewContext(natsClient *NatsClient, baseSub string) *Context {
+	return &Context{
+		Context:     context.Background(),
+		NatsClient:  natsClient,
+		NatsSubject: baseSub,
 	}
 }

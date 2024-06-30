@@ -3,22 +3,20 @@ package micro
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 )
 
 func Respond[T any](req NatsRequest, data *T, err error) {
 	req.RespondJSON(NewMessage(data, err))
 }
 
-func Request[T any, V any](ctx *NatsContext, sub string, send *T, receive *V) (*V, error) {
+func Request[T any, V any](ctx *Context, subject string, send *T, receive *V) (*V, error) {
 	sendMsg := NewMessage(send, nil)
 	sendPayload, err := json.Marshal(sendMsg)
 	if err != nil {
 		return nil, err
 	}
 
-	subject := fmt.Sprintf(`%s.%s`, ctx.Subject, sub)
-	msg, err := ctx.Client.Conn.Request(subject, sendPayload, ctx.Client.Timeout)
+	msg, err := ctx.NatsClient.Conn.Request(subject, sendPayload, ctx.NatsClient.Timeout)
 	if err != nil {
 		return nil, err
 	}

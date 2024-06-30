@@ -48,8 +48,8 @@ func (r *router) LoadControllers(controllers []Controller) {
 	for _, c := range controllers {
 		baseSub := fmt.Sprintf(`%s.%s`, r.natsClient.Service.Info().Name, strings.ReplaceAll(c.Path(), "/", ""))
 
-		ctx := NewNatsContext(r.natsClient, baseSub)
-		c.SetNatsContext(ctx)
+		c.Context().NatsClient = r.natsClient
+		c.Context().NatsSubject = baseSub
 
 		ng := r.natsClient.Service.AddGroup(baseSub)
 		c.MountNats(ng)
