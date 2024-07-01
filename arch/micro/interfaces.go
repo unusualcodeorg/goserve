@@ -30,7 +30,7 @@ type Controller interface {
 
 type Router interface {
 	network.BaseRouter
-	NatsClient() *NatsClient
+	NatsClient() NatsClient
 	LoadControllers(controllers []Controller)
 }
 

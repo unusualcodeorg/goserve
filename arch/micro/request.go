@@ -7,25 +7,25 @@ import (
 )
 
 type RequestBuilder[T any] interface {
-	NatsClient() *NatsClient
+	NatsClient() NatsClient
 	Request(data any) Request[T]
 }
 
 type requestBuilder[T any] struct {
-	natsClient *NatsClient
+	natsClient NatsClient
 	subject    string
 	timeout    time.Duration
 }
 
-func NewRequestBuilder[T any](natsClient *NatsClient, subject string) RequestBuilder[T] {
+func NewRequestBuilder[T any](natsClient NatsClient, subject string) RequestBuilder[T] {
 	return &requestBuilder[T]{
 		natsClient: natsClient,
 		subject:    subject,
-		timeout:    natsClient.Timeout,
+		timeout:    natsClient.GetInstance().Timeout,
 	}
 }
 
-func (c *requestBuilder[T]) NatsClient() *NatsClient {
+func (c *requestBuilder[T]) NatsClient() NatsClient {
 	return c.natsClient
 }
 
@@ -57,7 +57,7 @@ func (r *request[T]) Nats() (*T, error) {
 		return nil, err
 	}
 
-	msg, err := r.builder.natsClient.Conn.Request(r.builder.subject, sendPayload, r.builder.timeout)
+	msg, err := r.builder.natsClient.GetInstance().Conn.Request(r.builder.subject, sendPayload, r.builder.timeout)
 	if err != nil {
 		return nil, err
 	}

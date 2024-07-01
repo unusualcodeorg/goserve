@@ -15,19 +15,28 @@ type Config struct {
 	Timeout            time.Duration
 }
 
-type NatsClient struct {
+type NatsClient interface {
+	GetInstance() *natsClient
+	Disconnect()
+}
+
+type natsClient struct {
 	Conn    *nats.Conn
 	Service micro.Service
 	Timeout time.Duration
 }
 
-func (n *NatsClient) Disconnect() {
+func (n *natsClient) GetInstance() *natsClient {
+	return n
+}
+
+func (n *natsClient) Disconnect() {
 	fmt.Println("disconnecting nats..")
 	n.Conn.Close()
 	fmt.Println("disconnected nats")
 }
 
-func NewNatsClient(config *Config) *NatsClient {
+func NewNatsClient(config *Config) NatsClient {
 	fmt.Println("connecting to nats..")
 
 	nc, err := nats.Connect(config.NatsUrl)
@@ -45,7 +54,7 @@ func NewNatsClient(config *Config) *NatsClient {
 
 	fmt.Println("connected to nats")
 
-	return &NatsClient{
+	return &natsClient{
 		Conn:    nc,
 		Service: srv,
 		Timeout: config.Timeout,

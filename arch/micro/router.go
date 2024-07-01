@@ -11,10 +11,10 @@ import (
 
 type router struct {
 	netRouter  network.Router
-	natsClient *NatsClient
+	natsClient NatsClient
 }
 
-func NewRouter(mode string, natsClient *NatsClient) Router {
+func NewRouter(mode string, natsClient NatsClient) Router {
 	return &router{
 		netRouter:  network.NewRouter(mode),
 		natsClient: natsClient,
@@ -25,7 +25,7 @@ func (r *router) GetEngine() *gin.Engine {
 	return r.netRouter.GetEngine()
 }
 
-func (r *router) NatsClient() *NatsClient {
+func (r *router) NatsClient() NatsClient {
 	return r.natsClient
 }
 
@@ -40,10 +40,12 @@ func (r *router) LoadControllers(controllers []Controller) {
 	}
 	r.netRouter.LoadControllers(nc)
 
-	for _, c := range controllers {
-		baseSub := fmt.Sprintf(`%s.%s`, r.natsClient.Service.Info().Name, strings.ReplaceAll(c.Path(), "/", ""))
+	natsClient := r.natsClient.GetInstance()
 
-		ng := r.natsClient.Service.AddGroup(baseSub)
+	for _, c := range controllers {
+		baseSub := fmt.Sprintf(`%s.%s`, natsClient.Service.Info().Name, strings.ReplaceAll(c.Path(), "/", ""))
+
+		ng := natsClient.Service.AddGroup(baseSub)
 		c.MountNats(ng)
 	}
 }
