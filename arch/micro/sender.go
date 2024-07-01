@@ -1,5 +1,12 @@
 package micro
 
+import (
+	"errors"
+	"fmt"
+
+	"github.com/unusualcodeorg/goserve/arch/network"
+)
+
 type sender struct{}
 
 func NewMessageSender() MessageSender {
@@ -21,5 +28,10 @@ func (s *send) Message(data any) {
 }
 
 func (s *send) Error(err error) {
+	if apiError, ok := err.(network.ApiError); ok {
+		msg := fmt.Sprintf("%d:%s", apiError.GetCode(), apiError.GetMessage())
+		s.natsRequest.RespondJSON(NewAnyMessage(nil, errors.New(msg)))
+		return
+	}
 	s.natsRequest.RespondJSON(NewAnyMessage(nil, err))
 }
