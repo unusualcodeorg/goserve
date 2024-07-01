@@ -5,17 +5,13 @@ import (
 )
 
 type baseController struct {
+	MessageSender
 	network.BaseController
-	context *Context
 }
 
 func NewBaseController(basePath string, authProvider network.AuthenticationProvider, authorizeProvider network.AuthorizationProvider) BaseController {
 	return &baseController{
+		MessageSender:  NewMessageSender(),
 		BaseController: network.NewBaseController(basePath, authProvider, authorizeProvider),
-		context:        EmptyContext(),
 	}
-}
-
-func (c *baseController) Context() *Context {
-	return c.context
 }

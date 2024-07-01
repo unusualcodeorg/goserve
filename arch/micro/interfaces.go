@@ -9,9 +9,18 @@ type NatsGroup = micro.Group
 type NatsHandlerFunc = micro.HandlerFunc
 type NatsRequest = micro.Request
 
+type SendMessage interface {
+	Message(data any)
+	Error(err error)
+}
+
+type MessageSender interface {
+	SendNats(req NatsRequest) SendMessage
+}
+
 type BaseController interface {
+	MessageSender
 	network.BaseController
-	Context() *Context
 }
 
 type Controller interface {
@@ -22,7 +31,6 @@ type Controller interface {
 type Router interface {
 	network.BaseRouter
 	NatsClient() *NatsClient
-	Disconnect()
 	LoadControllers(controllers []Controller)
 }
 

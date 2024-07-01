@@ -14,8 +14,7 @@ type router struct {
 	natsClient *NatsClient
 }
 
-func NewRouter(mode string, config *Config) Router {
-	natsClient := NewNatsClient(config)
+func NewRouter(mode string, natsClient *NatsClient) Router {
 	return &router{
 		netRouter:  network.NewRouter(mode),
 		natsClient: natsClient,
@@ -28,10 +27,6 @@ func (r *router) GetEngine() *gin.Engine {
 
 func (r *router) NatsClient() *NatsClient {
 	return r.natsClient
-}
-
-func (r *router) Disconnect() {
-	r.natsClient.Conn.Close()
 }
 
 func (r *router) LoadRootMiddlewares(middlewares []network.RootMiddleware) {
@@ -47,9 +42,6 @@ func (r *router) LoadControllers(controllers []Controller) {
 
 	for _, c := range controllers {
 		baseSub := fmt.Sprintf(`%s.%s`, r.natsClient.Service.Info().Name, strings.ReplaceAll(c.Path(), "/", ""))
-
-		c.Context().NatsClient = r.natsClient
-		c.Context().NatsSubject = baseSub
 
 		ng := r.natsClient.Service.AddGroup(baseSub)
 		c.MountNats(ng)

@@ -12,12 +12,19 @@ type Config struct {
 	NatsUrl            string
 	NatsServiceName    string
 	NatsServiceVersion string
+	Timeout            time.Duration
 }
 
 type NatsClient struct {
-	Conn        *nats.Conn
-	Service     micro.Service
+	Conn    *nats.Conn
+	Service micro.Service
 	Timeout time.Duration
+}
+
+func (n *NatsClient) Disconnect() {
+	fmt.Println("disconnecting nats..")
+	n.Conn.Close()
+	fmt.Println("disconnected nats")
 }
 
 func NewNatsClient(config *Config) *NatsClient {
@@ -36,11 +43,11 @@ func NewNatsClient(config *Config) *NatsClient {
 		panic(err)
 	}
 
-	fmt.Println("connected to nats..")
+	fmt.Println("connected to nats")
 
 	return &NatsClient{
-		Conn:        nc,
-		Service:     srv,
-		Timeout: nats.DefaultTimeout,
+		Conn:    nc,
+		Service: srv,
+		Timeout: config.Timeout,
 	}
 }
