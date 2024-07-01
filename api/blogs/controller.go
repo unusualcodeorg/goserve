@@ -7,7 +7,7 @@ import (
 	"github.com/unusualcodeorg/goserve/arch/network"
 )
 
-type blogsController struct {
+type controller struct {
 	network.BaseController
 	service Service
 }
@@ -17,20 +17,20 @@ func NewController(
 	authorizeMFunc network.AuthorizationProvider,
 	service Service,
 ) network.Controller {
-	return &blogsController{
+	return &controller{
 		BaseController: network.NewBaseController("/blogs", authMFunc, authorizeMFunc),
 		service:        service,
 	}
 }
 
-func (c *blogsController) MountRoutes(group *gin.RouterGroup) {
+func (c *controller) MountRoutes(group *gin.RouterGroup) {
 	group.GET("/latest", c.getLatestBlogsHandler)
 	group.GET("/tag/:tag", c.getTaggedBlogsHandler)
 	group.GET("/similar/id/:id", c.getSimilarBlogsHandler)
 
 }
 
-func (c *blogsController) getLatestBlogsHandler(ctx *gin.Context) {
+func (c *controller) getLatestBlogsHandler(ctx *gin.Context) {
 	pagination, err := network.ReqQuery(ctx, coredto.EmptyPagination())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -46,7 +46,7 @@ func (c *blogsController) getLatestBlogsHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessDataResponse("success", blogs)
 }
 
-func (c *blogsController) getTaggedBlogsHandler(ctx *gin.Context) {
+func (c *controller) getTaggedBlogsHandler(ctx *gin.Context) {
 	tag, err := network.ReqParams(ctx, dto.EmptyTag())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
@@ -68,7 +68,7 @@ func (c *blogsController) getTaggedBlogsHandler(ctx *gin.Context) {
 	c.Send(ctx).SuccessDataResponse("success", blogs)
 }
 
-func (c *blogsController) getSimilarBlogsHandler(ctx *gin.Context) {
+func (c *controller) getSimilarBlogsHandler(ctx *gin.Context) {
 	mongoId, err := network.ReqParams(ctx, coredto.EmptyMongoId())
 	if err != nil {
 		c.Send(ctx).BadRequestError(err.Error(), err)
