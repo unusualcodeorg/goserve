@@ -76,7 +76,7 @@ Sample API
 ### API DOC
 [![API Documentation](https://img.shields.io/badge/API%20Documentation-View%20Here-blue?style=for-the-badge)](https://documenter.getpostman.com/view/1552895/2sA3XWdefu)
 
-## Installation Instruction
+## Installation Instructions
 vscode is the recommended editor - dark theme 
 
 **1. Get the repo**
@@ -144,16 +144,6 @@ go run .tools/apigen.go sample
 ## How to use this architecture in your project?
 You can use [goservegen](https://github.com/unusualcodeorg/goservegen) CLI to generate starter project for this architecture. 
 > Check out the repo [github.com/unusualcodeorg/goservegen](https://github.com/unusualcodeorg/goservegen) for more information.
-
-> You can download the `goservegen` binary for your operating system from the latest release: [github.com/unusualcodeorg/goservegen/releases](https://github.com/unusualcodeorg/goservegen/releases)
-
-```bash
-cd ~/Downloads/goservegen_Darwin_arm64
-
-# ./goservegen [project directory path] [project module]
-./goservegen ~/Downloads/example github.com/yourusername/example
-```
-
 
 ## Documentation
 Information about the framework
@@ -233,7 +223,7 @@ type Document[T any] interface {
 }
 ``` 
 
-## DTO
+### DTO
 `api/sample/dto/create_sample.go`
 
 ```go
@@ -289,7 +279,7 @@ type Dto[T any] interface {
 }
 ``` 
 
-## Service
+### Service
 `api/sample/service.go`
 
 ```go
@@ -347,7 +337,7 @@ type BaseService interface {
 - Database Query: `mongo.QueryBuilder[model.Sample]` provide the methods to make common mongo queries for the model `model.Sample`
 - Redis Cache: `redis.Cache[dto.InfoSample]` provide the methods to make common redis queries for the DTO `dto.InfoSample`
 
-## Controller
+### Controller
 `api/sample/controller.go`
 
 ```go
