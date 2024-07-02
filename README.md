@@ -10,7 +10,7 @@
 
 This project is a fully production-ready solution designed to implement best practices for building performant and secure backend REST API services. It provides a robust architectural framework to ensure consistency and maintain high code quality. The architecture emphasizes feature separation, facilitating easier unit and integration testing.
 
-# Framework
+## Framework
 - Go
 - Gin
 - jwt
@@ -20,7 +20,7 @@ This project is a fully production-ready solution designed to implement best pra
 - Viper
 - Crypto
 
-## Highlights
+**Highlights**
 - API key support
 - Token based Authentication
 - Role based Authorization
@@ -28,15 +28,15 @@ This project is a fully production-ready solution designed to implement best pra
 - Integration Tests
 - Modular codebase
 
-# Architecture
+## Architecture
 The goal is to make each API independent from one another and only share services among them. This will make code reusable and reduce conflicts while working in a team. 
 
 The APIs will have separate directory based on the endpoint. Example `blog` and `blogs` will have seperate directory whereas `blog`, `blog/author`, and `blog/editor` will share common resources and will live inside same directory.
 
-## Startup Flow
+### Startup Flow
 cmd/main → startup/server → module, mongo, redis, router → api/[feature]/middlewares → api/[feature]/controller -> api/[feature]/service, authentication, authorization → handlers → sender
 
-## API Structure
+### API Structure
 ```
 Sample API
 ├── dto
@@ -53,7 +53,7 @@ Sample API
 - Controller is responsible for defining endpoints and corresponding handlers
 - Service is the main logic component and handles data. Controller interact with a service to process a request. A service can also interact with other services.
  
-# Project Directories
+## Project Directories
 1. **api**: APIs code 
 2. **arch**: It provide framework and base implementation for creating the architecture
 3. **cmd**: main function to start the program
@@ -64,7 +64,7 @@ Sample API
 8. **tests**: holds the integration tests
 9. **utils**: contains utility functions
 
-## Helper/Optional Directories
+**Helper/Optional Directories**
 1. **.extra**: mongo script for initialization inside docker, other web assets and documents
 2. **.github**: CI for tests
 3. **.tools**: api code, RSA key generator, and .env copier
@@ -73,29 +73,29 @@ Sample API
 ## API Design
 ![Request-Response-Design](.extra/docs/api-structure.png)
 
-## API DOC
+### API DOC
 [![API Documentation](https://img.shields.io/badge/API%20Documentation-View%20Here-blue?style=for-the-badge)](https://documenter.getpostman.com/view/1552895/2sA3XWdefu)
 
-# Installation Instruction
+## Installation Instruction
 vscode is the recommended editor - dark theme 
 
-### 1. Get the repo 
+**1. Get the repo**
 
 ```bash
 git clone https://github.com/unusualcodeorg/goserve.git
 ```
 
-### 2. Generate RSA Keys
+**2. Generate RSA Keys**
 ```
 go run .tools/rsa/keygen.go
 ```
 
-### 3. Create .env files
+**3. Create .env files**
 ```
 go run .tools/copy/envs.go 
 ```
 
-### 4. Run Docker Compose
+**4. Run Docker Compose**
 - Install Docker and Docker Compose. [Find Instructions Here](https://docs.docker.com/install/).
 
 ```bash
@@ -103,7 +103,7 @@ docker-compose up --build
 ```
 -  You will be able to access the api from http://localhost:8080
 
-### 5. Run Tests
+**5. Run Tests**
 ```bash
 docker exec -t goserver go test -v ./...
 ```
@@ -113,7 +113,7 @@ If having any issue
 - Make sure 27017 port is not occupied else change DB_PORT in **.env** file.
 - Make sure 6379 port is not occupied else change REDIS_PORT in **.env** file.
 
-# Run on the local machine
+## Run on the local machine
 ```bash
 go mod tidy
 ```
@@ -131,17 +131,17 @@ Best way to run this project is to use the vscode `Run and Debug` button. Script
 go run cmd/main.go
 ```
 
-# Template
+## Template
 New api creation can be done using command. `go run .tools/apigen.go [feature_name]`. This will create all the required skeleton files inside the directory api/[feature_name]
 
 ```bash
 go run .tools/apigen.go sample
 ```
 
-# Read the Article to understand this project
+## Read the Article to understand this project
 [How to Architect Good Go Backend REST API Services](https://medium.com/@janishar.ali/how-to-architecture-good-go-backend-rest-api-services-14cc4730c05b)
 
-# How to use this architecture in your project?
+## How to use this architecture in your project?
 You can use [goservegen](https://github.com/unusualcodeorg/goservegen) CLI to generate starter project for this architecture. 
 > Check out the repo [github.com/unusualcodeorg/goservegen](https://github.com/unusualcodeorg/goservegen) for more information.
 
@@ -155,10 +155,10 @@ cd ~/Downloads/goservegen_Darwin_arm64
 ```
 
 
-# Documentation
+## Documentation
 Information about the framework
 
-## Model
+### Model
 `api/sample/model/sample.go`
 
 ```go
@@ -440,7 +440,7 @@ type SendResponse interface {
 }
 ``` 
 
-## Enable Controller In Module
+### Enable Controller In Module
 `startup/module.go`
 
 ```go
@@ -459,7 +459,7 @@ func (m *module) Controllers() []network.Controller {
 }
 ```
 
-## Indexing (If Needed)
+### Indexing (If Needed)
 `startup/indexes.go`
 
 ```go
