@@ -1,6 +1,7 @@
 package micro
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/nats-io/nats.go/micro"
 	"github.com/unusualcodeorg/goserve/arch/network"
 )
@@ -26,6 +27,7 @@ type BaseController interface {
 type Controller interface {
 	BaseController
 	MountNats(group NatsGroup)
+	MountRoutes(group *gin.RouterGroup)
 }
 
 type Router interface {
