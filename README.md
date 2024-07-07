@@ -467,6 +467,8 @@ func EnsureDbIndexes(db mongo.Database) {
 ## Go Microservices Architecture using goserve
 `goserve` also provides `micro` package to build REST API microservices. Find the microservices version of this blog service project at [github.com/unusualcodeorg/gomicro](https://github.com/unusualcodeorg/gomicro)
 
+[Article - How to Create Microservices — A Practical Guide Using Go](https://medium.com/@janishar.ali/how-to-create-microservices-a-practical-guide-using-go-35445a821513)
+
 ## Find this project useful ? :heart:
 * Support it by clicking the :star: button on the upper right of this page. :v:
 
